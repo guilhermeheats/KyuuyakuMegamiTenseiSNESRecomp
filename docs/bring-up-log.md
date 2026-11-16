@@ -53,8 +53,9 @@
 
 - O 8F é o andar do baú inicial; a primeira batalha é no 7F.
 - A rota conhecida está em `docs/route-8f.md`: baú → corredor inferior a leste → lado direito a norte → corredor superior a oeste → sala central com a escada de descida (`D`).
-- O auto-map do jogo (`COMP` → `オートマッピング`) foi validado.
-- Ainda falta descer ao 7F; os save states 9–12 foram usados em exploração local e não são uma cadeia estável.
+- O auto-map do jogo (`COMP` → `オートマッピング`) foi validado, mas é um minimapa local e não mostrou a rota completa.
+- Exploração: o baú foi aberto; as saídas laterais levam a corredores longos que retornam ao mesmo baú. A escada `D` e o elevador `E` ainda não foram alcançados.
+- A primeira batalha continua pendente; os save states 9–13 foram usados em exploração local e não são uma cadeia estável.
 
 ### Save states e input
 

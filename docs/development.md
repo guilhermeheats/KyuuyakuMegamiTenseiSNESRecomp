@@ -161,8 +161,8 @@ independente é o próximo passo de validação.
 
 - O menu de status e o auto-mapping já foram validados; a primeira batalha
   ainda não.
-- O 8F já está mapeado; falta descer para o 7F pela escada central
-  (`docs/route-8f.md`).
+- A rota do 8F está identificada em `docs/route-8f.md`, mas a escada central
+  (`D`) ainda não foi alcançada; o elevador (`E`) é uma alternativa.
 - O save real do jogo (SRAM de 8 KiB) ainda não foi testado; os save states do
   host são apenas para desenvolvimento.
 - O state `save2` tem o nome `ナカジマあああ` por causa do avanço automático

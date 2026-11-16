@@ -19,6 +19,17 @@ O mapa completo do 8F mostra também a catedral (`C`), o elevador (`E`) e as
 escadas. Use o auto-map do jogo (`COMP` → `オートマッピング`) para acompanhar
 a posição atual.
 
+## Status do bring-up
+
+- O baú do 8F foi aberto e o loot (`500` + `宝玉`) foi validado.
+- O quarto do baú tem saídas laterais que levam a corredores longos; a
+  exploração inicial voltou ao mesmo baú, então a rota ainda não foi concluída.
+- O elevador (`E`) na parte inferior central é uma alternativa à escada (`D`).
+- A escada para o 7F ainda **não** foi alcançada; a primeira batalha continua
+  pendente.
+- Os save states `9`–`13` foram usados em exploração local e não formam uma
+  cadeia estável; a cadeia documentada no repositório vai até `save8`.
+
 ## Próximo ponto
 
 Ao descer para o 7F:

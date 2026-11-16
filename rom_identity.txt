@@ -1,0 +1,26 @@
+# ROM identity for Kyuuyaku Megami Tensei — the single source of truth.
+#
+# Read by three consumers, so a revision change is made once, here:
+#   - the build   (CMake generates snesrecomp_rom_identity.h from this file)
+#   - tools/regen.sh
+#   - .github/workflows/release.yml
+#
+# Format is `key = value`, one per line; `#` starts a comment. Values may be
+# quoted. Leaving a digest empty means the build cannot verify a ROM it is
+# handed — it will say so rather than accept it.
+
+display_name    = Kyuuyaku Megami Tensei
+rom_file        = kyuuyaku.sfc
+# Every digest of the bare image (copier header stripped), so the Retro
+# catalog can take a submission's identity from this file rather than ask
+# the submitter to hash the ROM again. The build verifies on crc32/sha256.
+expected_crc32  = c8d286c9
+expected_md5    = 9918dbf3f0d349cac24631bdf77939f3
+expected_sha1   = 827f6e0534e2317e3348ce76bd47bec8691b3563
+expected_sha256 = ffdc7f254c6d965d481918e7d53a451f94f6b1cb035383ae3dfc8f3b5895de3b
+rom_size        = 2097152
+mapping         = lorom
+region          = JPN
+# What a mod package's [[target]] game_id must name to apply to this title
+# (snesrecomp/docs/MOD_PACKAGES.md). Stable across revisions on purpose.
+game_id         = kyuuyakumegamitensei-jpn

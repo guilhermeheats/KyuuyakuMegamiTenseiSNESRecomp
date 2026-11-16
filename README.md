@@ -23,8 +23,8 @@ until the host work in `src/game_rtl.c` is done. See
 | | |
 |---|---|
 | File | `kyuuyaku.sfc` |
-| Publisher | Atlus / Opera House |
-| Developer | — |
+| Publisher | Atlus |
+| Developer | Opera House |
 | Year | 1995 |
 | Mapping | lorom |
 | Region | JPN (Japan) |
@@ -34,6 +34,17 @@ until the host work in `src/game_rtl.c` is done. See
 
 `tools/regen.sh` refuses to run against anything else, so a mismatched
 revision fails immediately instead of producing subtly wrong output.
+
+## Project docs
+
+- [Roadmap](docs/roadmap.md) — escopo, rotina semanal e primeiros 30 dias.
+- [ROM identity](docs/rom-identity.md) — hashes, revisão escolhida e verificação.
+- [ROM map](docs/rom-map.md) — vetores e primeiras entradas.
+- [RAM map](docs/ram-map.md) — âncoras iniciais de RAM.
+- [Checkpoints](docs/checkpoints.md) — cenas para comparar com o emulador.
+- [Bring-up log](docs/bring-up-log.md) — o que já foi feito e o que bloqueia.
+- [Linux build deps](docs/linux-build-deps.md) — pacotes no openSUSE Leap 16.
+- [Sources](docs/sources.md) — links e projetos de referência.
 
 ## Build
 

@@ -20,6 +20,7 @@ Atualizado em 2026-11-16.
 | Movimento | OK |
 | Interação com baú | OK — loot `500` + `宝玉` |
 | Menu de status | OK — COMP/MAGIC/ITEM/STATUS e ficha |
+| Auto-mapping | OK — mapa da dungeon pelo menu COMP |
 | Primeira batalha | pendente |
 | Save/load via SRAM do jogo | pendente |
 
@@ -38,7 +39,8 @@ Marcos de frame observados com `--framedump`:
 | 15100 | diálogo do baú |
 | 15500 | loot do baú (`500` + `宝玉`) |
 | 16400 | menu principal (COMP/MAGIC/ITEM/STATUS) |
-| 16800 | ficha de status do personagem |
+| 16600 | submenu COMP (aliados, auto-mapping, config) |
+| 16800 | ficha de status; auto-mapping |
 
 ## Ambiente
 

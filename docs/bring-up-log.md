@@ -45,7 +45,8 @@
   - frame 15100: diálogo do baú (“宝箱だ！ 開けますか？”)
   - frame 15500: loot do baú (`500` + `宝玉`)
   - frame 16400: menu principal (COMP/MAGIC/ITEM/STATUS)
-  - frame 16800: ficha de status do personagem
+  - frame 16600: submenu COMP (aliados, auto-mapping, config)
+  - frame 16800: ficha de status e auto-mapping
 - Nenhum screenshot do jogo foi commitado; os frames ficam em `/tmp`.
 
 ### Save states e input

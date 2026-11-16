@@ -16,8 +16,9 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
 | CP-009 | Interação com baú | andar até o baú (~frame 15100) | OK — diálogo YES/NO; loot `500` + `宝玉` |
 | CP-010 | Primeira batalha | andar até um encontro | pendente |
 | CP-011 | Menu de status | apertar A na passagem (~frame 16400) | OK — COMP/MAGIC/ITEM/STATUS; ficha em ~frame 16800 |
-| CP-012 | Salvar e carregar pelo jogo | salvar via SRAM, reiniciar, carregar | pendente |
-| CP-013 | Início do Megami Tensei II | completar o MT1 ou usar save de teste | pendente |
+| CP-012 | Auto-mapping | COMP → オートマッピング (~frame 16800) | OK — mapa da dungeon desenhado |
+| CP-013 | Salvar e carregar pelo jogo | salvar via SRAM, reiniciar, carregar | pendente |
+| CP-014 | Início do Megami Tensei II | completar o MT1 ou usar save de teste | pendente |
 
 ## Formato sugerido de registro
 

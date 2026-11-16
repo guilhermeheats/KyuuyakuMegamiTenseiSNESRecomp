@@ -62,6 +62,7 @@ Fora do MVP: widescreen, tradução, MSU-1, netplay, mods de conteúdo.
 - [x] Chegar à primeira dungeon.
 - [x] Testar movimento e interação com baú.
 - [x] Testar o menu de status.
+- [x] Testar o auto-mapping.
 - [x] Documentar o caminho e os símbolos descobertos.
 - [x] Atualizar `docs/checkpoints.md`.
 - [ ] Primeira batalha.

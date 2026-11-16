@@ -42,6 +42,8 @@ Para regenerar, rode na ordem. Cada script carrega o state anterior.
 | `junction-a.txt` | carrega `save8` e abre o menu (COMP/MAGIC/ITEM/STATUS) |
 | `menu-status.txt` | abre o menu e entra em STATUS |
 | `menu-status-detail.txt` | abre a ficha detalhada do personagem |
+| `menu-comp.txt` | abre o submenu COMP |
+| `menu-automap.txt` | abre COMP → オートマッピング |
 
 ## Exemplo
 

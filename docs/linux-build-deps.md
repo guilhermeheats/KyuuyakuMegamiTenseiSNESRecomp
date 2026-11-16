@@ -8,12 +8,15 @@ O scaffold consegue baixar e compilar o SDL3 sozinho, mas o SDL ainda precisa da
 sudo zypper install -y \
   libX11-devel libXext-devel libXrandr-devel libXcursor-devel libXi-devel \
   libXfixes-devel libXinerama-devel libXss-devel libXxf86vm-devel libXrender-devel \
+  libXtst-devel \
   wayland-devel wayland-protocols-devel libdecor-devel libxkbcommon-devel \
   Mesa-libGL-devel Mesa-libEGL-devel Mesa-libGLESv2-devel \
-  alsa-devel libpulse-devel pipewire-devel libjack-devel \
+  alsa-devel libpulse-devel pipewire-devel \
   systemd-devel libdrm-devel libgbm-devel dbus-1-devel \
   libusb-1_0-devel fribidi-devel libthai-devel
 ```
+
+`libjack-devel` não entra na lista: neste sistema o `pipewire-jack` já ocupa o provedor de JACK e o pacote entra em conflito. O JACK é opcional para o SDL; ALSA/PipeWire/Pulse bastam.
 
 ## Depois de instalar
 

@@ -13,10 +13,10 @@ Native recompilation of Kyuuyaku Megami Tensei (SNES, Japan) using SNESRecomp.
 
 ## Status
 
-Scaffolded on 2026-11-16 — **not yet a working port.** The layout, build,
-regeneration pipeline, CI, and packaging are wired up; the game does not run
-until the host work in `src/game_rtl.c` is done. See
-[Porting from here](#porting-from-here).
+Scaffolded on 2026-11-16. The build now **boots, reaches the title screen and
+plays the opening story sequence**. It is **not yet a playable port**: save
+selection, the first dungeon, battles and save/load still need to be validated.
+See [Porting from here](#porting-from-here) and `docs/checkpoints.md`.
 
 ## ROM identity
 

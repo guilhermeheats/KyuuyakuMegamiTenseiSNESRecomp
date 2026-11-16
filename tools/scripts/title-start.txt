@@ -1,0 +1,5 @@
+# Kyuuyaku Megami Tensei — teste de título
+# A tela de título aparece por volta do frame 3600 no build atual.
+wait 3600
+press start 2
+wait 120

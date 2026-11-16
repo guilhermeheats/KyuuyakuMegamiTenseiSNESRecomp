@@ -20,15 +20,29 @@
 
 ### Build
 
-- A configuração do CMake parou porque faltam bibliotecas de desenvolvimento do sistema:
-  - X11/Wayland: SDL não encontra backend de janela;
-  - OpenGL: o host desktop exige `OpenGL::GL`;
-  - ALSA/Pulse: áudio opcional, mas necessário para uma experiência completa.
-- Solução: instalar os pacotes de `docs/linux-build-deps.md` e reconfigurar.
+- A primeira configuração parou por falta de bibliotecas de desenvolvimento do sistema (X11/Wayland/OpenGL/XTest).
+- Instalados os pacotes de `docs/linux-build-deps.md`; o `libXtst-devel` foi o último necessário para o SDL habilitar XTest.
+- Configuração e build concluídos:
+  - binário: `build/KyuuyakuMegamiTenseiSNESRecomp` (8,0 MB)
+  - 514 alvos compilados
+  - SDL3 3.4.10 compilado do source, com X11, Wayland, OpenGL, ALSA e PipeWire.
+
+### Runtime
+
+- `./build/KyuuyakuMegamiTenseiSNESRecomp ~/roms/kyuuyaku.sfc`
+- Janela 960x720, renderer OpenGL, áudio PipeWire a 32 kHz.
+- ~60 fps; a ROM carrega e o jogo executa.
+- Marcos observados com `--framedump`:
+  - frame 600: tela preta (início do boot)
+  - frame 1800: texto de introdução em japonês
+  - frame 3600: tela de título “旧約・女神転生”
+  - frame 3720: transição após pressionar Start
+  - frame 4200: texto da introdução do MT1
+- Nenhum screenshot do jogo foi commitado; os frames ficam em `/tmp`.
 
 ### Próximo passo
 
-1. Instalar as dependências de build.
-2. Configurar e compilar `build/`.
-3. Executar o binário com a ROM e registrar o primeiro frame de boot no `docs/checkpoints.md`.
-4. Se o boot não chegar ao logo/título, capturar o log e comparar com o MesenCE.
+1. Entender a sequência de input do título/introdução e chegar ao primeiro menu jogável.
+2. Mapear a seleção de save e a primeira sala da dungeon (`CP-002`/`CP-004`).
+3. Comparar o boot com o MesenCE e registrar um checkpoint com hash de WRAM.
+4. Começar a nomear as rotinas descobertas em `recomp/symbols.toml`.

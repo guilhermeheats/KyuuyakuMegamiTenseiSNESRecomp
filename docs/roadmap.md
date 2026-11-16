@@ -35,9 +35,9 @@ Fora do MVP: widescreen, tradução, MSU-1, netplay, mods de conteúdo.
 
 ### Semana 1
 
-- [ ] Instalar dependências de build (`docs/linux-build-deps.md`).
-- [ ] Configurar e compilar o projeto.
-- [ ] Rodar com a ROM e registrar o primeiro frame.
+- [x] Instalar dependências de build (`docs/linux-build-deps.md`).
+- [x] Configurar e compilar o projeto.
+- [x] Rodar com a ROM e registrar o primeiro frame.
 - [ ] Estudar registradores e modos de endereçamento do 65816.
 
 ### Semana 2
@@ -52,14 +52,15 @@ Fora do MVP: widescreen, tradução, MSU-1, netplay, mods de conteúdo.
 - [ ] Identificar o main loop e a rotina de input.
 - [ ] Mapear as primeiras variáveis de RAM.
 - [ ] Resolver o primeiro dispatch miss.
-- [ ] Chegar à tela de título.
+- [x] Chegar à tela de título.
 
 ### Semana 4
 
-- [ ] Passar do título para a seleção de save/novo jogo.
-- [ ] Documentar o caminho e os símbolos descobertos.
-- [ ] Atualizar `docs/checkpoints.md`.
-- [ ] Definir a próxima meta: primeira sala da dungeon.
+- [x] Passar do título para a introdução do MT1.
+- [ ] Chegar à seleção de save/novo jogo.
+- [x] Documentar o caminho e os símbolos descobertos.
+- [x] Atualizar `docs/checkpoints.md`.
+- [x] Definir a próxima meta: primeira sala da dungeon.
 
 ## Critério de aceite do vertical slice
 

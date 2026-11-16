@@ -15,7 +15,7 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
 | CP-008 | Movimento | setas na dungeon | OK — câmera muda de célula |
 | CP-009 | Interação com baú | andar até o baú (~frame 15100) | OK — diálogo YES/NO; loot `500` + `宝玉` |
 | CP-010 | Primeira batalha | andar até um encontro | pendente |
-| CP-011 | Menu de status | abrir o menu | pendente |
+| CP-011 | Menu de status | apertar A na passagem (~frame 16400) | OK — COMP/MAGIC/ITEM/STATUS; ficha em ~frame 16800 |
 | CP-012 | Salvar e carregar pelo jogo | salvar via SRAM, reiniciar, carregar | pendente |
 | CP-013 | Início do Megami Tensei II | completar o MT1 ou usar save de teste | pendente |
 

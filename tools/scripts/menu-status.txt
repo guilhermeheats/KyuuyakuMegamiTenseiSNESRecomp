@@ -1,0 +1,13 @@
+wait 10
+loadstate 8
+wait 60
+press a 2
+wait 60
+press down 2
+wait 30
+press down 2
+wait 30
+press down 2
+wait 30
+press a 2
+wait 240

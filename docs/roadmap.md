@@ -61,9 +61,10 @@ Fora do MVP: widescreen, tradução, MSU-1, netplay, mods de conteúdo.
 - [x] Distribuir os 15 pontos de status.
 - [x] Chegar à primeira dungeon.
 - [x] Testar movimento e interação com baú.
+- [x] Testar o menu de status.
 - [x] Documentar o caminho e os símbolos descobertos.
 - [x] Atualizar `docs/checkpoints.md`.
-- [ ] Primeira batalha e menu de status.
+- [ ] Primeira batalha.
 
 ## Critério de aceite do vertical slice
 

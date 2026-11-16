@@ -44,11 +44,13 @@
   - frame 14861: primeira dungeon, corredor inicial
   - frame 15100: diálogo do baú (“宝箱だ！ 開けますか？”)
   - frame 15500: loot do baú (`500` + `宝玉`)
+  - frame 16400: menu principal (COMP/MAGIC/ITEM/STATUS)
+  - frame 16800: ficha de status do personagem
 - Nenhum screenshot do jogo foi commitado; os frames ficam em `/tmp`.
 
 ### Save states e input
 
-- Criada uma cadeia de save states locais em `build/saves/` (`save1` … `save7`).
+- Criada uma cadeia de save states locais em `build/saves/` (`save1` … `save8`).
 - Scripts em `tools/scripts/` reproduzem o caminho; a documentação está em
   `tools/scripts/README.md`.
 - O state `save2` contém `ナカジマあああ` por causa do avanço automático com A;
@@ -56,7 +58,7 @@
 
 ### Próximo passo
 
-1. Testar a primeira batalha e o menu de status (`CP-010`/`CP-011`).
+1. Testar a primeira batalha (`CP-010`).
 2. Testar salvar/carregar pelo jogo (SRAM de 8 KiB), não só save state do host.
 3. Comparar o boot com o MesenCE e registrar um checkpoint com hash de WRAM.
 4. Começar a nomear as rotinas descobertas em `recomp/symbols.toml`.

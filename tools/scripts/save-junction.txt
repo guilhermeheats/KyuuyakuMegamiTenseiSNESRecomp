@@ -1,0 +1,10 @@
+wait 10
+loadstate 7
+wait 60
+press left 60
+wait 60
+press up 60
+wait 120
+savestate 8
+wait 2
+quit

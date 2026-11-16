@@ -15,10 +15,10 @@ Native recompilation of Kyuuyaku Megami Tensei (SNES, Japan) using SNESRecomp.
 
 Scaffolded on 2026-11-16. The build now **boots, reaches the title screen,
 plays the opening story, accepts the two character names, allocates stats and
-enters the first dungeon**. Movement, chest interaction and looting work. It is **not
-yet a full port**: the first battle, the status menu and in-game save/load
-still need to be validated. See [Porting from here](#porting-from-here) and
-`docs/checkpoints.md`.
+enters the first dungeon**. Movement, chest interaction, looting and the
+status menu work. It is **not yet a full port**: the first battle and in-game
+save/load still need to be validated. See [Porting from here](#porting-from-here)
+and `docs/checkpoints.md`.
 
 ## ROM identity
 

@@ -21,7 +21,7 @@ sudo zypper install -y \
 ## Depois de instalar
 
 ```bash
-cd ~/Projects/KyuuyakuMegamiTenseiSNESRecomp
+cd ~/Projects/KyuuyakuTen
 rm -rf build build-headless
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel

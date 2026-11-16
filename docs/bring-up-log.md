@@ -11,7 +11,7 @@
 
 ### Projeto
 
-- Repositório criado em `~/Projects/KyuuyakuMegamiTenseiSNESRecomp`.
+- Repositório criado em `~/Projects/KyuuyakuTen`.
 - Scaffold do snesrecomp gerado com 1 jogador, sem netplay, sem GitHub.
 - `tools/regen.sh` gerou 4 arquivos C em `src/gen/`, 1 banco e 4 roots.
 - `I_RESET` (`$8000`) e `I_NMI` (`$827A`) vieram do scaffold.
@@ -23,13 +23,13 @@
 - A primeira configuração parou por falta de bibliotecas de desenvolvimento do sistema (X11/Wayland/OpenGL/XTest).
 - Instalados os pacotes de `docs/linux-build-deps.md`; o `libXtst-devel` foi o último necessário para o SDL habilitar XTest.
 - Configuração e build concluídos:
-  - binário: `build/KyuuyakuMegamiTenseiSNESRecomp` (8,0 MB)
+  - binário: `build/KyuuyakuTen` (8,0 MB)
   - 514 alvos compilados
   - SDL3 3.4.10 compilado do source, com X11, Wayland, OpenGL, ALSA e PipeWire.
 
 ### Runtime
 
-- `./build/KyuuyakuMegamiTenseiSNESRecomp ~/roms/kyuuyaku.sfc`
+- `./build/KyuuyakuTen ~/roms/kyuuyaku.sfc`
 - Janela 960x720, renderer OpenGL, áudio PipeWire a 32 kHz.
 - ~60 fps; a ROM carrega e o jogo executa.
 - Marcos observados com `--framedump`:

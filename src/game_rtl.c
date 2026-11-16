@@ -56,7 +56,7 @@ void GameSessionReset(void)
 }
 
 const RtlGameInfo kGameInfo = {
-    .title = "kyuuyakumegamitensei",
+    .title = "kyuuyakuten",
     .initialize = NULL,
     .run_frame = &GameRunOneFrame,
     .draw_ppu_frame = &GameDrawPpuFrame,

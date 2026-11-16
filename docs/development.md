@@ -59,23 +59,23 @@ Dependências de sistema no openSUSE: `docs/linux-build-deps.md`.
 ## Build
 
 ```bash
-cd ~/Projects/KyuuyakuMegamiTenseiSNESRecomp
+cd ~/Projects/KyuuyakuTen
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel
 ```
 
-O binário fica em `build/KyuuyakuMegamiTenseiSNESRecomp`.
+O binário fica em `build/KyuuyakuTen`.
 
 ## Execução
 
 ```bash
-./build/KyuuyakuMegamiTenseiSNESRecomp ~/roms/kyuuyaku.sfc
+./build/KyuuyakuTen ~/roms/kyuuyaku.sfc
 ```
 
 Para abrir direto na primeira dungeon usando o save state local:
 
 ```bash
-./build/KyuuyakuMegamiTenseiSNESRecomp \
+./build/KyuuyakuTen \
   --script tools/scripts/load-game.txt \
   ~/roms/kyuuyaku.sfc
 ```
@@ -101,7 +101,7 @@ Exemplo de captura:
 SNESRECOMP_FRAMEDUMP_START=14861 \
 SNESRECOMP_FRAMEDUMP_END=14861 \
 SNESRECOMP_FRAMEDUMP_PIXELS=1 \
-./build/KyuuyakuMegamiTenseiSNESRecomp \
+./build/KyuuyakuTen \
   --script tools/scripts/load-game.txt \
   --framedump /tmp/kmt-frames \
   ~/roms/kyuuyaku.sfc

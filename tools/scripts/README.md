@@ -48,7 +48,7 @@ Para regenerar, rode na ordem. Cada script carrega o state anterior.
 ## Exemplo
 
 ```bash
-./build/KyuuyakuMegamiTenseiSNESRecomp \
+./build/KyuuyakuTen \
   --script tools/scripts/save-title.txt \
   "$HOME/roms/kyuuyaku.sfc"
 ```
@@ -59,7 +59,7 @@ Para capturar frames:
 SNESRECOMP_FRAMEDUMP_START=14861 \
 SNESRECOMP_FRAMEDUMP_END=14861 \
 SNESRECOMP_FRAMEDUMP_PIXELS=1 \
-./build/KyuuyakuMegamiTenseiSNESRecomp \
+./build/KyuuyakuTen \
   --script tools/scripts/load-game.txt \
   --framedump /tmp/kmt-frames \
   "$HOME/roms/kyuuyaku.sfc"

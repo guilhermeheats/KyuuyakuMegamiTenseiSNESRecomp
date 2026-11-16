@@ -1,10 +1,12 @@
-# Kyuuyaku Megami Tensei Recomp
+# KyuuyakuTen
 
-A native recompilation of **Kyuuyaku Megami Tensei** (JPN), built on
+**KyuuyakuTen** is a native recompilation project for **Kyuuyaku Megami Tensei**
+(JPN), built on
 [snesrecomp](https://github.com/RetroPortingToolKit/snesrecomp).
 
-Native recompilation of Kyuuyaku Megami Tensei (SNES, Japan) using SNESRecomp.
-
+- Repository: <https://github.com/guilhermeheats/KyuuyakuTen>
+- Project name: **KyuuyakuTen**
+- Game: **Kyuuyaku Megami Tensei** (SNES, Japan, 1995)
 
 
 > **You must legally own a copy of the game.** No ROM data is distributed with
@@ -50,6 +52,8 @@ revision fails immediately instead of producing subtly wrong output.
 - [Linux build deps](docs/linux-build-deps.md) — pacotes no openSUSE Leap 16.
 - [Sources](docs/sources.md) — links e projetos de referência.
 - [Contributing](CONTRIBUTING.md) — regras para contribuir sem violar direitos autorais.
+- [Notices](NOTICE.md) — licenças do projeto, do framework e do launcher.
+- [Third-party attribution](THIRD_PARTY_ATTRIBUTION.md) — avisos MIT/ISC completos.
 
 ## Build
 
@@ -72,8 +76,8 @@ both from ever being committed.
 ## Run
 
 ```sh
-./build/KyuuyakuMegamiTenseiSNESRecomp                     # launcher picks the ROM
-./build/KyuuyakuMegamiTenseiSNESRecomp /path/to/kyuuyaku.sfc # or name it and skip the launcher
+./build/KyuuyakuTen                     # launcher picks the ROM
+./build/KyuuyakuTen /path/to/kyuuyaku.sfc # or name it and skip the launcher
 ```
 
 With no ROM on the command line the build opens the recomp-ui launcher: a ROM
@@ -125,10 +129,14 @@ Single player.
 
 ## License
 
-This project's own source is under the license in `LICENSE`. The framework
-carries its own terms — see `snesrecomp/LICENSE` and
-`snesrecomp/THIRD_PARTY_ATTRIBUTION.md`. Neither covers the game data, which
-is not distributed here.
+This project's own source is **source-available** under the PolyForm
+Noncommercial License 1.0.0 in [`LICENSE`](LICENSE). It is **not** an OSI
+open-source license and commercial use requires separate permission.
+
+The framework and launcher carry their own terms — see [`NOTICE.md`](NOTICE.md),
+`snesrecomp/LICENSE`, `snesrecomp/PERMISSIONS.md` and
+`THIRD_PARTY_ATTRIBUTION.md`. None of these licenses covers the game data,
+which is not distributed here.
 
 ## Disclaimer
 

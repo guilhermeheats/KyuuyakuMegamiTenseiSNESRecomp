@@ -31,7 +31,7 @@ At minimum, verify that the build still reaches the title screen and the first
 dungeon after a change that touches the host or analysis configuration.
 
 ```bash
-./build/KyuuyakuMegamiTenseiSNESRecomp ~/roms/kyuuyaku.sfc
+./build/KyuuyakuTen ~/roms/kyuuyaku.sfc
 ```
 
 For frame comparisons:
@@ -40,7 +40,7 @@ For frame comparisons:
 SNESRECOMP_FRAMEDUMP_START=14861 \
 SNESRECOMP_FRAMEDUMP_END=14861 \
 SNESRECOMP_FRAMEDUMP_PIXELS=1 \
-./build/KyuuyakuMegamiTenseiSNESRecomp \
+./build/KyuuyakuTen \
   --script tools/scripts/load-game.txt \
   --framedump /tmp/kmt-frames \
   ~/roms/kyuuyaku.sfc
@@ -68,6 +68,7 @@ Include:
 ## License
 
 This project is source-available under the PolyForm Noncommercial License
-1.0.0. The snesrecomp framework and its third-party components keep their own
-terms; see `snesrecomp/LICENSE` and
-`snesrecomp/THIRD_PARTY_ATTRIBUTION.md`.
+1.0.0; it is not an OSI open-source license. The snesrecomp framework,
+recomp-ui and third-party components keep their own terms. Read
+[`NOTICE.md`](NOTICE.md), `snesrecomp/LICENSE`, `snesrecomp/PERMISSIONS.md` and
+`THIRD_PARTY_ATTRIBUTION.md` before distributing a build.

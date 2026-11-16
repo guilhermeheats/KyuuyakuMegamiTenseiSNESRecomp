@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(KyuuyakuMegamiTenseiSNESRecomp C CXX)
+project(KyuuyakuTen C CXX)
 
 set(CMAKE_C_STANDARD 11)
 
@@ -36,7 +36,7 @@ set(SNESRECOMP_ENABLE_MODS ON CACHE BOOL
     "Mod package loader + trusted plugins (required for every title)" FORCE)
 include(${SNESRECOMP_ROOT}/runner/runner.cmake)
 
-add_executable(KyuuyakuMegamiTenseiSNESRecomp
+add_executable(KyuuyakuTen
     ${SNESRECOMP_RUNNER_SOURCES}
     src/main.c
     src/host_contract.c
@@ -48,7 +48,7 @@ add_executable(KyuuyakuMegamiTenseiSNESRecomp
 # turns it into snesrecomp_rom_identity.h (SNESRECOMP_ROM_EXPECTED_SHA256 and
 # friends) for src/main.c, and tools/regen.sh, scripts/package_release.sh and
 # the release workflow read the same file. A revision bump is one edit there.
-snesrecomp_rom_identity(KyuuyakuMegamiTenseiSNESRecomp ${CMAKE_SOURCE_DIR}/rom_identity.txt)
+snesrecomp_rom_identity(KyuuyakuTen ${CMAKE_SOURCE_DIR}/rom_identity.txt)
 
 # Generated recompiler output. Not committed: it is derived from a copyrighted
 # ROM, so every developer regenerates it locally from their own copy -- and a
@@ -58,7 +58,7 @@ snesrecomp_rom_identity(KyuuyakuMegamiTenseiSNESRecomp ${CMAKE_SOURCE_DIR}/rom_i
 # That is what release zips contain; the player's machine produces the
 # playable binary from their own ROM. Without the option an empty src/gen/ is
 # still a hard error (the framework owns the message).
-snesrecomp_target_generated_code(KyuuyakuMegamiTenseiSNESRecomp ${CMAKE_SOURCE_DIR}/src/gen)
+snesrecomp_target_generated_code(KyuuyakuTen ${CMAKE_SOURCE_DIR}/src/gen)
 
 # The mod catalog. This names WHERE the packages are; the framework owns the
 # layout they are staged into beside the executable, and stages them on every
@@ -73,11 +73,11 @@ snesrecomp_target_generated_code(KyuuyakuMegamiTenseiSNESRecomp ${CMAKE_SOURCE_D
 # workspace ended up shipping an empty Mods page and nothing said so. Declaring
 # it is now also enforced: a project with packages that never calls this fails
 # to configure.
-snesrecomp_target_mod_catalog(KyuuyakuMegamiTenseiSNESRecomp ${CMAKE_SOURCE_DIR}/mods/preloaded)
+snesrecomp_target_mod_catalog(KyuuyakuTen ${CMAKE_SOURCE_DIR}/mods/preloaded)
 # Any other directory the game reads exe-relative (a translations/ table, ...)
 # is staged with snesrecomp_target_stage_dir, never with a separate ALL target.
 
-target_include_directories(KyuuyakuMegamiTenseiSNESRecomp PRIVATE
+target_include_directories(KyuuyakuTen PRIVATE
     ${SNESRECOMP_RUNNER_INCLUDE_DIRS}
     # common_rtl.c includes "config.h": the desktop key-map / Config contract
     # the framework host supplies (snesrecomp_target_desktop_host below).
@@ -85,12 +85,12 @@ target_include_directories(KyuuyakuMegamiTenseiSNESRecomp PRIVATE
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/recomp
 )
-target_link_libraries(KyuuyakuMegamiTenseiSNESRecomp PRIVATE ${SNESRECOMP_RUNNER_LIBRARIES})
-target_compile_definitions(KyuuyakuMegamiTenseiSNESRecomp PRIVATE
+target_link_libraries(KyuuyakuTen PRIVATE ${SNESRECOMP_RUNNER_LIBRARIES})
+target_compile_definitions(KyuuyakuTen PRIVATE
     SNES_GAME_VERSION="${SNESRECOMP_BUILD_VERSION}"
     SNES_GAME_TITLE="Kyuuyaku Megami Tensei"
 )
-snesrecomp_target_sdl(KyuuyakuMegamiTenseiSNESRecomp)
+snesrecomp_target_sdl(KyuuyakuTen)
 
 # The desktop host: launcher flow, ROM resolution, config.ini + [KeyMap],
 # window + SDL/OpenGL presenters, audio, gamepads, the save-state browser and
@@ -98,11 +98,11 @@ snesrecomp_target_sdl(KyuuyakuMegamiTenseiSNESRecomp)
 # report. src/main.c is the shim that names this title and supplies its
 # hooks; the host is the framework's and improves on a submodule pull.
 # Add TIER2 once this port reads the interpreter-gap manifest after each run.
-snesrecomp_target_desktop_host(KyuuyakuMegamiTenseiSNESRecomp)
+snesrecomp_target_desktop_host(KyuuyakuTen)
 # rom.cfg (the ROM the wizard set this project up from; git-ignored) is
 # staged beside the executable when none is there yet, so the first launch
 # opens on that dump rather than asking for one.
-snesrecomp_target_rom_cache(KyuuyakuMegamiTenseiSNESRecomp)
+snesrecomp_target_rom_cache(KyuuyakuTen)
 
 # Shared Dear ImGui pre-boot launcher (ROM picker, verification, display /
 # audio / input settings). Self-contained: it brings its own ImGui, GL link and
@@ -118,7 +118,7 @@ include(${RECOMP_UI_ROOT}/recomp_ui.cmake)
 # BOXART stages launcher_assets/img/boxart.tga beside the exe; the launcher
 # shows assets/img/boxart.tga by default. EXISTS-guarded in recomp_ui.cmake,
 # so this configures cleanly before any art is fetched.
-recomp_target_launcher_ui(KyuuyakuMegamiTenseiSNESRecomp CONSOLE snes
+recomp_target_launcher_ui(KyuuyakuTen CONSOLE snes
     BOXART "${CMAKE_SOURCE_DIR}/launcher_assets/img/boxart.tga")
 
 # Generate & rebuild from inside the launcher: pick ROM -> recompile locally
@@ -126,9 +126,9 @@ recomp_target_launcher_ui(KyuuyakuMegamiTenseiSNESRecomp CONSOLE snes
 # project contributes no configuration (snesrecomp_codegen_host_autowire in
 # src/main.c). recomp-ui/src is on the include path because the host speaks
 # RecompLauncherCGameInfo.
-target_sources(KyuuyakuMegamiTenseiSNESRecomp PRIVATE
+target_sources(KyuuyakuTen PRIVATE
     ${SNESRECOMP_ROOT}/host/snesrecomp_codegen_host.c)
-target_include_directories(KyuuyakuMegamiTenseiSNESRecomp PRIVATE
+target_include_directories(KyuuyakuTen PRIVATE
     ${SNESRECOMP_ROOT}/host
     ${RECOMP_UI_ROOT}/src)
 

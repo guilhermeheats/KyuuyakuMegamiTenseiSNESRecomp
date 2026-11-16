@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Package a Kyuuyaku Megami Tensei release: a SETUP PACK.
+# Package a KyuuyakuTen release: a SETUP PACK.
 #
 # The zip does not contain the game. It contains a setup program (the host
 # built with -DSNESRECOMP_SETUP_HOST=ON, i.e. without recompiled code), the
@@ -16,7 +16,7 @@
 # the cmake-clang-v1 pack named by RETCOMM_TOOLCHAIN_DIR into the zip so the
 # player downloads nothing.
 #
-# Writes: dist/kyuuyaku-megami-tensei-<VERSION>-<platform-tag>.zip
+# Writes: dist/kyuuyakuten-<VERSION>-<platform-tag>.zip
 set -euo pipefail
 
 # A silent exit is the worst outcome a packaging step can have: the first
@@ -62,8 +62,8 @@ exec bash "$IMPL" \
   --runtime-dir mods \
   --build-dir "$BUILD_DIR" \
   --artifact "$PLATFORM" \
-  --exe-name KyuuyakuMegamiTenseiSNESRecomp \
-  --zip-prefix kyuuyaku-megami-tensei \
+  --exe-name KyuuyakuTen \
+  --zip-prefix kyuuyakuten \
   --display-name "Kyuuyaku Megami Tensei" \
   --rom-hint "$ROM_FILE" \
   --rom-sha256 "$ROM_SHA256" \

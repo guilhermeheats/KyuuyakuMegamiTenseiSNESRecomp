@@ -39,6 +39,7 @@ revision fails immediately instead of producing subtly wrong output.
 
 ## Project docs
 
+- [Development](docs/development.md) — ambiente, estado atual, ferramentas e testes.
 - [Roadmap](docs/roadmap.md) — escopo, rotina semanal e primeiros 30 dias.
 - [ROM identity](docs/rom-identity.md) — hashes, revisão escolhida e verificação.
 - [ROM map](docs/rom-map.md) — vetores e primeiras entradas.
@@ -48,6 +49,7 @@ revision fails immediately instead of producing subtly wrong output.
 - [Input scripts](tools/scripts/README.md) — cadeia de save states e testes.
 - [Linux build deps](docs/linux-build-deps.md) — pacotes no openSUSE Leap 16.
 - [Sources](docs/sources.md) — links e projetos de referência.
+- [Contributing](CONTRIBUTING.md) — regras para contribuir sem violar direitos autorais.
 
 ## Build
 
@@ -127,3 +129,21 @@ This project's own source is under the license in `LICENSE`. The framework
 carries its own terms — see `snesrecomp/LICENSE` and
 `snesrecomp/THIRD_PARTY_ATTRIBUTION.md`. Neither covers the game data, which
 is not distributed here.
+
+## Disclaimer
+
+This is an unofficial, non-commercial preservation and reverse-engineering
+project. It is not affiliated with, endorsed by, or sponsored by Atlus, Namco,
+Nintendo, Opera House, or any of their subsidiaries. Kyuuyaku Megami Tensei
+and all related names and assets are trademarks or copyrights of their
+respective owners. No game data is distributed.
+
+## Credits
+
+- [snesrecomp](https://github.com/RetroPortingToolKit/snesrecomp) by Matthew
+  Stanley and contributors, which builds on the snesrev ports and LakeSnes.
+- [recomp-ui](https://github.com/mstan/recomp-ui) for the launcher.
+- The snesrecomp, LakeSnes, snesrev and ares communities for the emulation and
+  reverse-engineering foundations.
+- The fan translators and the Megami Tensei community for the documentation,
+  text tables and test references.

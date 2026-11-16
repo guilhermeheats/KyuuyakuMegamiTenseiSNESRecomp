@@ -45,6 +45,7 @@ revision fails immediately instead of producing subtly wrong output.
 - [RAM map](docs/ram-map.md) — âncoras iniciais de RAM.
 - [Checkpoints](docs/checkpoints.md) — cenas para comparar com o emulador.
 - [Bring-up log](docs/bring-up-log.md) — o que já foi feito e o que bloqueia.
+- [Input scripts](tools/scripts/README.md) — cadeia de save states e testes.
 - [Linux build deps](docs/linux-build-deps.md) — pacotes no openSUSE Leap 16.
 - [Sources](docs/sources.md) — links e projetos de referência.
 

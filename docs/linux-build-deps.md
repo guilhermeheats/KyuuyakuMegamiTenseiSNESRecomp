@@ -29,6 +29,17 @@ cmake --build build --parallel
 
 Se o CMake ainda não encontrar X11/Wayland/OpenGL, confira o log `build/CMakeFiles/CMakeOutput.log` e o resumo do SDL no final da configuração.
 
+## Opcional: Clang
+
+Para um build alternativo de diagnóstico:
+
+```bash
+sudo zypper install -y clang
+```
+
+No openSUSE Leap 16, use também a flag documentada em
+`docs/development.md` para o Clang encontrar o `libstdc++` do GCC.
+
 ## Observação
 
 O build `build-headless` foi uma tentativa de contornar a falta dos pacotes com `-DSDL_UNIX_CONSOLE_BUILD=ON`; ele não serve para jogar porque não tem backend de vídeo. O caminho normal é instalar as dependências acima e usar `build/`.

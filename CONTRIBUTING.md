@@ -70,5 +70,8 @@ Include:
 This project is source-available under the PolyForm Noncommercial License
 1.0.0; it is not an OSI open-source license. The snesrecomp framework,
 recomp-ui and third-party components keep their own terms. Read
-[`NOTICE.md`](NOTICE.md), `snesrecomp/LICENSE`, `snesrecomp/PERMISSIONS.md` and
-`THIRD_PARTY_ATTRIBUTION.md` before distributing a build.
+[`NOTICE.md`](NOTICE.md),
+[snesrecomp/LICENSE](https://github.com/RetroPortingToolKit/snesrecomp/blob/main/LICENSE),
+[snesrecomp/PERMISSIONS.md](https://github.com/RetroPortingToolKit/snesrecomp/blob/main/PERMISSIONS.md)
+and [`THIRD_PARTY_ATTRIBUTION.md`](THIRD_PARTY_ATTRIBUTION.md) before
+distributing a build.

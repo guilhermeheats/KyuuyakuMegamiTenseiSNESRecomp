@@ -66,6 +66,42 @@ cmake --build build --parallel
 
 O binário fica em `build/KyuuyakuTen`.
 
+## GCC ou Clang?
+
+O build validado usa **GCC 15.3.0**, e ele é suficiente para o projeto. O
+snesrecomp e o SDL3 também suportam Clang; não há requisito de “matching” de
+compilador, porque o objetivo é fidelidade de execução, não gerar o mesmo
+binário da ROM.
+
+Recomendação prática:
+
+- **GCC** para o build de release: é o padrão do openSUSE, já está validado e
+  não exige instalação extra.
+- **Clang** para desenvolvimento e diagnóstico: mensagens melhores,
+  `clang-tidy`, `-fsanitize=address,undefined` e builds às vezes mais rápidos.
+- Se um bug aparecer em um compilador e não no outro, isso é sinal de
+  comportamento indefinido no código do host; vale investigar, mas não é
+  motivo para trocar o compilador de release.
+
+Build alternativo com Clang (não substitui o `build/` validado):
+
+```bash
+cmake -S . -B build-clang -G Ninja -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_C_COMPILER=clang \
+  -DCMAKE_CXX_COMPILER=clang++ \
+  -DCMAKE_CXX_FLAGS="--gcc-install-dir=/usr/lib64/gcc/x86_64-suse-linux/15"
+cmake --build build-clang --parallel
+```
+
+No openSUSE Leap 16, o Clang 19 não encontra o `libstdc++` e os headers C++ do
+GCC sozinho; o `--gcc-install-dir` resolve isso. Em outras distros, remova a
+flag se o Clang já encontra o `libstdc++` ou use `-stdlib=libc++` com o
+`libc++-devel` instalado.
+
+`build-*` já está no `.gitignore`. O build Clang foi validado com o mesmo save
+state da dungeon; a única diferença observada foi um warning no
+`recomp-ui` (submódulo), não no código do jogo.
+
 ## Execução
 
 ```bash

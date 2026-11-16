@@ -20,9 +20,9 @@ which is licensed under the **PolyForm Noncommercial License 1.0.0**,
 Copyright (c) 2026 Matthew Stanley.
 
 - Additional permissions (donations, advertising and free access):
-  [`snesrecomp/PERMISSIONS.md`](snesrecomp/PERMISSIONS.md)
+  [snesrecomp/PERMISSIONS.md](https://github.com/RetroPortingToolKit/snesrecomp/blob/main/PERMISSIONS.md)
 - Third-party notices and license texts:
-  [`snesrecomp/THIRD_PARTY_ATTRIBUTION.md`](snesrecomp/THIRD_PARTY_ATTRIBUTION.md)
+  [snesrecomp/THIRD_PARTY_ATTRIBUTION.md](https://github.com/RetroPortingToolKit/snesrecomp/blob/main/THIRD_PARTY_ATTRIBUTION.md)
 - A repository-root mirror of the third-party notices is kept in
   [`THIRD_PARTY_ATTRIBUTION.md`](THIRD_PARTY_ATTRIBUTION.md) so a source
   snapshot without submodule contents still carries the required notices.
@@ -35,7 +35,7 @@ are in the files above and are also present in the submodule.
 
 The launcher uses [recomp-ui](https://github.com/mstan/recomp-ui), licensed
 under the **MIT License**, Copyright (c) 2026 Matthew Stanley. See
-[`recomp-ui/LICENSE`](recomp-ui/LICENSE).
+[recomp-ui/LICENSE](https://github.com/mstan/recomp-ui/blob/master/LICENSE).
 
 ## Game data
 

@@ -134,9 +134,10 @@ Noncommercial License 1.0.0 in [`LICENSE`](LICENSE). It is **not** an OSI
 open-source license and commercial use requires separate permission.
 
 The framework and launcher carry their own terms — see [`NOTICE.md`](NOTICE.md),
-`snesrecomp/LICENSE`, `snesrecomp/PERMISSIONS.md` and
-`THIRD_PARTY_ATTRIBUTION.md`. None of these licenses covers the game data,
-which is not distributed here.
+[snesrecomp/LICENSE](https://github.com/RetroPortingToolKit/snesrecomp/blob/main/LICENSE),
+[snesrecomp/PERMISSIONS.md](https://github.com/RetroPortingToolKit/snesrecomp/blob/main/PERMISSIONS.md)
+and [`THIRD_PARTY_ATTRIBUTION.md`](THIRD_PARTY_ATTRIBUTION.md). None of these
+licenses covers the game data, which is not distributed here.
 
 ## Disclaimer
 

@@ -13,7 +13,7 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
 | CP-006 | Distribuição de status | confirmar o segundo nome (~frame 12667) | OK — 15 pontos por personagem |
 | CP-007 | Primeira dungeon | confirmar os status (~frame 14861) | OK — corredor inicial |
 | CP-008 | Movimento | setas na dungeon | OK — câmera muda de célula |
-| CP-009 | Interação com baú | andar até o baú (~frame 15100) | OK — diálogo YES/NO |
+| CP-009 | Interação com baú | andar até o baú (~frame 15100) | OK — diálogo YES/NO; loot `500` + `宝玉` |
 | CP-010 | Primeira batalha | andar até um encontro | pendente |
 | CP-011 | Menu de status | abrir o menu | pendente |
 | CP-012 | Salvar e carregar pelo jogo | salvar via SRAM, reiniciar, carregar | pendente |

@@ -15,6 +15,7 @@ Os save states ficam em `build/saves/saveN.sav` e **não** são versionados.
 | `save4` | 12667 | distribuição de status do protagonista | `name-save-stats.txt` |
 | `save5` | 14861 | primeira dungeon, corredor inicial | `enter-game-save.txt` |
 | `save6` | 15346 | diálogo do baú | `save-chest.txt` |
+| `save7` | 15868 | baú aberto, loot recebido, um passo atrás | `chest-loot-save.txt` |
 
 Para regenerar, rode na ordem. Cada script carrega o state anterior.
 
@@ -34,8 +35,8 @@ Para regenerar, rode na ordem. Cada script carrega o state anterior.
 | `move-forward.txt` | dá um passo para frente |
 | `move-forward-3.txt` | vai até o baú |
 | `save-chest.txt` | salva `save6` no diálogo do baú |
-| `open-chest.txt` | vai até o baú e pressiona A |
-| `chest-a.txt` | carrega `save6` e pressiona A |
+| `chest-open.txt` | carrega `save6`, abre o baú e mostra o loot |
+| `chest-loot-save.txt` | abre o baú, fecha a mensagem, dá um passo atrás e salva `save7` |
 
 ## Exemplo
 

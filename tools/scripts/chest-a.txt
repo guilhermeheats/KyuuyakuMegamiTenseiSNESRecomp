@@ -1,5 +1,0 @@
-wait 10
-loadstate 6
-wait 120
-press a 30
-wait 300

@@ -43,11 +43,12 @@
   - frame 12667: distribuição de status do protagonista
   - frame 14861: primeira dungeon, corredor inicial
   - frame 15100: diálogo do baú (“宝箱だ！ 開けますか？”)
+  - frame 15500: loot do baú (`500` + `宝玉`)
 - Nenhum screenshot do jogo foi commitado; os frames ficam em `/tmp`.
 
 ### Save states e input
 
-- Criada uma cadeia de save states locais em `build/saves/` (`save1` … `save6`).
+- Criada uma cadeia de save states locais em `build/saves/` (`save1` … `save7`).
 - Scripts em `tools/scripts/` reproduzem o caminho; a documentação está em
   `tools/scripts/README.md`.
 - O state `save2` contém `ナカジマあああ` por causa do avanço automático com A;

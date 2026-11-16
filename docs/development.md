@@ -18,7 +18,7 @@ Atualizado em 2026-11-16.
 | Distribuição de status | OK |
 | Primeira dungeon | OK |
 | Movimento | OK |
-| Interação com baú | OK |
+| Interação com baú | OK — loot `500` + `宝玉` |
 | Primeira batalha | pendente |
 | Menu de status | pendente |
 | Save/load via SRAM do jogo | pendente |
@@ -36,6 +36,7 @@ Marcos de frame observados com `--framedump`:
 | 12667 | status do protagonista |
 | 14861 | primeira dungeon |
 | 15100 | diálogo do baú |
+| 15500 | loot do baú (`500` + `宝玉`) |
 
 ## Ambiente
 

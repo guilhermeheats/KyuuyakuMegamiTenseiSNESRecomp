@@ -1,0 +1,74 @@
+wait 10
+loadstate 4
+wait 120
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press start 2
+wait 60
+press a 2
+wait 250
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press a 2
+wait 30
+press start 2
+wait 60
+press a 2
+wait 700
+savestate 5
+wait 2
+quit

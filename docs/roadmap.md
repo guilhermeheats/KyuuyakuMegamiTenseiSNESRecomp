@@ -57,17 +57,21 @@ Fora do MVP: widescreen, tradução, MSU-1, netplay, mods de conteúdo.
 ### Semana 4
 
 - [x] Passar do título para a introdução do MT1.
-- [ ] Chegar à seleção de save/novo jogo.
+- [x] Entrar com os nomes dos dois personagens.
+- [x] Distribuir os 15 pontos de status.
+- [x] Chegar à primeira dungeon.
+- [x] Testar movimento e interação com baú.
 - [x] Documentar o caminho e os símbolos descobertos.
 - [x] Atualizar `docs/checkpoints.md`.
-- [x] Definir a próxima meta: primeira sala da dungeon.
+- [ ] Primeira batalha e menu de status.
 
 ## Critério de aceite do vertical slice
 
 1. Boot estável.
-2. Título e seleção de save.
-3. Novo jogo e introdução.
+2. Título e novo jogo.
+3. Introdução, nomes e status.
 4. Movimento na primeira dungeon.
-5. Primeira batalha com uma ação completa.
-6. Menu de status.
-7. Salvar, reiniciar e carregar.
+5. Interação com baú.
+6. Primeira batalha com uma ação completa.
+7. Menu de status.
+8. Salvar, reiniciar e carregar.

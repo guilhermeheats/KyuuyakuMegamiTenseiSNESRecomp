@@ -1,0 +1,5 @@
+# Salva um state na tela de título para testes rápidos.
+wait 3600
+savestate 1
+wait 2
+quit

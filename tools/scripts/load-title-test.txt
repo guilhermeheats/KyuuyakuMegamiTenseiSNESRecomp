@@ -1,0 +1,4 @@
+# Carrega o state de título e espera alguns frames.
+wait 10
+loadstate 1
+wait 30

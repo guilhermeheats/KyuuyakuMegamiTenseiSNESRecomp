@@ -1,0 +1,9 @@
+wait 10
+loadstate 5
+wait 60
+press up 60
+wait 60
+press up 60
+wait 60
+press up 60
+wait 120

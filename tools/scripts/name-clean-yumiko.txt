@@ -1,0 +1,11 @@
+# State 2 (nome do protagonista) -> State 3 (nome da Yumiko), sem caracteres extras.
+wait 10
+loadstate 2
+wait 120
+press start 10
+wait 120
+press a 30
+wait 300
+savestate 3
+wait 2
+quit

@@ -38,11 +38,24 @@
   - frame 3600: tela de título “旧約・女神転生”
   - frame 3720: transição após pressionar Start
   - frame 4200: texto da introdução do MT1
+  - frame 11299: entrada do nome do protagonista
+  - frame 11883: entrada do nome da Yumiko
+  - frame 12667: distribuição de status do protagonista
+  - frame 14861: primeira dungeon, corredor inicial
+  - frame 15100: diálogo do baú (“宝箱だ！ 開けますか？”)
 - Nenhum screenshot do jogo foi commitado; os frames ficam em `/tmp`.
+
+### Save states e input
+
+- Criada uma cadeia de save states locais em `build/saves/` (`save1` … `save6`).
+- Scripts em `tools/scripts/` reproduzem o caminho; a documentação está em
+  `tools/scripts/README.md`.
+- O state `save2` contém `ナカジマあああ` por causa do avanço automático com A;
+  é um artefato de teste, não um bug do recomp.
 
 ### Próximo passo
 
-1. Entender a sequência de input do título/introdução e chegar ao primeiro menu jogável.
-2. Mapear a seleção de save e a primeira sala da dungeon (`CP-002`/`CP-004`).
+1. Testar a primeira batalha e o menu de status (`CP-010`/`CP-011`).
+2. Testar salvar/carregar pelo jogo (SRAM de 8 KiB), não só save state do host.
 3. Comparar o boot com o MesenCE e registrar um checkpoint com hash de WRAM.
 4. Começar a nomear as rotinas descobertas em `recomp/symbols.toml`.

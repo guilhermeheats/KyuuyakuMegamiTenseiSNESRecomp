@@ -1,0 +1,84 @@
+# Avança a introdução do MT1 com A, depois do título.
+wait 3600
+press start 2
+wait 120
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90
+press a 2
+wait 90

@@ -49,6 +49,13 @@
   - frame 16800: ficha de status e auto-mapping
 - Nenhum screenshot do jogo foi commitado; os frames ficam em `/tmp`.
 
+### Rota do 8F
+
+- O 8F é o andar do baú inicial; a primeira batalha é no 7F.
+- A rota conhecida está em `docs/route-8f.md`: baú → corredor inferior a leste → lado direito a norte → corredor superior a oeste → sala central com a escada de descida (`D`).
+- O auto-map do jogo (`COMP` → `オートマッピング`) foi validado.
+- Ainda falta descer ao 7F; os save states 9–12 foram usados em exploração local e não são uma cadeia estável.
+
 ### Save states e input
 
 - Criada uma cadeia de save states locais em `build/saves/` (`save1` … `save8`).

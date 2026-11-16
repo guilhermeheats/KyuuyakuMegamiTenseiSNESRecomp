@@ -159,7 +159,10 @@ independente é o próximo passo de validação.
 
 ## Limitações conhecidas
 
-- A primeira batalha e o menu de status ainda não foram validados.
+- O menu de status e o auto-mapping já foram validados; a primeira batalha
+  ainda não.
+- O 8F já está mapeado; falta descer para o 7F pela escada central
+  (`docs/route-8f.md`).
 - O save real do jogo (SRAM de 8 KiB) ainda não foi testado; os save states do
   host são apenas para desenvolvimento.
 - O state `save2` tem o nome `ナカジマあああ` por causa do avanço automático
@@ -171,9 +174,8 @@ independente é o próximo passo de validação.
 
 ## Próximos passos
 
-1. Andar até um encontro e validar a primeira batalha.
-2. Abrir o menu de status e conferir os valores dos personagens.
-3. Salvar via SRAM, reiniciar e carregar.
-4. Comparar o boot com o MesenCE usando frames e WRAM.
-5. Nomear as rotinas descobertas em `recomp/symbols.toml`.
-6. Expandir a cobertura para o restante do MT1.
+1. Seguir a rota do 8F, descer ao 7F e validar a primeira batalha.
+2. Salvar via SRAM, reiniciar e carregar.
+3. Comparar o boot com o MesenCE usando frames e WRAM.
+4. Nomear as rotinas descobertas em `recomp/symbols.toml`.
+5. Expandir a cobertura para o restante do MT1.

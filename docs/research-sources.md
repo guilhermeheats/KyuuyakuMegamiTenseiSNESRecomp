@@ -117,5 +117,6 @@ mapa, imagem, ROM ou save de terceiros é versionado no repositório.
 1. Confirmar as coordenadas/gatilhos de Basim, Gnome e Dryad no 7F e descer ao
    6F.
 2. Mapear o 7F com o auto-map `Fixed` e `0x877`/`0x878`/`0x865`.
-3. Validar o carregamento do SRAM pelo menu do elder (CP-013) e o início do
-   Megami Tensei II (CP-014).
+3. Fechar o CP-013: a gravação/flush do SRAM já foi validada, mas o
+   carregamento pelo `CONTINUE` do título ainda falha; depois validar o início
+   do Megami Tensei II (CP-014).

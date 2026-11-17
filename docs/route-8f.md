@@ -157,7 +157,8 @@ versionados.
 - Confirmar as coordenadas e os gatilhos exatos de Basim, Gnome e Dryad no 7F
   (o evento de Heket já foi confirmado em `(8,2)`).
 - Descer do 7F para o 6F e validar a continuação da torre.
-- Validar o carregamento do SRAM pelo menu do elder (CP-013).
+- Fechar o CP-013: a gravação/flush do SRAM já funciona, mas o `CONTINUE` do
+  título ainda rejeita o save e zera a SRAM; o elder reconhece o mesmo save.
 - Mapear o 7F e o 6F com o auto-map `Fixed` para as próximas batalhas.
 
 ## Modelo de movimento (corrigido)

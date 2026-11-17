@@ -17,7 +17,7 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
 | CP-010 | Primeira batalha | rota confirmada em `docs/route-8f.md`: Gate Keeper `(2,2)`, escada `(2,3)`, 7F `(10,2)`, batalha em `(8,2)` | **OK** — evento scripted de Heket; menu `FIGHT`/`ESCAPE`/`TALK`/`AUTO`, ataques, dano, revide e negociação `TALK`→`NO`; batalha encerrada em paz e retorno ao dungeon |
 | CP-011 | Menu de status | apertar A na passagem (~frame 16400) | OK — COMP/MAGIC/ITEM/STATUS; ficha em ~frame 16800 |
 | CP-012 | Auto-mapping | A → COMP → `オートマッピング` (5º item; down ×4); configurar `Fixed` | OK — minimapa local; modo Fixed norte-para-cima mostra posição/EV |
-| CP-013 | Salvar e carregar pelo jogo | salvar via SRAM, reiniciar, carregar | parcial — menu do elder tem 4 slots e `記録する`/`外に出る`; o SRAM lido ao vivo ficou zerado, falta validar o flush/carregamento |
+| CP-013 | Salvar e carregar pelo jogo | salvar via SRAM, reiniciar, carregar | **parcial** — gravação/flush OK: o elder grava os 4 slots; `save.srm` tem 8192 bytes e 93 bytes não-zero; o boot relê o arquivo. O carregamento pelo título (`CONTINUE`) ainda falha: mostra `セーブされたデータがありません` e zera o SRAM. |
 | CP-014 | Início do Megami Tensei II | completar o MT1 ou usar save de teste | pendente |
 
 ## CP-010 — detalhes da primeira batalha
@@ -42,6 +42,35 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
   `save9` (mensagem de Heket), `save8` (menu inicial da batalha),
   `save7` (menu após o primeiro turno), `save6` (pós-batalha).
   Esses arquivos ficam em `build-debug/saves/` e não são versionados.
+
+## CP-013 — detalhes do SRAM
+
+- **Data:** 2026-11-17
+- **Save feito pelo elder** no 8F `(1,3)` via `記録する` → slot 1 → `YES`.
+  A lista do elder passou a mostrar
+  `0 ダイダロス L1 ナカジマあああ ユミコ`.
+- **Formato observado:** quatro slots de `0x800` bytes em `0x0000`,
+  `0x0800`, `0x1000` e `0x1800`; cada slot tem o header `DDSO` em `0x0000`
+  e um checksum em `slot+0x00EF`. O save mínimo ocupa 93 bytes não-zero
+  (o resto é zero).
+- **Gravação:** a rotina `$03:A35B` copia `$7E:0C00` → SRAM `0x0000` e
+  `$7E:8000` → SRAM `0x0400`, e grava o checksum em `slot+0x00EF`.
+- **Flush:** ao fechar a janela (`SDL_QUIT`), `RtlWriteSram` grava
+  `saves/save.srm`; o SHA-256 do arquivo ficou igual ao da SRAM em memória
+  (`a0ca482f…`).
+- **Leitura no boot:** o processo seguinte carregou o arquivo e a SRAM em
+  memória voltou com o mesmo hash `a0ca482f…`.
+- **Bloqueio:** no título, `START`/`CONTINUE` → `CONTINUE` mostra
+  `セーブされたデータがありません` e zera a SRAM. O elder reconhece o mesmo
+  save, então o problema está no caminho de validação/carregamento do título,
+  não na gravação.
+- **Tentativas:** duplicar o slot válido para os quatro offsets e corrigir o
+  checksum (`0x5A`) não resolveu; o título continuou zerando a SRAM. A
+  comparação com emulador foi iniciada com Snes9x, mas a configuração de
+  input do emulador ainda não permitiu selecionar `CONTINUE`.
+- **Próximo passo:** comparar o SRAM com um save válido de emulador ou
+  instrumentar as leituras de SRAM do caminho `CONTINUE` para achar a
+  validação que rejeita o arquivo.
 
 ## Formato sugerido de registro
 

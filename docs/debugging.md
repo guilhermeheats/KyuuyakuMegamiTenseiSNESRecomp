@@ -178,6 +178,31 @@ ao dungeon em `(8,2)`.
 > diálogo, use `B` para sair de menus; não pressione `A` repetidamente. Foi
 > assim que o menu `COMP → MAGIC` abriu durante a validação.
 
+### SRAM e save/load (2026-11-17)
+
+O caminho de gravação do save do jogo foi validado, mas o carregamento pelo
+título ainda não:
+
+- o elder do 8F grava em quatro slots de `0x800` bytes, em `0x0000`,
+  `0x0800`, `0x1000` e `0x1800`;
+- cada slot começa com o header `DDSO` e tem um checksum em `slot+0x00EF`;
+- a rotina de save em `$03:A35B` copia `$7E:0C00` → SRAM `0x0000` e
+  `$7E:8000` → SRAM `0x0400`; a rotina de load em `$03:A3BF` faz o inverso;
+- a gravação em disco acontece no shutdown (`RtlWriteSram`): o arquivo
+  `saves/save.srm` (8192 bytes) ficou com 93 bytes não-zero e SHA-256
+  `a0ca482fe5919969a94c51e9073d1b25527a05b06b273f56ec5493ca56aa100a`,
+  idêntico à SRAM em memória;
+- no boot seguinte, o arquivo foi relido e a SRAM em memória voltou com o
+  mesmo hash; o elder reconheceu o save e mostrou
+  `0 ダイダロス L1 ナカジマあああ ユミコ`;
+- porém, no título, `CONTINUE` mostra `セーブされたデータがありません` e
+  zera a SRAM. Duplicar o slot para os quatro offsets e corrigir o checksum
+  (`0x5A`) não resolveu.
+
+O bloqueio está no caminho de validação/carregamento do título, não na
+gravação. O próximo passo é comparar com um save válido de emulador
+(Mesen/Snes9x) ou instrumentar as leituras de SRAM desse caminho.
+
 ## Exploração BFS (2026-11-17)
 
 Foi feito um BFS de caminhos a partir do `save5`, recarregando o state e

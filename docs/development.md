@@ -159,15 +159,14 @@ independente é o próximo passo de validação.
 
 ## Limitações conhecidas
 
-- O menu de status e o auto-mapping já foram validados; a primeira batalha
-  ainda não.
-- A rota do 8F está identificada em `docs/route-8f.md`, mas a escada central
-  (`D`) ainda não foi alcançada; o elevador (`E`) é uma alternativa.
-- O servidor de debug funciona e `0x80f`/`0x811`/`0x813` reagem ao movimento,
-  mas a correlação com a grade do mapa ainda não está fechada; veja
-  `docs/debugging.md`.
-- O save real do jogo (SRAM de 8 KiB) ainda não foi testado; os save states do
-  host são apenas para desenvolvimento.
+- O menu de status, o auto-mapping e a primeira batalha já foram validados.
+- A rota do 8F está confirmada em `docs/route-8f.md`: Gate Keeper em `(2,2)`,
+  escada em `(2,3)` e chegada ao 7F em `(10,2)`.
+- O servidor de debug funciona e `0x877`/`0x878`/`0x865` dão a posição; a
+  grade do mapa ainda não está totalmente mapeada para o 7F.
+- A gravação/flush do save real (SRAM de 8 KiB) foi validada; o carregamento
+  pelo título ainda falha (CP-013). Os save states do host são apenas para
+  desenvolvimento.
 - O state `save2` tem o nome `ナカジマあああ` por causa do avanço automático
   com A. É artefato de teste, não bug do recomp.
 - Os scripts de input dependem do timing atual; ajustes de `wait` podem ser
@@ -177,9 +176,12 @@ independente é o próximo passo de validação.
 
 ## Próximos passos
 
-1. Fechar o mapa de coordenadas com o servidor de debug (`docs/debugging.md`),
-   seguir a rota do 8F, descer ao 7F e validar a primeira batalha.
-2. Salvar via SRAM, reiniciar e carregar.
-3. Comparar o boot com o MesenCE usando frames e WRAM.
-4. Nomear as rotinas descobertas em `recomp/symbols.toml`.
-5. Expandir a cobertura para o restante do MT1.
+1. Fechar CP-013: achar por que o `CONTINUE` do título rejeita o save e zera a
+   SRAM; comparar com um save válido de emulador e instrumentar as leituras de
+   SRAM do caminho de load.
+2. Completar a validação de batalha: vitória/derrota/recrutamento, recompensas
+   e level-up, além do `TALK` já validado.
+3. Comparar boot/dungeon/batalha com o MesenCE usando frames e WRAM.
+4. Nomear as rotinas descobertas em `recomp/symbols.toml` — começando pelo
+   caminho da batalha — e promover as seguras para AOT (`emit = true`).
+5. Expandir a cobertura para o restante do MT1 (7F, 6F, ...).

@@ -85,9 +85,13 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
   e deixando todo o resto igual, o `CONTINUE` ainda zerou a SRAM. Portanto a
   rejeição **não é só o checksum**: o título deve checar outro campo/tabela
   (provável tabela de arquivos/metadata) que o save do elder não preenche.
-- **Próximo passo:** comparar com um save válido de emulador (para ver a
-  tabela/metadata esperada) ou instrumentar o caminho `CONTINUE` para achar
-  a condição exata que rejeita o save.
+- **Instrumentação local (revertida):** logs em `cpu_write8`/`cpu_write16`,
+  `cart_writeLorom`/`cart_writeHirom`, `RtlReset`, `SnesInit` e
+  `RtlReadSram` não dispararam no `CONTINUE`; a SRAM é zerada por um caminho
+  que não passa por esses pontos (provável `memset`/DMA/reinit de cart).
+- **Próximo passo:** instrumentar `cart_load`/`memset`/DMA ou comparar com
+  um save válido de emulador (para ver a tabela/metadata esperada) e achar a
+  condição exata que rejeita o save.
 
 ## Formato sugerido de registro
 

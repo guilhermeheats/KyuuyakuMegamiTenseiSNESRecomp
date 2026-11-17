@@ -183,7 +183,10 @@ As primeiras rotinas de jogo promovidas para AOT são as de SRAM em bank `$03`:
 O save AOT produziu o mesmo hash de SRAM do save LLE; o load pelo título ainda
 está bloqueado. O diagnóstico GDB mostrou que o validador calcula `0x5A` para
 o slot 0, mas o título ainda rejeita mesmo com `0xEF=0x5A`; falta identificar
-a tabela/metadata que o save do elder não preenche.
+a tabela/metadata que o save do elder não preenche. A instrumentação local de
+`cpu_write8`, `cart_write*`, `RtlReset`, `SnesInit` e `RtlReadSram` não
+capturou o zeroing; o próximo alvo é `cart_load`/`memset`/DMA ou um save de
+emulador para comparar.
 
 ## Próximos passos
 

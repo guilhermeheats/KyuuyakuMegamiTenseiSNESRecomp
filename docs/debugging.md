@@ -67,6 +67,60 @@ As capturas de `screenshot` são gravadas no diretório de trabalho do host
   do 8F; escrever valores isolados pode renderizar corredores, mas não levou à
   escada `D` nem ao elevador `E`.
 
+## Correção do modelo de movimento (2026-11-17)
+
+A exploração desta rodada mostrou que `0x80F`/`0x811` **não** são um par x/y.
+Os endereços observados são:
+
+| Endereço | Significado |
+|---|---|
+| `0x877` | x local/global |
+| `0x878` | y local/global |
+| `0x80F` | direção: `0`=N, `1`=E, `2`=S, `3`=W |
+| `0x811` | contador de movimento para frente |
+| `0x813` | contador de giro |
+| `0x865` | área/sala (`01`/`02`/`03` observados) |
+| `0x867` | background/view dependente da direção |
+
+Consequências:
+
+- o BFS antigo tratava a direção como posição e por isso criava vários “nós”
+  para a mesma célula;
+- o wall follower antigo seguia o anel externo da cidade, não o bloco central;
+- os IDs `0x11`, `0x31`, `0x05`, `0x51` etc. são **backgrounds por direção**,
+  não um grafo de portas. As transições com A observadas nesses tiles precisam
+  ser revalidadas com o modelo novo;
+- `up` = andar para frente, `left`/`right` = girar 90°; `down` pode funcionar
+  como giro de 180° em alguns estados. Para navegar, prefira `up` e
+  `left`/`right` e evite `down`.
+
+### Auto-map
+
+O auto-map é um minimapa **local**, centrado no jogador e rotacionado pela
+direção. Caminho confiável:
+
+```text
+A (menu) → COMP → down × 4 → A
+```
+
+O 5º item do submenu COMP é `オートマッピング`. O mapa não mostra a coordenada
+global; use `0x877`/`0x878`/`0x865` para registrar a posição.
+
+### Âncoras validadas no 8F
+
+- baú: aberto a partir da célula local `(0,5)`, com `0x878` = 5; loot 500 +
+  宝玉, dinheiro `0x0C72` = 500;
+- elder: diálogo multi-página em `(1,3)`, com `記録する` / `外に出る` e quatro
+  slots de save;
+- loja/placa `RAIFURU` e mensagem do velho de verde no bloco central;
+- a escada `(3,3)` ainda não foi acionada; o velho de verde em `(3,3)` repete
+  “みな元気じゃな” e empurra o jogador para `(3,2)`;
+- loja de armaduras em `(1,5)`: 2 Combat Suits; loja de armas em `(2,5)`:
+  Jack Knife + Nunchaku; elevador em `(3,5)` parado (“邪悪な力により…”)；
+- a tela de status/equipamento abre com **X**; a página `EQUIPMENTS` abre com
+  **direita**. O cursor de equipar ainda não foi dominado; o inventário contém
+  os itens comprados.
+
 ## Exploração BFS (2026-11-17)
 
 Foi feito um BFS de caminhos a partir do `save5`, recarregando o state e

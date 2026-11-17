@@ -1,0 +1,116 @@
+{
+  "source": "pareido.jp ROM-derived event table for Kyuuyaku Megami Tensei (SNES)",
+  "source_url": "https://pareido.jp/cyber-newtown/megaten-daedalus/nam-mt-dg-0/",
+  "floor": "8F",
+  "name": "Mikon City",
+  "region": 0,
+  "block": {
+    "x": 0,
+    "y": 0,
+    "width": 8,
+    "height": 8
+  },
+  "random_encounters": false,
+  "connected_cells": 64,
+  "notes": [
+    "Safe town: no random battles on 8F.",
+    "Coordinates are the Atlas (ROM) coordinates from the event table.",
+    "The local WRAM coordinates 0x877/0x878 are not identical to every event coordinate; event cells can be object cells on a wall.",
+    "Gate Keeper candidate cells are the talk events at (3,2) and (4,3). The exact sprite/tile is not yet confirmed in-game."
+  ],
+  "events": [
+    {
+      "x": 1,
+      "y": 3,
+      "type": "elder",
+      "label": "長老 / password and save",
+      "enter": "north"
+    },
+    {
+      "x": 1,
+      "y": 5,
+      "type": "chest",
+      "label": "500 Macca + jewel",
+      "enter": "north",
+      "observed": "Opened from local (0,5); 500 Macca and 宝玉 were received."
+    },
+    {
+      "x": 2,
+      "y": 5,
+      "type": "talk",
+      "label": "message / shop row",
+      "enter": "north"
+    },
+    {
+      "x": 3,
+      "y": 2,
+      "type": "talk",
+      "label": "Gate Keeper candidate",
+      "enter": "south"
+    },
+    {
+      "x": 3,
+      "y": 3,
+      "type": "stairs_down",
+      "label": "down stairs to 7F",
+      "destination": {
+        "floor": "7F",
+        "x": 11,
+        "y": 3
+      }
+    },
+    {
+      "x": 3,
+      "y": 5,
+      "type": "talk",
+      "label": "message / shop row",
+      "enter": "north"
+    },
+    {
+      "x": 4,
+      "y": 1,
+      "type": "healing_spring",
+      "label": "回復の泉 / Healing Spring"
+    },
+    {
+      "x": 4,
+      "y": 3,
+      "type": "talk",
+      "label": "Gate Keeper candidate",
+      "enter": "south"
+    },
+    {
+      "x": 4,
+      "y": 5,
+      "type": "shop",
+      "label": "weapon/armor shop"
+    },
+    {
+      "x": 5,
+      "y": 5,
+      "type": "elevator",
+      "label": "elevator (not usable before the first boss)"
+    },
+    {
+      "x": 7,
+      "y": 0,
+      "type": "cathedral_of_shadows",
+      "label": "邪教の館 / fusion and revival"
+    }
+  ],
+  "connections": [
+    {
+      "type": "stairs_down",
+      "from": {
+        "x": 3,
+        "y": 3
+      },
+      "to": {
+        "floor": "7F",
+        "x": 11,
+        "y": 3
+      },
+      "source": "pareido 8F/7F event tables"
+    }
+  ]
+}

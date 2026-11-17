@@ -65,6 +65,24 @@ SNESRECOMP_FRAMEDUMP_PIXELS=1 \
   "$HOME/roms/kyuuyaku.sfc"
 ```
 
+## Navegação via servidor TCP (`build-debug`)
+
+`nav_mikon.py` usa o servidor de debug na porta 4377 (não o `--script` do host)
+e serve para calibrar movimento e explorar o 8F:
+
+```bash
+./build-debug/KyuuyakuTen --no-launcher "$HOME/roms/kyuuyaku.sfc" &
+python3 tools/scripts/nav_mikon.py --loadstate 9 --state
+python3 tools/scripts/nav_mikon.py --loadstate 9 --forward 1 --state
+python3 tools/scripts/nav_mikon.py --face E --probe
+python3 tools/scripts/nav_mikon.py --automap
+```
+
+Endereços observados: `0x877` = x, `0x878` = y, `0x80F` = direção
+(`0`=N, `1`=E, `2`=S, `3`=W), `0x811`/`0x813` = contadores de movimento/giro,
+`0x865` = área/sala, `0x867` = background/view. O auto-map é um minimapa local
+(abre com `A` → `COMP` → 5º item → `A`).
+
 ## Observações
 
 - Os scripts dependem do timing atual do build. Se a sequência mudar, ajuste os

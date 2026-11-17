@@ -1,0 +1,96 @@
+{
+  "source": "pareido.jp ROM-derived encounter tables for Kyuuyaku Megami Tensei (SNES)",
+  "source_url": "https://pareido.jp/cyber-newtown/megaten-daedalus/nam-mt-dg-0/",
+  "total_rolls": 16,
+  "sets": [
+    {
+      "region": 0,
+      "set": 0,
+      "floors": [
+        "8F",
+        "7F",
+        "6F",
+        "5F"
+      ],
+      "note": "8F is Mikon City and has no random battles; the table applies to 7F-5F.",
+      "rolls": [
+        {
+          "demon": "Pink Looper",
+          "rolls": 3
+        },
+        {
+          "demon": "Mad Slug",
+          "rolls": 3
+        },
+        {
+          "demon": "Heket",
+          "rolls": 2
+        },
+        {
+          "demon": "Gnome",
+          "rolls": 2
+        },
+        {
+          "demon": "Green Slime",
+          "rolls": 2
+        },
+        {
+          "demon": "Zombie",
+          "rolls": 2
+        },
+        {
+          "demon": "Basim",
+          "rolls": 2
+        }
+      ]
+    },
+    {
+      "region": 1,
+      "set": 0,
+      "floors": [
+        "4F",
+        "3F",
+        "2F",
+        "1F"
+      ],
+      "rolls": [
+        {
+          "demon": "Cancer",
+          "rolls": 2
+        },
+        {
+          "demon": "Lemurian",
+          "rolls": 2
+        },
+        {
+          "demon": "Solas",
+          "rolls": 2
+        },
+        {
+          "demon": "Dryad",
+          "rolls": 2
+        },
+        {
+          "demon": "Will-o'-wisp",
+          "rolls": 2
+        },
+        {
+          "demon": "Ghost",
+          "rolls": 2
+        },
+        {
+          "demon": "Orc",
+          "rolls": 2
+        },
+        {
+          "demon": "Cerberus",
+          "rolls": 1
+        },
+        {
+          "demon": "Bug",
+          "rolls": 1
+        }
+      ]
+    }
+  ]
+}

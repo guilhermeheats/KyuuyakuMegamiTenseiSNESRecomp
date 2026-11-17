@@ -1,0 +1,90 @@
+{
+  "source": "pareido.jp ROM-derived event table for Kyuuyaku Megami Tensei (SNES)",
+  "source_url": "https://pareido.jp/cyber-newtown/megaten-daedalus/nam-mt-dg-0/",
+  "floor": "7F",
+  "name": "Daedalus Tower 7F",
+  "region": 0,
+  "block": {
+    "x": 8,
+    "y": 0,
+    "width": 8,
+    "height": 8
+  },
+  "components": [
+    {
+      "id": 1,
+      "cells": 54,
+      "events": [
+        {
+          "x": 11,
+          "y": 3,
+          "type": "stairs_up",
+          "label": "arrival from 8F (3,3)"
+        },
+        {
+          "x": 11,
+          "y": 4,
+          "type": "stairs_down",
+          "label": "down to 6F"
+        },
+        {
+          "x": 12,
+          "y": 5,
+          "type": "talk",
+          "enter": "north"
+        },
+        {
+          "x": 14,
+          "y": 6,
+          "type": "talk"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "cells": 9,
+      "events": [
+        {
+          "x": 13,
+          "y": 6,
+          "type": "talk",
+          "enter": "north"
+        },
+        {
+          "x": 15,
+          "y": 2,
+          "type": "talk",
+          "enter": "north"
+        },
+        {
+          "x": 15,
+          "y": 3,
+          "type": "stairs_down",
+          "label": "down to 6F"
+        }
+      ]
+    }
+  ],
+  "elevator": {
+    "atlas": {
+      "x": 5,
+      "y": 5
+    },
+    "stops": false,
+    "note": "The 7F elevator stop flag is 0 in the ROM-derived table; the walkthrough also says the elevator is unavailable at this point. Component #2 is reached from 6F (15,3), not from the 8F stairs."
+  },
+  "fixed_battles": {
+    "demons": [
+      "Basim",
+      "Gnome"
+    ],
+    "source": "GameFAQs walkthrough 54063 (SNES) and Sion's 7F route map (★1/★2)",
+    "note": "The guide lists nonrandom battles against Basim and Gnome on 7F 1st section. The pareido event table does not list fixed battles on 7F, so the exact trigger tiles are still unconfirmed. The first battle can be one of these fixed encounters."
+  },
+  "notes": [
+    "The 8F down stairs (3,3) land on the 7F up stairs (11,3) in component #1.",
+    "Component #1 also has the down stairs to 6F at (11,4).",
+    "The first battle should be sought in component #1; the elevator is not usable.",
+    "Sion's notes recommend avoiding Zombie early and recruiting Heket/Gnome."
+  ]
+}

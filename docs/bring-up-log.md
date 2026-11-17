@@ -1,5 +1,50 @@
 # Bring-up log
 
+## 2026-11-17 — pesquisa de rota e modelo de movimento
+
+### Dados extraídos
+
+- Tabela de eventos do 8F e 7F derivada do ROM (Pareido), encontros e loja:
+  `docs/data/`.
+- O 8F tem 11 eventos e 64 células conectadas; a escada é `(3,3)` → 7F
+  `(11,3)`.
+- O 7F tem duas componentes (54 + 9 células); a escada do 8F cai na #1.
+- O elevador do 7F não para (flag 0).
+- O detonado e a rota da Sion listam batalhas não aleatórias contra **Basim** e
+  **Gnome** no 7F; a tabela do ROM não as lista como eventos fixos.
+
+### Validações no jogo
+
+- Baú do 8F aberto: diálogo “500と「宝玉」を手に入れた”; dinheiro 500 em
+  `0x0C72`.
+- Elder encontrado: diálogo multi-página, `記録する`/`外に出る`, quatro slots
+  de save.
+- Placa `RAIFURU` (loja de armas), velho de verde (“みな元気じゃな”) e chama
+  azul (dica de recrutamento) encontrados.
+- Auto-map local validado por `A` → `COMP` → `オートマッピング` (5º item;
+  descer 4 vezes). É um minimapa local rotacionado, não um mapa global.
+- Loja de armaduras em `(1,5)`: 2 Combat Suits (280 Macca).
+- Loja de armas em `(2,5)`: Jack Knife (80) + Nunchaku (130).
+- Elevador em `(3,5)`: “邪悪な力により エレベーターは停止している”.
+- Total gasto 490; restam 10 Macca. O inventário tem os 4 itens.
+- A tela de status/equipamento abre com `X`; a página `EQUIPMENTS` abre com
+  `direita`.
+
+### Correção do modelo de movimento
+
+- `0x877` = x, `0x878` = y, `0x80F` = direção, `0x811` = contador de movimento,
+  `0x813` = contador de giro, `0x865` = área/sala, `0x867` = background/view.
+- O BFS/wall follower antigo tratava `0x80F`/`0x811` como coordenadas; por isso
+  girava em falso no mesmo trecho.
+- `up` = frente, `left`/`right` = giro de 90°; `down` pode ser giro de 180°.
+
+### Bloqueio atual
+
+- A escada do 8F ainda não foi acionada. O velho de verde em `(3,3)` repete a
+  mensagem e empurra o jogador para `(3,2)`.
+- O Gate Keeper ainda não foi confirmado; candidatos `(3,2)` e `(4,3)`.
+- A primeira batalha continua pendente.
+
 ## 2026-11-16
 
 ### ROM

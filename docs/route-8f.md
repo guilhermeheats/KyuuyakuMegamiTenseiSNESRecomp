@@ -1,76 +1,116 @@
 # Rota do 8F — Mikon City
 
 > **Correção importante:** o 8F é **Mikon City**, uma cidade segura, com lojas,
-> Healing Spring, House of Heresy, o homem do password e o baú de 500 makka.
+> Healing Spring, House of Heresy, o elder/password e o baú de 500 Macca.
 > **Não existem batalhas aleatórias no 8F.** A primeira batalha acontece no
 > **7F**; o objetivo aqui é encontrar o Viking/Gate Keeper e descer as escadas.
 > O elevador não pode ser usado neste ponto.
 
-O 8F é o andar do baú inicial; a primeira batalha acontece no **7F**. Para
-chegar lá é preciso encontrar a escada de descida (`D`) no mapa.
+## Dados exatos do 8F (tabela derivada do ROM)
 
-## Rota conhecida
+Fonte: <https://pareido.jp/cyber-newtown/megaten-daedalus/nam-mt-dg-0/>
 
-Segundo as notas de rota da comunidade, a sequência do 8F é:
+| Célula | Evento | Entrada | Observação |
+|---|---|---|---|
+| `(7,0)` | 邪教の館 / Cathedral of Shadows | — | canto superior direito |
+| `(4,1)` | 回復の泉 / Healing Spring | — | |
+| `(3,2)` | Conversa | sul | **candidato a Gate Keeper** |
+| `(1,3)` | 長老 / Elder | norte | save/password |
+| `(3,3)` | **Escada de descida** | — | **→ 7F `(11,3)`** |
+| `(4,3)` | Conversa | sul | **candidato a Gate Keeper** |
+| `(1,5)` | Baú | norte | 500 Macca + 宝玉 |
+| `(2,5)` | Conversa | norte | fileira das lojas |
+| `(3,5)` | Conversa | norte | fileira das lojas |
+| `(4,5)` | Loja | — | armas + armaduras |
+| `(5,5)` | Elevador | — | não usar agora |
 
-1. Pegar o baú do 8F (`500` Macca; neste build também veio `宝玉`).
-2. Sair do quarto do baú para o corredor inferior.
-3. Seguir para **leste** pelo corredor inferior.
-4. Subir para **norte** pelo lado direito do mapa.
-5. Seguir para **oeste** pelo corredor superior.
-6. Descer para **sul** até a sala central, onde ficam a escada de descida (`D`)
-   e o healer (`H`).
+O 8F tem 64 células conectadas. A escada `(3,3)` leva ao 7F `(11,3)`.
 
-O mapa completo do 8F mostra também a catedral (`C`), o elevador (`E`) e as
-escadas. Use o auto-map do jogo (`COMP` → `オートマッピング`) para acompanhar
-a posição atual.
+## Rota da comunidade (anel)
 
-## Status do bring-up
+A rota da Sion (<https://sioneus.me/notes/kmt1>) desenha um anel no 8F:
 
-- O baú do 8F foi aberto e o loot (`500` + `宝玉`) foi validado.
-- O loop de tiles não é uma dungeon: é a área segura de Mikon City. A ausência
-  de encontros em 113 movimentos é esperada.
-- O próximo objetivo é entrar nas lojas/casas, falar com NPCs, achar o
-  Viking/Gate Keeper e a escada para o 7F.
-- O quarto do baú tem saídas laterais que levam a corredores longos; a
-  exploração inicial voltou ao mesmo baú, então a rota ainda não foi concluída.
-- O elevador (`E`) na parte inferior central é uma alternativa à escada (`D`).
-- A escada para o 7F ainda **não** foi alcançada; a primeira batalha continua
-  pendente.
-- Os save states `9`–`13` foram usados em exploração local e não formam uma
-  cadeia estável; a cadeia documentada no repositório vai até `save8`.
-- O build de debug (`SNESRECOMP_ENABLE_TRACE=ON`) e o servidor TCP foram
-  validados. `0x80f`/`0x811`/`0x813` reagem ao movimento, mas ainda não foi
-  possível correlacioná-los com segurança com a grade do mapa. Veja
-  `docs/debugging.md`.
-- Um BFS de profundidade 5 (50 nós) encontrou o diálogo do baú no caminho
-  `up/up/up`, mas nenhuma escada, healer ou elevador. A assinatura incluía a
-  direção, gerando muitos nós duplicados; a próxima tentativa deve usar só
-  posição/tile.
-- Um wall follower left-hand (113 movimentos, 89 rotações) percorreu o ciclo
-  `0x11 → 0x33 → 0x51 → 0x31 → 0x05 → 0x11` sem encontrar escada, healer ou
-  elevador. A área alcançável a partir do `save5` é um loop fechado; a saída
-  deve exigir porta/evento ou outro ponto de entrada.
-- Teste de A nos cinco tiles do loop: no tile `0x05`, com as orientações 0 e 1,
-  A muda para o tile `0x31` em vez de abrir o menu. É uma porta/transição
-  especial, mas o loop continua; esse é o próximo ponto de investigação.
-- Foram encontradas portas com A em vários tiles: `0x41 → 0x11/0x31`,
-  `0x31 → 0x05/0x41`, `0x11 → 0x31/0x05`, `0x51 → 0x11/0x01`. O grafo completo
-  está em `docs/debugging.md`. O tile `0x01` ainda não foi explorado.
+1. virar 180° no início;
+2. seguir para o sul até o canto inferior esquerdo;
+3. virar à esquerda e seguir para o leste pelo corredor inferior;
+4. virar à esquerda e subir pelo corredor direito;
+5. virar à esquerda e seguir para o oeste pelo corredor superior;
+6. virar à esquerda e descer para o bloco central, onde ficam baú, elder,
+   loja, fonte e a escada `(3,3)`.
 
-## Próximo ponto
+O wall follower antigo percorreu o anel externo e não entrou no bloco central.
+O auto-map local mostra as paredes, mas não a coordenada global.
 
-Ao descer para o 7F:
+## O que já foi validado no jogo
 
-- a primeira batalha é um encontro aleatório;
-- se nenhum encontro aparecer, existe um tile de encontro fixo no 7F;
-- para o primeiro combate, evite zumbis, conforme a rota da comunidade.
+- O baú do 8F foi aberto; o diálogo mostrou “500と「宝玉」を手に入れた” e o
+  dinheiro em `0x0C72` passou a 500.
+- O elder foi encontrado; o diálogo é multi-página e termina em
+  `記録する` / `外に出る`, com quatro slots de save.
+- A placa `RAIFURU` (loja de armas) foi vista no bloco central.
+- O velho de verde (mensagem “みな元気じゃな”) e a chama azul (dica sobre
+  recrutar demônios) foram encontrados.
+- O auto-map foi aberto por `A` → `COMP` → `オートマッピング`
+  (5º item; descer 4 vezes) e é um minimapa local rotacionado pela direção.
+- A **loja de armaduras** foi encontrada em `(1,5)`; foram comprados 2
+  Combat Suits (280 Macca).
+- A **loja de armas** foi encontrada em `(2,5)`; foram comprados Jack Knife
+  (80) e Nunchaku (130). Total gasto: 490; restam 10 Macca.
+- O **elevador** em `(3,5)` mostra “邪悪な力により エレベーターは停止している”
+  (parado por um poder maligno), confirmando que não pode ser usado agora.
+- A tela de status/equipamento abre com **X**; a página `EQUIPMENTS` é acessada
+  com **direita**. O inventário contém Jack Knife, Nunchaku e 2 Combat Suits.
+
+## O que ainda falta
+
+- A escada para o 7F ainda **não** foi alcançada nesta rodada.
+- O Gate Keeper ainda **não** foi confirmado; os candidatos são os talks
+  `(3,2)` e `(4,3)`. O velho de verde em `(3,3)` é uma mensagem, não o aviso
+  do Viking do detonado.
+- A primeira batalha continua pendente.
+
+## Modelo de movimento (corrigido)
+
+O modelo antigo tratava `0x80F`/`0x811` como coordenadas x/y; isso estava
+errado. Os endereços observados são:
+
+| Endereço | Significado |
+|---|---|
+| `0x877` | x local/global |
+| `0x878` | y local/global |
+| `0x80F` | direção: `0`=N, `1`=E, `2`=S, `3`=W |
+| `0x811` | contador de movimento para frente |
+| `0x813` | contador de giro |
+| `0x865` | área/sala (`01`/`02`/`03` observados) |
+| `0x867` | background/view dependente da direção |
+
+Controles observados: `up` = andar para frente; `left`/`right` = girar 90°;
+`down` pode funcionar como giro de 180° em alguns estados. Use `up` para
+movimento e `left`/`right` para orientação; evite `down` durante a navegação.
+
+## 7F — primeira batalha
+
+A tabela do ROM lista 7 eventos no 7F, em duas componentes:
+
+- **#1 (54 células):** subida `(11,3)`, descida `(11,4)`, talks `(12,5)` e
+  `(14,6)`;
+- **#2 (9 células):** talks `(13,6)` e `(15,2)`, descida `(15,3)`.
+
+A escada do 8F cai na componente #1. O elevador do 7F **não para** (flag 0).
+O detonado e o mapa da Sion listam **batalhas não aleatórias contra Basim e
+Gnome** no 7F; a tabela do ROM não as lista como eventos fixos, então os tiles
+exatos ainda precisam ser confirmados no jogo. Para o primeiro combate, evite
+Zombie no início.
 
 ## Referências
 
+- Tabela derivada do ROM:
+  <https://pareido.jp/cyber-newtown/megaten-daedalus/nam-mt-dg-0/>
 - Notas de rota (Sion): <https://sioneus.me/notes/kmt1/>
-- Mapa do 8F usado como referência visual (não versionado):
-  <https://www.deviantart.com/24karatdvno/art/Kyuuyaku-Megami-Tensei-Maps--Tower-of-Daedalus-496133904>
+- Detonado/tradução (GameFAQs 54063):
+  <https://gamefaqs.gamespot.com/snes/581301-kyuuyaku-megami-tensei/faqs/54063?print=1>
+- Mapas da comunidade (FC/NES, topologia):
+  <https://aruto.info/dds/dds1/map1.html> e
+  <https://grappli.net/strategy/megamitensei1/story-daidaros-kouryaku/>
 
-O mapa é material de terceiros; não foi copiado para o repositório. A rota
-acima é uma descrição textual para orientar o bring-up.
+Os mapas são material de terceiros e não foram copiados para o repositório.

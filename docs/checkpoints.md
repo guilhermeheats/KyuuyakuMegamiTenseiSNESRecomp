@@ -73,6 +73,12 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
   checksum (`0x5A`) não resolveu; o título continuou zerando a SRAM. A
   comparação com emulador foi iniciada com Snes9x, mas a configuração de
   input do emulador ainda não permitiu selecionar `CONTINUE`.
+- **AOT:** as cinco rotinas de SRAM (`$03:A35B` save, `$03:A3BF` load,
+  `$03:A397` header, `$03:ACFB` checksum e `$03:AD20` validação) foram
+  promovidas em `recomp/symbols.toml` com `emit = true`, `entry_m = 1`,
+  `entry_x = 0`. O analyzer gerou 14 variantes AOT e 0 LLE-only; o save AOT
+  produziu o mesmo hash `a0ca482f…` do save LLE, mas o `CONTINUE` do título
+  continua rejeitando/zerando o SRAM.
 - **Próximo passo:** comparar o SRAM com um save válido de emulador ou
   instrumentar as leituras de SRAM do caminho `CONTINUE` para achar a
   validação que rejeita o arquivo.

@@ -174,6 +174,15 @@ independente é o próximo passo de validação.
 - Apenas a ROM japonesa original (`c8d286c9`) é suportada.
 - Não há widescreen, tradução ou MSU-1; o foco é a fidelidade do jogo original.
 
+### AOT
+
+As primeiras rotinas de jogo promovidas para AOT são as de SRAM em bank `$03`:
+`Sram_SaveSlot` (`$A35B`), `Sram_LoadSlot` (`$A3BF`), `Sram_CheckHeader`
+(`$A397`), `Sram_Checksum` (`$ACFB`) e `Sram_ValidateChecksums` (`$AD20`), com
+`entry_m = 1` e `entry_x = 0`. O analyzer gerou 14 variantes AOT e 0 LLE-only.
+O save AOT produziu o mesmo hash de SRAM do save LLE; o load pelo título ainda
+está bloqueado.
+
 ## Próximos passos
 
 1. Fechar CP-013: achar por que o `CONTINUE` do título rejeita o save e zera a

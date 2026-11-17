@@ -19,3 +19,50 @@ addr = "827a"
 bank = 0
 emit = false
 note = "Native NMI vector ($FFEA)"
+
+# SRAM save/load path (bank $03). These are the first game routines promoted
+# from the interpreter so the save/load behavior can be compared AOT vs LLE.
+[[func]]
+name = "Sram_SaveSlot"
+addr = "A35B"
+bank = 3
+emit = true
+entry_m = 1
+entry_x = 0
+note = "Copy WRAM $7E:0C00/$7E:8000 to an SRAM slot; checksum at slot+$00EF"
+
+[[func]]
+name = "Sram_LoadSlot"
+addr = "A3BF"
+bank = 3
+emit = true
+entry_m = 1
+entry_x = 0
+note = "Copy an SRAM slot to WRAM $7E:0C00/$7E:8000"
+
+[[func]]
+name = "Sram_CheckHeader"
+addr = "A397"
+bank = 3
+emit = true
+entry_m = 1
+entry_x = 0
+note = "Check the DDSO header in SRAM"
+
+[[func]]
+name = "Sram_Checksum"
+addr = "ACFB"
+bank = 3
+emit = true
+entry_m = 1
+entry_x = 0
+note = "Checksum helper for one 0x800-byte SRAM slot"
+
+[[func]]
+name = "Sram_ValidateChecksums"
+addr = "AD20"
+bank = 3
+emit = true
+entry_m = 1
+entry_x = 0
+note = "Validate the four SRAM save slots"

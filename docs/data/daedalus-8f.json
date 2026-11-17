@@ -16,7 +16,9 @@
     "Safe town: no random battles on 8F.",
     "Coordinates are the Atlas (ROM) coordinates from the event table.",
     "The local WRAM coordinates 0x877/0x878 are not identical to every event coordinate; event cells can be object cells on a wall.",
-    "Gate Keeper candidate cells are the talk events at (3,2) and (4,3). The exact sprite/tile is not yet confirmed in-game."
+    "Observed in-game (2026-11-17): the Gate Keeper is the blue demon at WRAM (2,2), triggered entering from (2,1) moving south; dialog text starts with 'おい、坊主！'.",
+    "Observed in-game: the down stairs are used from WRAM (2,3), the room immediately south of the Gate Keeper; the prompt is '階段を降りますか？' and YES descends to 7F WRAM (10,2).",
+    "The green old man at WRAM (3,3) says 'みな元気じゃな', pushes the player back to (3,2), and is not the Gate Keeper or the stairs."
   ],
   "events": [
     {
@@ -45,8 +47,9 @@
       "x": 3,
       "y": 2,
       "type": "talk",
-      "label": "Gate Keeper candidate",
-      "enter": "south"
+      "label": "Gate Keeper (blue demon)",
+      "enter": "south",
+      "observed": "Confirmed in-game at WRAM (2,2), entering from (2,1) moving south. Dialog: 'おい、坊主！ここから先は魔物の棲み家だぜ！行くことは言わないが気をつけてな'."
     },
     {
       "x": 3,
@@ -57,7 +60,8 @@
         "floor": "7F",
         "x": 11,
         "y": 3
-      }
+      },
+      "observed": "Used from WRAM (2,3), the room south of the Gate Keeper. Prompt: '階段を降りますか？' -> YES. 7F arrival: HUD '7F', WRAM (10,2), facing north."
     },
     {
       "x": 3,
@@ -76,8 +80,9 @@
       "x": 4,
       "y": 3,
       "type": "talk",
-      "label": "Gate Keeper candidate",
-      "enter": "south"
+      "label": "central-block talk (not Gate Keeper)",
+      "enter": "south",
+      "observed": "Explored at WRAM (3,3)/(4,3); no Gate Keeper dialog. The green old man at WRAM (3,3) says 'みな元気じゃな'."
     },
     {
       "x": 4,

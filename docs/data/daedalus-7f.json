@@ -79,12 +79,37 @@
       "Gnome"
     ],
     "source": "GameFAQs walkthrough 54063 (SNES) and Sion's 7F route map (★1/★2)",
-    "note": "The guide lists nonrandom battles against Basim and Gnome on 7F 1st section. The pareido event table does not list fixed battles on 7F, so the exact trigger tiles are still unconfirmed. The first battle can be one of these fixed encounters."
+    "note": "The guide lists nonrandom battles against Basim and Gnome on 7F 1st section. The pareido event table does not list fixed battles on 7F, so the exact trigger tiles are still unconfirmed. In-game (2026-11-17), the first scripted battle was Heket at WRAM (8,2), not Basim/Gnome."
+  },
+  "observed": {
+    "date": "2026-11-17",
+    "arrival": {
+      "hud": "7F",
+      "wram": {
+        "x": 10,
+        "y": 2
+      },
+      "facing": "north"
+    },
+    "first_battle": {
+      "wram": {
+        "x": 8,
+        "y": 2
+      },
+      "message": "妖魔ヘケットが現れた！",
+      "menu": [
+        "FIGHT",
+        "ESCAPE",
+        "TALK",
+        "AUTO"
+      ],
+      "outcome": "TALK -> NO -> '悪魔は満足そうに去っていった'; returned to the dungeon at (8,2)."
+    }
   },
   "notes": [
-    "The 8F down stairs (3,3) land on the 7F up stairs (11,3) in component #1.",
+    "The 8F down stairs (3,3) land on the 7F up stairs (11,3) in component #1; in WRAM this is (10,2).",
     "Component #1 also has the down stairs to 6F at (11,4).",
-    "The first battle should be sought in component #1; the elevator is not usable.",
+    "The first battle observed in component #1 was Heket at WRAM (8,2); the elevator is not usable.",
     "Sion's notes recommend avoiding Zombie early and recruiting Heket/Gnome."
   ]
 }

@@ -118,9 +118,15 @@ O mapa pode ser aberto pelo botão **L** (atalho) ou por `COMP` →
 `オートマッピング`. O mapa não mostra a coordenada global; use
 `0x877`/`0x878`/`0x865` para registrar a posição.
 
-O **Gate Keeper** verdadeiro é o **demônio azul de cajado no vão escuro**
-(fonte: Cielgrand, `ddsmegaten33.png`). O velho de verde em `(3,3)` que repete
-“みな元気じゃな” é uma mensagem/loja, não o Gate Keeper.
+O **Gate Keeper** verdadeiro é o **demônio azul de cajado no vão escuro** em
+`(2,2)` (fonte: Cielgrand, `ddsmegaten33.png`; diálogo confirmado no jogo em
+2026-11-17). O velho de verde em `(3,3)` que repete “みな元気じゃな” é uma
+mensagem/loja, não o Gate Keeper nem a escada.
+
+A entrada do bloco central é pelo corredor superior, não pelo bloco do elder:
+`(0,0) → (2,0) → (2,1) → (2,2)`. A escada fica na sala seguinte, `(2,3)`;
+ao entrar, o jogo pergunta `階段を降りますか？` e `YES` desce ao 7F em
+`(10,2)` (HUD `7F`).
 
 ### Âncoras validadas no 8F
 
@@ -129,14 +135,48 @@ O **Gate Keeper** verdadeiro é o **demônio azul de cajado no vão escuro**
 - elder: diálogo multi-página em `(1,3)`, com `記録する` / `外に出る` e quatro
   slots de save;
 - loja/placa `RAIFURU` e mensagem do velho de verde no bloco central;
-- a escada `(3,3)` ainda não foi acionada; o velho de verde em `(3,3)` repete
-  “みな元気じゃな” e empurra o jogador para `(3,2)`. Ele é uma mensagem/loja,
-  não o Gate Keeper; o Gate Keeper verdadeiro é o demônio azul no vão escuro;
+- o Gate Keeper é o demônio azul em `(2,2)`; o diálogo “おい、坊主！…” foi
+  confirmado entrando em `(2,2)` pelo norte (vindo de `(2,1)`);
+- a escada foi acionada em `(2,3)`: `階段を降りますか？` → `YES` → 7F em
+  `(10,2)`, com o HUD `7F`;
+- o velho de verde em `(3,3)` repete “みな元気じゃな” e empurra o jogador para
+  `(3,2)`; ele é uma mensagem/loja, não o Gate Keeper nem a escada;
 - loja de armaduras em `(1,5)`: 2 Combat Suits; loja de armas em `(2,5)`:
   Jack Knife + Nunchaku; elevador em `(3,5)` parado (“邪悪な力により…”)；
 - a tela de status/equipamento abre com **X**; a página `EQUIPMENTS` abre com
   **direita**. O cursor de equipar ainda não foi dominado; o inventário contém
   os itens comprados.
+
+### Rota confirmada 8F → 7F (2026-11-17)
+
+Rota usada com o `save10` (equipado, em `(1,4)`):
+
+```text
+E×3 → (4,4)
+N×4 → (4,0)
+W×2 → (2,0)
+S×2 → (2,1) → (2,2)   # Gate Keeper
+S   → (2,3)           # 階段を降りますか？ YES → 7F (10,2)
+```
+
+No 7F, a primeira batalha scripted foi encontrada em `(8,2)` (WRAM), ao
+descer do corredor superior e entrar na sala:
+
+```text
+(10,2) --W--> (9,2) --N--> (9,1) --W--> (8,1) --S--> (8,2)
+妖魔ヘケットが現れた！
+```
+
+O menu de batalha é `FIGHT`/`ESCAPE`/`TALK`/`AUTO`; cada personagem escolhe
+`ATTACK`/`COMP`/`ITEM`/`DEFEND` e o jogo pede confirmação `YES`/`NO`.
+A negociação `TALK` → `わたしと対等に話すつもりか？` → `NO` →
+`はははっ、よく分かっているようだな` →
+`悪魔は満足そうに去っていった` encerra a batalha em paz e devolve o controle
+ao dungeon em `(8,2)`.
+
+> **Cuidado com `A`:** no dungeon, `A` abre o menu `COMP`. Depois de fechar um
+> diálogo, use `B` para sair de menus; não pressione `A` repetidamente. Foi
+> assim que o menu `COMP → MAGIC` abriu durante a validação.
 
 ## Exploração BFS (2026-11-17)
 
@@ -218,12 +258,11 @@ arquivos e valide o screenshot antes de explorar).
 
 ## Próximo uso
 
-1. Carregar `save5` (dungeon) ou `save8` (junção).
-2. Ler uma faixa da WRAM antes/depois de um passo em cada direção.
-3. Correlacionar os valores com a posição no mapa do 8F.
-4. Ao identificar a coordenada da escada/elevador, navegar até ela com
-   `set_controller` + `step`, sem editar o estado do jogo.
-5. Validar a descida ao 7F e a primeira batalha.
+1. Carregar `save11` (chegada ao 7F) ou `save6` (pós-batalha) para continuar.
+2. Usar o auto-map `Fixed` e `0x877`/`0x878`/`0x865` para mapear o 7F.
+3. Confirmar as coordenadas/gatilhos de Basim, Gnome e Dryad e descer ao 6F.
+4. Validar o carregamento do SRAM pelo menu do elder (CP-013) e o início do
+   Megami Tensei II (CP-014).
 
 Não use `write_ram` em um save real; use sempre um save state descartável e
 recarregue-o depois do teste.

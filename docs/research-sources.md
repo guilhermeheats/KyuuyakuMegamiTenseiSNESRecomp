@@ -18,7 +18,8 @@ mapa, imagem, ROM ou save de terceiros é versionado no repositório.
   - baú do 8F: 500 Macca + 宝玉.
 - Ressalva: a tabela não lista batalhas fixas no 7F. O detonado e o mapa da
   Sion listam Basim e Gnome como encontros não aleatórios no 7F; os tiles
-  exatos ainda não foram confirmados.
+  exatos ainda não foram confirmados. No jogo, o primeiro evento scripted
+  observado no 7F foi **Heket** em `(8,2)` (WRAM), não Basim/Gnome.
 
 ### 2. Sion’s Runs — rota de speedrun (SNES)
 
@@ -27,7 +28,8 @@ mapa, imagem, ROM ou save de terceiros é versionado no repositório.
   - rota do 8F em anel até o bloco central;
   - recomendação de comprar Jack Knife, Nunchaku e Combat Suits;
   - 7F: Basim e Gnome como encontros fixos; evitar Zombie no início;
-  - Heket é recrutável apenas no 7F.
+  - Heket é recrutável apenas no 7F; no jogo, Heket apareceu como evento
+    scripted em `(8,2)` (WRAM) e pôde ser dispensado pela opção `TALK` → `NO`.
 - Ressalva: as notas são de speedrun; algumas indicações de “tile de encontro
   fixo” não têm coordenada explícita.
 
@@ -102,15 +104,18 @@ mapa, imagem, ROM ou save de terceiros é versionado no repositório.
 - A placa `RAIFURU` (loja de armas) foi vista no bloco central.
 - O velho de verde (mensagem “みな元気じゃな”) e a chama azul (dica sobre recrutar
   demônios) foram encontrados.
-- A escada para o 7F ainda **não** foi alcançada; a primeira batalha continua
-  pendente.
+- O Gate Keeper foi confirmado em `(2,2)` (WRAM), com o diálogo
+  `おい、坊主！…`; o velho de verde em `(3,3)` é outro NPC.
+- A escada foi acionada em `(2,3)` (WRAM), com `階段を降りますか？` → `YES`,
+  e desceu para o 7F em `(10,2)` (HUD `7F`).
+- A primeira batalha foi validada no 7F em `(8,2)` (WRAM): evento scripted
+  `妖魔ヘケットが現れた！`, menu de batalha, ataques/dano, revide e negociação
+  `TALK` → `NO` encerrando a batalha em paz.
 
 ## Próximos passos de pesquisa
 
-1. Mapear o grafo de salas/áreas do 8F usando `0x865` + `0x877`/`0x878` e o
-   auto-map local.
-2. Identificar o Gate Keeper pelo diálogo, testando os talks `(3,2)` e `(4,3)`
-   a partir das direções de entrada corretas.
-3. Encontrar a sala da escada `▼` e descer para 7F `(11,3)`.
-4. Validar a primeira batalha no 7F (Basim/Gnome fixos ou encontro aleatório),
-   com screenshots e resultado.
+1. Confirmar as coordenadas/gatilhos de Basim, Gnome e Dryad no 7F e descer ao
+   6F.
+2. Mapear o 7F com o auto-map `Fixed` e `0x877`/`0x878`/`0x865`.
+3. Validar o carregamento do SRAM pelo menu do elder (CP-013) e o início do
+   Megami Tensei II (CP-014).

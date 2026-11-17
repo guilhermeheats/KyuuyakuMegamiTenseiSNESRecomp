@@ -73,6 +73,9 @@
 - Wall follower left-hand: 113 movimentos e 89 rotações em um ciclo fechado
   `0x11 → 0x33 → 0x51 → 0x31 → 0x05 → 0x11`, sem escada/elevador. A saída
   deve exigir uma porta/evento ou outro ponto de entrada.
+- A nos cinco tiles do loop: no tile `0x05` (orientações 0/1) há uma transição
+  especial para `0x31`, sem abrir o menu; nos outros tiles A abre o menu. A
+  transição ainda não levou à escada/elevador.
 - Ainda não foi possível mapear a coordenada da escada `D`/elevador `E`; a
   primeira batalha continua pendente.
 

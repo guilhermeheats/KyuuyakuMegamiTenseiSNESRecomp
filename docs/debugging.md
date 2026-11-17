@@ -98,6 +98,21 @@ alcançável a partir do `save5` é um loop; a rota para a escada/elevador deve
 exigir uma porta/evento ou outro ponto de entrada (por exemplo, o `save8` ou
 uma interação com A em um tile específico).
 
+### Interação com A nos tiles do loop
+
+Foram testados os tiles `0x05`, `0x11`, `0x31`, `0x33` e `0x51`, em quatro
+orientações cada:
+
+- na maioria, A abre o menu normal (`COMP/MAGIC/ITEM/STATUS`);
+- no tile `0x05`, com as orientações 0 e 1, A **não** abre o menu: o tile muda
+  para `0x31` e a visão mostra uma parede/abertura. Isso sugere uma porta ou
+  transição especial nesse tile;
+- mesmo depois dessa transição, o wall follower continua no mesmo ciclo
+  `0x11 → 0x33 → 0x51 → 0x31 → 0x05`.
+
+A porta/transição do tile `0x05` é o próximo ponto a investigar com o mapa
+do 8F e com A em sequências diferentes.
+
 ### Save states entre builds
 
 `loadstate 5` funciona no `build-debug`, mas `loadstate 13` carregou um estado

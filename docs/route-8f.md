@@ -41,6 +41,9 @@ a posição atual.
   `0x11 → 0x33 → 0x51 → 0x31 → 0x05 → 0x11` sem encontrar escada, healer ou
   elevador. A área alcançável a partir do `save5` é um loop fechado; a saída
   deve exigir porta/evento ou outro ponto de entrada.
+- Teste de A nos cinco tiles do loop: no tile `0x05`, com as orientações 0 e 1,
+  A muda para o tile `0x31` em vez de abrir o menu. É uma porta/transição
+  especial, mas o loop continua; esse é o próximo ponto de investigação.
 
 ## Próximo ponto
 

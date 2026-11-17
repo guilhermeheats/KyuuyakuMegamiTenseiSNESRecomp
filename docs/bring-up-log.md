@@ -66,6 +66,10 @@
 - `0x80f`, `0x811` e `0x813` mudam com movimento/rotação; escrever em `0x811`
   altera a visão renderizada.
 - `0x865`/`0x867` mudam, mas parecem IDs de sala/tile, não coordenadas simples.
+- BFS de caminhos a partir do `save5`, profundidade 5/50 nós: o caminho
+  `up/up/up` abre o baú; nenhuma escada, healer ou elevador foi encontrado.
+- A assinatura incluía a direção (`0x813`), gerando muitos estados duplicados;
+  a próxima tentativa deve usar só posição/tile.
 - Ainda não foi possível mapear a coordenada da escada `D`/elevador `E`; a
   primeira batalha continua pendente.
 

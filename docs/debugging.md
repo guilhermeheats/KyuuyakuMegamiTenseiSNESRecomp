@@ -67,6 +67,23 @@ As capturas de `screenshot` são gravadas no diretório de trabalho do host
   do 8F; escrever valores isolados pode renderizar corredores, mas não levou à
   escada `D` nem ao elevador `E`.
 
+## Exploração BFS (2026-11-17)
+
+Foi feito um BFS de caminhos a partir do `save5`, recarregando o state e
+repetindo o caminho antes de testar cada direção:
+
+- profundidade 5, limite de 50 nós;
+- screenshot de cada nó;
+- assinatura lida em `0x80f` e `0x865`.
+
+Resultado: o BFS encontrou muitos estados de **orientação** diferentes no mesmo
+trecho, não novas salas. O caminho `up/up/up` a partir do `save5` abre o diálogo
+do baú. Nenhum screenshot mostrou a escada `D`, o healer `H` ou o elevador `E`.
+
+A assinatura incluía `0x813` (direção), o que inflou o número de nós. A próxima
+iteração deve usar apenas posição/tile e ignorar a direção, além de comparar
+com o mapa do 8F.
+
 ## Próximo uso
 
 1. Carregar `save5` (dungeon) ou `save8` (junção).

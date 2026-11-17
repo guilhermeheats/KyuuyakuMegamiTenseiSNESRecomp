@@ -33,6 +33,10 @@ a posição atual.
   validados. `0x80f`/`0x811`/`0x813` reagem ao movimento, mas ainda não foi
   possível correlacioná-los com segurança com a grade do mapa. Veja
   `docs/debugging.md`.
+- Um BFS de profundidade 5 (50 nós) encontrou o diálogo do baú no caminho
+  `up/up/up`, mas nenhuma escada, healer ou elevador. A assinatura incluía a
+  direção, gerando muitos nós duplicados; a próxima tentativa deve usar só
+  posição/tile.
 
 ## Próximo ponto
 

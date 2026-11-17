@@ -84,6 +84,20 @@ A assinatura incluía `0x813` (direção), o que inflou o número de nós. A pr�
 iteração deve usar apenas posição/tile e ignorar a direção, além de comparar
 com o mapa do 8F.
 
+### Wall follower (2026-11-17)
+
+Foi executado um wall follower left-hand a partir do `save5`, com 113 movimentos
+e 89 rotações. Ele percorreu um ciclo fechado de tiles:
+
+```text
+0x11 → 0x33 → 0x51 → 0x31 → 0x05 → 0x11 → ...
+```
+
+Nenhum tile de escada, healer ou elevador apareceu. Conclusão: a componente
+alcançável a partir do `save5` é um loop; a rota para a escada/elevador deve
+exigir uma porta/evento ou outro ponto de entrada (por exemplo, o `save8` ou
+uma interação com A em um tile específico).
+
 ### Save states entre builds
 
 `loadstate 5` funciona no `build-debug`, mas `loadstate 13` carregou um estado

@@ -70,6 +70,9 @@
   `up/up/up` abre o baú; nenhuma escada, healer ou elevador foi encontrado.
 - A assinatura incluía a direção (`0x813`), gerando muitos estados duplicados;
   a próxima tentativa deve usar só posição/tile.
+- Wall follower left-hand: 113 movimentos e 89 rotações em um ciclo fechado
+  `0x11 → 0x33 → 0x51 → 0x31 → 0x05 → 0x11`, sem escada/elevador. A saída
+  deve exigir uma porta/evento ou outro ponto de entrada.
 - Ainda não foi possível mapear a coordenada da escada `D`/elevador `E`; a
   primeira batalha continua pendente.
 

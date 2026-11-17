@@ -37,6 +37,10 @@ a posição atual.
   `up/up/up`, mas nenhuma escada, healer ou elevador. A assinatura incluía a
   direção, gerando muitos nós duplicados; a próxima tentativa deve usar só
   posição/tile.
+- Um wall follower left-hand (113 movimentos, 89 rotações) percorreu o ciclo
+  `0x11 → 0x33 → 0x51 → 0x31 → 0x05 → 0x11` sem encontrar escada, healer ou
+  elevador. A área alcançável a partir do `save5` é um loop fechado; a saída
+  deve exigir porta/evento ou outro ponto de entrada.
 
 ## Próximo ponto
 

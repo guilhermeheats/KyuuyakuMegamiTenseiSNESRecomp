@@ -60,7 +60,24 @@ mapa, imagem, ROM ou save de terceiros é versionado no repositório.
   auto-map da versão SNES. Use-os para topologia, não para coordenadas locais
   de WRAM.
 
-### 5. Tabela de RAM / cheats públicos
+### 5. Cielgrand — sistema SNES
+
+- URL: <https://cielgrand.web.fc2.com/retrogame/ddsmegaten1.html>
+- Conteúdo extraído:
+  - `X` abre o status; `L` abre o mapa; `R` abre o analisador de demônios;
+  - o status tem 3 páginas; a página da direita é a de equipamento;
+  - o auto-map é o efeito da magia マッパラー e mostra escada de descida (`D`),
+    de subida (`U`), elevador (`E`), catedral (`J`), fonte (`K`) e a posição
+    atual em vermelho;
+  - o config tem `オートマッピング` com os modos `フリー` (Free) e `こてい`
+    (Fixed); o modo Fixed é norte-para-cima;
+  - screenshot do **Gate Keeper** azul no vão escuro:
+    <https://cielgrand.web.fc2.com/img/ddsmegaten33.png>;
+  - screenshot do auto-map da cidade:
+    <https://cielgrand.web.fc2.com/img/ddsmegaten22.png>.
+- Ressalva: o texto é uma visão geral do sistema; não é um mapa passo a passo.
+
+### 6. Tabela de RAM / cheats públicos
 
 - `docs/ram-map.md`
 - Endereços usados: dinheiro `0x0C72`–`0x0C74`, magnetita `0x0C75`–`0x0C76`,

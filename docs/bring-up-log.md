@@ -21,8 +21,11 @@
   de save.
 - Placa `RAIFURU` (loja de armas), velho de verde (“みな元気じゃな”) e chama
   azul (dica de recrutamento) encontrados.
-- Auto-map local validado por `A` → `COMP` → `オートマッピング` (5º item;
-  descer 4 vezes). É um minimapa local rotacionado, não um mapa global.
+- Auto-map validado. O modo `Fixed` (`こてい`) foi configurado por
+  `A → COMP → コンフィグ → オートマッピング`; o mapa fica norte para cima e
+  mostra posição atual, elevador (`E`), catedral (`J`) e fonte (`K`).
+- O Gate Keeper verdadeiro é o **demônio azul de cajado no vão escuro**
+  (Cielgrand, `ddsmegaten33.png`); o velho de verde em `(3,3)` é uma mensagem.
 - Loja de armaduras em `(1,5)`: 2 Combat Suits (280 Macca).
 - Loja de armas em `(2,5)`: Jack Knife (80) + Nunchaku (130).
 - Elevador em `(3,5)`: “邪悪な力により エレベーターは停止している”.

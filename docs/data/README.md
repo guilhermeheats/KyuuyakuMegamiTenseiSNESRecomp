@@ -26,6 +26,8 @@ Não há imagens de mapas, ROM, assets, saves ou screenshots versionados aqui.
   <https://grappli.net/strategy/megamitensei1/story-daidaros-kouryaku/>
 - Auto-map SNES (8F/7F) do opatil:
   <https://dds.opatil.com/kmt1/story/c01.html>
+- Sistema SNES e Gate Keeper azul (Cielgrand):
+  <https://cielgrand.web.fc2.com/retrogame/ddsmegaten1.html>
 
 ## Ressalvas
 

@@ -96,15 +96,31 @@ Consequências:
 
 ### Auto-map
 
-O auto-map é um minimapa **local**, centrado no jogador e rotacionado pela
-direção. Caminho confiável:
+O auto-map é um minimapa **local**. Ele tem dois modos, configuráveis em
+`COMP → コンフィグ → オートマッピング`:
+
+- `フリー` (Free): o mapa gira junto com a direção do jogador;
+- `こてい` (Fixed): o mapa fica **norte para cima** e mostra a posição atual em
+  vermelho, a escada de descida (`D`), a de subida (`U`), o elevador (`E`), a
+  catedral (`J`) e a fonte (`K`).
+
+O modo **Fixed** é o que deve ser usado para navegar; o modo Free foi o que
+causou a confusão nas tentativas anteriores. Caminho do menu:
 
 ```text
-A (menu) → COMP → down × 4 → A
+A (menu) → COMP → down × 5 → A (config)
+  → down × 2 → A (auto mapping)
+  → selecionar こてい (Fixed)
 ```
 
-O 5º item do submenu COMP é `オートマッピング`. O mapa não mostra a coordenada
-global; use `0x877`/`0x878`/`0x865` para registrar a posição.
+O 5º item do submenu COMP é `オートマッピング`; o 6º é `コンフィグ`.
+O mapa pode ser aberto pelo botão **L** (atalho) ou por `COMP` →
+`オートマッピング`. O mapa não mostra a coordenada global; use
+`0x877`/`0x878`/`0x865` para registrar a posição.
+
+O **Gate Keeper** verdadeiro é o **demônio azul de cajado no vão escuro**
+(fonte: Cielgrand, `ddsmegaten33.png`). O velho de verde em `(3,3)` que repete
+“みな元気じゃな” é uma mensagem/loja, não o Gate Keeper.
 
 ### Âncoras validadas no 8F
 
@@ -114,7 +130,8 @@ global; use `0x877`/`0x878`/`0x865` para registrar a posição.
   slots de save;
 - loja/placa `RAIFURU` e mensagem do velho de verde no bloco central;
 - a escada `(3,3)` ainda não foi acionada; o velho de verde em `(3,3)` repete
-  “みな元気じゃな” e empurra o jogador para `(3,2)`;
+  “みな元気じゃな” e empurra o jogador para `(3,2)`. Ele é uma mensagem/loja,
+  não o Gate Keeper; o Gate Keeper verdadeiro é o demônio azul no vão escuro;
 - loja de armaduras em `(1,5)`: 2 Combat Suits; loja de armas em `(2,5)`:
   Jack Knife + Nunchaku; elevador em `(3,5)` parado (“邪悪な力により…”)；
 - a tela de status/equipamento abre com **X**; a página `EQUIPMENTS` abre com

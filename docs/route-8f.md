@@ -60,6 +60,13 @@ O auto-map local mostra as paredes, mas não a coordenada global.
   (parado por um poder maligno), confirmando que não pode ser usado agora.
 - A tela de status/equipamento abre com **X**; a página `EQUIPMENTS` é acessada
   com **direita**. O inventário contém Jack Knife, Nunchaku e 2 Combat Suits.
+- O auto-map foi colocado em **`Fixed`** por
+  `A → COMP → コンフィグ → オートマッピング → こてい`. O mapa fica norte para
+  cima e mostra a posição atual em vermelho, o elevador (`E`), a catedral
+  (`J`) e a fonte (`K`); a escada (`D`) aparece quando o trecho é explorado.
+- O **Gate Keeper** verdadeiro é o **demônio azul de cajado no vão escuro**
+  (fonte: Cielgrand, screenshot `ddsmegaten33.png`). O velho de verde em
+  `(3,3)` que diz “みな元気じゃな” é uma mensagem/loja, não o Gate Keeper.
 
 ## O que ainda falta
 
@@ -114,5 +121,8 @@ Zombie no início.
   <https://grappli.net/strategy/megamitensei1/story-daidaros-kouryaku/>
 - Auto-map SNES do opatil (8F/7F):
   <https://dds.opatil.com/kmt1/story/c01.html>
+- Sistema SNES (X=status, L=mapa, R=analisador, config Free/Fixed) e
+  screenshot do Gate Keeper azul:
+  <https://cielgrand.web.fc2.com/retrogame/ddsmegaten1.html>
 
 Os mapas são material de terceiros e não foram copiados para o repositório.

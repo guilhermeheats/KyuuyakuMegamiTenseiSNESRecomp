@@ -57,6 +57,18 @@
 - Exploração: o baú foi aberto; as saídas laterais levam a corredores longos que retornam ao mesmo baú. A escada `D` e o elevador `E` ainda não foram alcançados.
 - A primeira batalha continua pendente; os save states 9–13 foram usados em exploração local e não são uma cadeia estável.
 
+### Depuração (2026-11-17)
+
+- Compilado `build-debug` com `-DSNESRECOMP_ENABLE_TRACE=ON`.
+- Servidor TCP de debug validado em `127.0.0.1:4377`.
+- Testados `loadstate`, `step`, `set_controller`, `read_ram`, `write_ram` e
+  `screenshot` com o cliente `snesrecomp/tools/sneslib`.
+- `0x80f`, `0x811` e `0x813` mudam com movimento/rotação; escrever em `0x811`
+  altera a visão renderizada.
+- `0x865`/`0x867` mudam, mas parecem IDs de sala/tile, não coordenadas simples.
+- Ainda não foi possível mapear a coordenada da escada `D`/elevador `E`; a
+  primeira batalha continua pendente.
+
 ### Save states e input
 
 - Criada uma cadeia de save states locais em `build/saves/` (`save1` … `save8`).

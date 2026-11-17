@@ -163,6 +163,9 @@ independente é o próximo passo de validação.
   ainda não.
 - A rota do 8F está identificada em `docs/route-8f.md`, mas a escada central
   (`D`) ainda não foi alcançada; o elevador (`E`) é uma alternativa.
+- O servidor de debug funciona e `0x80f`/`0x811`/`0x813` reagem ao movimento,
+  mas a correlação com a grade do mapa ainda não está fechada; veja
+  `docs/debugging.md`.
 - O save real do jogo (SRAM de 8 KiB) ainda não foi testado; os save states do
   host são apenas para desenvolvimento.
 - O state `save2` tem o nome `ナカジマあああ` por causa do avanço automático
@@ -174,7 +177,8 @@ independente é o próximo passo de validação.
 
 ## Próximos passos
 
-1. Seguir a rota do 8F, descer ao 7F e validar a primeira batalha.
+1. Fechar o mapa de coordenadas com o servidor de debug (`docs/debugging.md`),
+   seguir a rota do 8F, descer ao 7F e validar a primeira batalha.
 2. Salvar via SRAM, reiniciar e carregar.
 3. Comparar o boot com o MesenCE usando frames e WRAM.
 4. Nomear as rotinas descobertas em `recomp/symbols.toml`.

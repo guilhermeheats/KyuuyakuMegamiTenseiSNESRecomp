@@ -29,6 +29,10 @@ a posição atual.
   pendente.
 - Os save states `9`–`13` foram usados em exploração local e não formam uma
   cadeia estável; a cadeia documentada no repositório vai até `save8`.
+- O build de debug (`SNESRECOMP_ENABLE_TRACE=ON`) e o servidor TCP foram
+  validados. `0x80f`/`0x811`/`0x813` reagem ao movimento, mas ainda não foi
+  possível correlacioná-los com segurança com a grade do mapa. Veja
+  `docs/debugging.md`.
 
 ## Próximo ponto
 

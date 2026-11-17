@@ -79,9 +79,15 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
   `entry_x = 0`. O analyzer gerou 14 variantes AOT e 0 LLE-only; o save AOT
   produziu o mesmo hash `a0ca482f…` do save LLE, mas o `CONTINUE` do título
   continua rejeitando/zerando o SRAM.
-- **Próximo passo:** comparar o SRAM com um save válido de emulador ou
-  instrumentar as leituras de SRAM do caminho `CONTINUE` para achar a
-  validação que rejeita o arquivo.
+- **Diagnóstico GDB:** no boot, `Sram_ValidateChecksums_M1X0` chamou
+  `Sram_Checksum_M1X0` para o slot 0 e o checksum calculado foi `0x5A`;
+  o valor gravado no save era `0x00`. Mesmo gravando manualmente `0xEF=0x5A`
+  e deixando todo o resto igual, o `CONTINUE` ainda zerou a SRAM. Portanto a
+  rejeição **não é só o checksum**: o título deve checar outro campo/tabela
+  (provável tabela de arquivos/metadata) que o save do elder não preenche.
+- **Próximo passo:** comparar com um save válido de emulador (para ver a
+  tabela/metadata esperada) ou instrumentar o caminho `CONTINUE` para achar
+  a condição exata que rejeita o save.
 
 ## Formato sugerido de registro
 

@@ -203,6 +203,16 @@ O bloqueio está no caminho de validação/carregamento do título, não na
 gravação. O próximo passo é comparar com um save válido de emulador
 (Mesen/Snes9x) ou instrumentar as leituras de SRAM desse caminho.
 
+Diagnóstico com GDB nos símbolos AOT:
+
+- no boot, `Sram_ValidateChecksums_M1X0` chamou `Sram_Checksum_M1X0` para o
+  slot 0 e o checksum calculado foi `0x5A`; o save tinha `0x00` em `0xEF`;
+- gravar manualmente `0xEF=0x5A` e manter o resto do save igual **ainda**
+  fez o `CONTINUE` zerar a SRAM;
+- logo, a rejeição não é só o checksum. O título deve validar também uma
+  tabela/metadata de arquivos que o save do elder não preenche (ou preenche
+  em outro formato).
+
 ## Exploração BFS (2026-11-17)
 
 Foi feito um BFS de caminhos a partir do `save5`, recarregando o state e

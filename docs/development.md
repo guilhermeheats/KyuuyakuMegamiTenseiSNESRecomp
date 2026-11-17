@@ -181,7 +181,9 @@ As primeiras rotinas de jogo promovidas para AOT são as de SRAM em bank `$03`:
 (`$A397`), `Sram_Checksum` (`$ACFB`) e `Sram_ValidateChecksums` (`$AD20`), com
 `entry_m = 1` e `entry_x = 0`. O analyzer gerou 14 variantes AOT e 0 LLE-only.
 O save AOT produziu o mesmo hash de SRAM do save LLE; o load pelo título ainda
-está bloqueado.
+está bloqueado. O diagnóstico GDB mostrou que o validador calcula `0x5A` para
+o slot 0, mas o título ainda rejeita mesmo com `0xEF=0x5A`; falta identificar
+a tabela/metadata que o save do elder não preenche.
 
 ## Próximos passos
 

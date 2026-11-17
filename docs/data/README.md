@@ -24,6 +24,8 @@ Não há imagens de mapas, ROM, assets, saves ou screenshots versionados aqui.
 - Mapas da comunidade (FC/NES, usados só para topologia):
   <https://aruto.info/dds/dds1/map1.html> e
   <https://grappli.net/strategy/megamitensei1/story-daidaros-kouryaku/>
+- Auto-map SNES (8F/7F) do opatil:
+  <https://dds.opatil.com/kmt1/story/c01.html>
 
 ## Ressalvas
 

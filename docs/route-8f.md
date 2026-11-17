@@ -112,5 +112,7 @@ Zombie no início.
 - Mapas da comunidade (FC/NES, topologia):
   <https://aruto.info/dds/dds1/map1.html> e
   <https://grappli.net/strategy/megamitensei1/story-daidaros-kouryaku/>
+- Auto-map SNES do opatil (8F/7F):
+  <https://dds.opatil.com/kmt1/story/c01.html>
 
 Os mapas são material de terceiros e não foram copiados para o repositório.

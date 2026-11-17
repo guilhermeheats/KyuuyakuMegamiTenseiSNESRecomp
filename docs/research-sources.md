@@ -43,16 +43,22 @@ mapa, imagem, ROM ou save de terceiros é versionado no repositório.
   - 7F 2ª seção: batalha não aleatória contra Dryad.
 - Ressalva: é uma tradução; o texto em japonês do Gate Keeper pode diferir.
 
-### 4. Mapas da comunidade (FC/NES)
+### 4. Mapas da comunidade (FC/NES e auto-map SNES)
 
 - Aruto: <https://aruto.info/dds/dds1/map1.html>
 - Grappli: <https://grappli.net/strategy/megamitensei1/story-daidaros-kouryaku/>
+- Opatil (mapas SNES): <https://dds.opatil.com/kmt1/story/c01.html>
 - Conteúdo extraído:
   - topologia do 8F: anel externo, bloco central, sala da escada `▼`, gate `門`,
     loja, elevador, catedral;
-  - posição relativa da escada, do elder e da fonte.
-- Ressalva: são mapas da versão FC. A versão SNES tem uma loja única; as
-  coordenadas exatas podem variar. Use apenas para topologia.
+  - posição relativa da escada, do elder e da fonte;
+  - o auto-map SNES do opatil mostra o marcador do jogador sobre o ícone cinza
+    da escada, com o ícone de mensagem/Gate Keeper logo acima, e a fonte azul
+    à direita; a fileira inferior tem baú, armadura, arma, EV e mensagens;
+  - o 7F do opatil confirma Basim, Gnome e Dryad como encontros fixos.
+- Ressalva: os mapas do aruto/grappli são da versão FC; o do opatil é o
+  auto-map da versão SNES. Use-os para topologia, não para coordenadas locais
+  de WRAM.
 
 ### 5. Tabela de RAM / cheats públicos
 

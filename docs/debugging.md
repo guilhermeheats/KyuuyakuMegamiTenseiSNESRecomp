@@ -84,6 +84,14 @@ A assinatura incluía `0x813` (direção), o que inflou o número de nós. A pr�
 iteração deve usar apenas posição/tile e ignorar a direção, além de comparar
 com o mapa do 8F.
 
+### Save states entre builds
+
+`loadstate 5` funciona no `build-debug`, mas `loadstate 13` carregou um estado
+de introdução em vez do corredor. Os states `9`–`13` foram criados pelo build de
+release e não são confiáveis no build de debug. Para o próximo BFS, gere os
+states **dentro do próprio build-debug** (ou use `save_state`/`load_state` com
+arquivos e valide o screenshot antes de explorar).
+
 ## Próximo uso
 
 1. Carregar `save5` (dungeon) ou `save8` (junção).

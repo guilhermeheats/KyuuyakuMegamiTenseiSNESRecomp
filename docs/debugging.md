@@ -113,6 +113,30 @@ orientações cada:
 A porta/transição do tile `0x05` é o próximo ponto a investigar com o mapa
 do 8F e com A em sequências diferentes.
 
+### Portas de Mikon City (A + direção)
+
+O 8F é uma cidade, não uma dungeon. As transições de porta observadas com A
+foram:
+
+| Tile | A + direção | Destino |
+|---|---|---|
+| `0x41` (início) | face 0 | menu |
+| `0x41` | face 1 | `0x11` |
+| `0x41` | faces 2/3 | `0x31` |
+| `0x31` | face 0 | menu |
+| `0x31` | face 1 | `0x05` |
+| `0x31` | faces 2/3 | `0x41` |
+| `0x05` | faces 0/1 | `0x31` |
+| `0x11` | faces 1/2 | `0x31` |
+| `0x11` | face 3 | `0x05` |
+| `0x51` | face 1 | `0x11` |
+| `0x51` | faces 2/3 | `0x01` |
+| `0x33` | face 1 | `0x31` |
+| `0x35` | qualquer | menu |
+
+Essas transições são portas/entradas de prédios, não escadas. O próximo alvo é
+explorar o tile `0x01` e os demais destinos ainda não visitados.
+
 ### Save states entre builds
 
 `loadstate 5` funciona no `build-debug`, mas `loadstate 13` carregou um estado

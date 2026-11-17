@@ -54,6 +54,9 @@ a posição atual.
 - Teste de A nos cinco tiles do loop: no tile `0x05`, com as orientações 0 e 1,
   A muda para o tile `0x31` em vez de abrir o menu. É uma porta/transição
   especial, mas o loop continua; esse é o próximo ponto de investigação.
+- Foram encontradas portas com A em vários tiles: `0x41 → 0x11/0x31`,
+  `0x31 → 0x05/0x41`, `0x11 → 0x31/0x05`, `0x51 → 0x11/0x01`. O grafo completo
+  está em `docs/debugging.md`. O tile `0x01` ainda não foi explorado.
 
 ## Próximo ponto
 

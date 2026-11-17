@@ -122,6 +122,11 @@ O 8F tem 64 células conectadas. A escada `(3,3)` leva ao 7F `(11,3)`.
   `NO` → “はははっ、よく分かっているようだな” →
   “悪魔は満足そうに去っていった” encerrou a batalha em paz; o jogo voltou ao
   dungeon no 7F em `(8,2)`, com a party em 10/10 e 9/9.
+- O caminho de **derrota/game over** também foi validado com `AUTO`: a party
+  chegou a 0/10 e 0/9, apareceram `パーティーは敵に敗れて...` e
+  `志半ばに力尽きた`, seguidos da cena do barco; o recomp não crashou.
+- **Vitória** ainda pendente: os ataques físicos causam 0–1 e Yumiko não tem
+  magia utilizável neste ponto (`使える魔法はありません`).
 
 ## 7F — primeira batalha
 

@@ -14,7 +14,7 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
 | CP-007 | Primeira dungeon | confirmar os status (~frame 14861) | OK — corredor inicial |
 | CP-008 | Movimento | setas na dungeon | OK — câmera muda de célula |
 | CP-009 | Interação com baú | andar até o baú (~frame 15100) | OK — diálogo YES/NO; loot `500` + `宝玉` |
-| CP-010 | Primeira batalha | rota confirmada em `docs/route-8f.md`: Gate Keeper `(2,2)`, escada `(2,3)`, 7F `(10,2)`, batalha em `(8,2)` | **OK** — evento scripted de Heket; menu `FIGHT`/`ESCAPE`/`TALK`/`AUTO`, ataques, dano, revide e negociação `TALK`→`NO`; batalha encerrada em paz e retorno ao dungeon |
+| CP-010 | Primeira batalha | rota confirmada em `docs/route-8f.md`: Gate Keeper `(2,2)`, escada `(2,3)`, 7F `(10,2)`, batalha em `(8,2)` | **OK** — evento scripted de Heket; menu `FIGHT`/`ESCAPE`/`TALK`/`AUTO`, ataques, dano, revide, negociação `TALK`→`NO` e derrota/game over via `AUTO`; vitória ainda pendente |
 | CP-011 | Menu de status | apertar A na passagem (~frame 16400) | OK — COMP/MAGIC/ITEM/STATUS; ficha em ~frame 16800 |
 | CP-012 | Auto-mapping | A → COMP → `オートマッピング` (5º item; down ×4); configurar `Fixed` | OK — minimapa local; modo Fixed norte-para-cima mostra posição/EV |
 | CP-013 | Salvar e carregar pelo jogo | salvar via SRAM, reiniciar, carregar | **parcial** — gravação/flush OK: o elder grava os 4 slots; `save.srm` tem 8192 bytes e 93 bytes não-zero; o boot relê o arquivo. O carregamento pelo título (`CONTINUE`) ainda falha: mostra `セーブされたデータがありません` e zera o SRAM. |
@@ -37,6 +37,11 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
   2–3 de dano. A negociação `TALK` → `わたしと対等に話すつもりか？` → `NO`
   → `はははっ、よく分かっているようだな` →
   `悪魔は満足そうに去っていった` encerrou a batalha em paz.
+- **Derrota/game over:** `AUTO` levou a party a 0/10 e 0/9, com
+  `パーティーは敵に敗れて...` / `志半ばに力尽きた` e a cena do barco
+  (game over); o jogo não crashou.
+- **Vitória:** ainda não obtida; os ataques físicos causam 0–1 e Yumiko não
+  tem magia utilizável neste ponto (`使える魔法はありません`).
 - **Pós-batalha:** retorno ao dungeon do 7F em `(8,2)`, party em 10/10 e 9/9.
 - **Saves locais:** `save10` (8F equipado), `save11` (chegada ao 7F),
   `save9` (mensagem de Heket), `save8` (menu inicial da batalha),

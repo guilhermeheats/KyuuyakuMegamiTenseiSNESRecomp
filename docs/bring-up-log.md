@@ -51,6 +51,9 @@
 
 ### Rota do 8F
 
+- **Correção:** o 8F é Mikon City, uma cidade segura, sem encontros aleatórios.
+  O loop de 113 movimentos é a cidade/área inicial, não uma dungeon. A primeira
+  batalha é no 7F; o caminho é achar o Viking/Gate Keeper e as escadas.
 - O 8F é o andar do baú inicial; a primeira batalha é no 7F.
 - A rota conhecida está em `docs/route-8f.md`: baú → corredor inferior a leste → lado direito a norte → corredor superior a oeste → sala central com a escada de descida (`D`).
 - O auto-map do jogo (`COMP` → `オートマッピング`) foi validado, mas é um minimapa local e não mostrou a rota completa.

@@ -1,4 +1,10 @@
-# Rota do 8F — Torre de Daedalus
+# Rota do 8F — Mikon City
+
+> **Correção importante:** o 8F é **Mikon City**, uma cidade segura, com lojas,
+> Healing Spring, House of Heresy, o homem do password e o baú de 500 makka.
+> **Não existem batalhas aleatórias no 8F.** A primeira batalha acontece no
+> **7F**; o objetivo aqui é encontrar o Viking/Gate Keeper e descer as escadas.
+> O elevador não pode ser usado neste ponto.
 
 O 8F é o andar do baú inicial; a primeira batalha acontece no **7F**. Para
 chegar lá é preciso encontrar a escada de descida (`D`) no mapa.
@@ -22,6 +28,10 @@ a posição atual.
 ## Status do bring-up
 
 - O baú do 8F foi aberto e o loot (`500` + `宝玉`) foi validado.
+- O loop de tiles não é uma dungeon: é a área segura de Mikon City. A ausência
+  de encontros em 113 movimentos é esperada.
+- O próximo objetivo é entrar nas lojas/casas, falar com NPCs, achar o
+  Viking/Gate Keeper e a escada para o 7F.
 - O quarto do baú tem saídas laterais que levam a corredores longos; a
   exploração inicial voltou ao mesmo baú, então a rota ainda não foi concluída.
 - O elevador (`E`) na parte inferior central é uma alternativa à escada (`D`).

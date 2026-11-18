@@ -260,12 +260,13 @@ limpo e re-promover as duas funções.
 ## Próximos passos
 
 1. Declarar contratos de saída para `$03:E91A`/`$03:E9B1`, `$02:D13B` e o
-   bloco `$30`, um de cada vez, validando `save4`/`save9` e o `snesref` após
-   cada contrato. O contrato de `$03:983C` já foi testado: sobe para 596
-   AOT/677 nós, mas o save9 cai para 98,59% porque o frame wait `$00:9300`
-   passa a girar ~5x mais; investigar antes de adotar (detalhes em
-   `docs/coverage.md`). Se um contrato expuser outro BRK de caminho de erro,
-   adicionar uma fronteira `data_region` como `$05:E5DB`.
+   bloco `$30`, um de cada vez, validando `save4`/`save9`, o `snesref` e o
+   **tempo de parede** após cada contrato. O contrato de `$03:983C` já foi
+   testado: sobe para 596 AOT/677 nós, mas o `step 60` no save9 passa de
+   **1,03s para 12,79s** (12,4x) porque o frame wait `$00:9300` vira o
+   gargalo interpretado; foi rejeitado (detalhes em `docs/coverage.md`). Se
+   um contrato expuser outro BRK de caminho de erro, adicionar uma fronteira
+   `data_region` como `$05:E5DB`.
 2. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter e re-promover
    `$00:86C0`/`$00:88CE`; detalhes em `docs/coverage.md`.
 3. Declarar as tabelas indiretas restantes (`$00:9B04`, `$01:C72B`/`CD9C`/

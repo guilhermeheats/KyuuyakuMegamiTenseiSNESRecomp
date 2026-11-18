@@ -237,13 +237,26 @@ não há retorno para provar. O `$00:820E` foi promovido porque seu loop
 ### Experimento pendente: `$03:983C`
 
 O contrato `exit_mx_variant 03983C 1 0 1 0` / `1 1 1 1` foi testado e é
-correto: o grafo sobe para **677 nós / 596 AOT / 81 LLE**. Porém, no save9
-fresco o AOT cai de **99,75% para 98,59%**; o `interp_profile` mostra a
-página `$00:9300` (frame wait `$9397`) com **35M ciclos** (1,26% do CPU),
-contra ~7M no build de 511. O contrato promove o caminho de menu/texto do
-banco `$03`, que passa a esperar mais frames. Antes de adotar, investigar se
-é timing normal do menu ou um loop de espera incorreto; o contrato foi
-revertido para manter o build 511 validado.
+correto: o grafo sobe para **677 nós / 596 AOT / 81 LLE**. O A/B com o mesmo
+`save9` e `step 60` (3 trials, processo novo por trial) mostrou:
+
+| Métrica | 511 (baseline) | 596 (contrato) |
+|---|---:|---:|
+| AOT | **99,90%** | 98,74% |
+| Ciclos interpretados | 2,79M | 35,1M |
+| Página `$00:9300` (frame wait) | 2,6M | 35,0M |
+| `cpu_cycles` | 2,754B | 2,786B (+1,2%) |
+| Tempo do `step 60` | **1,03s** | **12,79s (12,4x)** |
+| `tier_hits` | 0 | 5 |
+| Stubs / party / tela | zero / iguais | zero / iguais |
+
+O `cpu_cycles` quase não muda, mas o tempo de parede explode: o contrato
+promove o caminho de menu/texto do banco `$03`, que termina o trabalho e
+gasta o resto do frame girando no `$9397` interpretado. O AOT% e o tempo de
+parede apontam para o mesmo gargalo: o frame wait precisa ser promovido ou
+o caminho que o chama precisa ser contido antes de adotar este contrato.
+**O contrato foi rejeitado e o build 511 mantido**; os próximos contratos
+devem passar pelo mesmo harness de tempo de parede, não só pelo AOT%.
 
 O próximo passo de maior alavancagem é declarar contratos de saída para
 `$03:E91A`/`$03:E9B1`, `$02:D13B` e o bloco `$30`, **um de cada vez**.

@@ -122,6 +122,10 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
   promovidas em `recomp/symbols.toml` com `emit = true`, `entry_m = 1`,
   `entry_x = 0`. O analyzer gerou 14 variantes AOT e 0 LLE-only; o save AOT
   produziu o mesmo hash `a0ca482f…` do save LLE.
+- **AOT da tela de level-up:** `LevelUp_Apply` (`$01:B3C6`) ficou LLE-only;
+  `LevelUp_PrintStat` (`$01:B5D5`) foi emitida em AOT como `M1X1`. O fluxo
+  completo (Nakajima e Yumiko, `BONUS`, `YES`/`NO`, magia aprendida) foi
+  testado no build AOT sem crash; estado no `save2`.
 - **Comparação de referência (2026-11-18):** com o `snesref` (Snes9x
   libretro) e a mesma SRAM, o frame 3660 do título teve apenas 6 bytes de
   WRAM diferentes (animação/stack), SRAM idêntica e framebuffer com RMSE

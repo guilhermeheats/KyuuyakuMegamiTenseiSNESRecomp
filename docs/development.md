@@ -196,13 +196,23 @@ O save AOT produziu o mesmo hash de SRAM do save LLE e o load pelo título foi
 validado no boot natural. O antigo `save1` restaurava SRAM zerada e mascarava
 o load; ele foi regenerado com a SRAM válida.
 
+Na segunda rodada foram nomeadas as rotinas da tela de level-up:
+`LevelUp_Apply` (`$01:B3C6`) e `LevelUp_PrintStat` (`$01:B5D5`), ambas com
+`entry_m = 1`, `entry_x = 1`. O analyzer gerou 11 roots, 54 variantes
+AOT-eligible e 6 LLE-only. `LevelUp_Apply` ficou **LLE-only** (todas as
+variantes continuam no interpretador), enquanto `LevelUp_PrintStat_M1X1` foi
+emitida em AOT. O fluxo completo foi testado a partir do `save11` no build
+AOT: alocação de Nakajima e Yumiko, `YES`/`NO`, `ユミコは魔法を憶えた` e
+retorno à dungeon (HP 26/26 e 27/27), sem crash. O estado resultante está no
+`save2`.
+
 ## Próximos passos
 
 1. Reviver a Yumiko (Kaifuku/8F ou magia/item) e repetir a batalha com ela
    viva; o recrutamento segue pendente (o manual exige nível maior que o do
    demônio).
 2. Comparar boot/dungeon/batalha com o MesenCE usando frames e WRAM.
-3. Nomear as rotinas descobertas em `recomp/symbols.toml` — começando pelo
-   caminho da batalha e pela tela de level-up (`$01:B4F6`, `$01:B431`,
-   `$01:B5D5`) — e promover as seguras para AOT (`emit = true`).
+3. Nomear/avaliar as rotinas do caminho de batalha no `symbols.toml`; a tela
+   de level-up já foi promovida (`LevelUp_PrintStat` AOT, `LevelUp_Apply`
+   LLE-only). Promover apenas as variantes que o analyzer provar seguras.
 4. Expandir a cobertura para o restante do MT1 (7F, 6F, ...).

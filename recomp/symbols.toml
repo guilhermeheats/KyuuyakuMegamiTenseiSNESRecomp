@@ -20,6 +20,27 @@ bank = 0
 emit = false
 note = "Native NMI vector ($FFEA)"
 
+# Level-up screen (bank $01). Entry $B3C6 sets up the screen and runs the
+# BONUS allocation loop; $B5D5 prints one stat and applies the 35 cap.
+# Both were exercised in the normal and debug-boosted level-up runs.
+[[func]]
+name = "LevelUp_Apply"
+addr = "B3C6"
+bank = 1
+emit = true
+entry_m = 1
+entry_x = 1
+note = "Level-up screen setup/allocation/finalize; called from bank $01 and $03"
+
+[[func]]
+name = "LevelUp_PrintStat"
+addr = "B5D5"
+bank = 1
+emit = true
+entry_m = 1
+entry_x = 1
+note = "Print/clamp one level-up stat; JSR target from LevelUp_Apply"
+
 # SRAM save/load path (bank $03). These are the first game routines promoted
 # from the interpreter so the save/load behavior can be compared AOT vs LLE.
 [[func]]

@@ -190,6 +190,10 @@ boost de debug. O código fica em bank `$01`:
 | `$01:B5D5` | imprime o valor e aplica o teto de `0x23` (35) |
 | `$01:B581` | finaliza e aplica HP/MP do level-up |
 
+No build AOT, `LevelUp_PrintStat` (`$01:B5D5`) foi emitida como `M1X1`;
+`LevelUp_Apply` (`$01:B3C6`) ficou LLE-only. O fluxo completo foi retestado
+a partir do `save11` e chegou de volta à dungeon com HP 26/26 e 27/27.
+
 Variáveis:
 
 - `$08` = bônus restante; `$09` = linha do cursor (0–4); `$0A` = offset do

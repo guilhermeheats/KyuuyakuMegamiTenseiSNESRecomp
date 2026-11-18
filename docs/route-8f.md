@@ -187,6 +187,7 @@ Para repetir a validação, os save states locais são:
 | `save7` | pós-vitória normal contra Heket (cópia de segurança) |
 | `save4` | 7F, `(8,1)`, pós-vitória contra 2 Mad Slugs, ainda com boost |
 | `save11` | tela `レベルアップ：ユミコ`, antes da alocação |
+| `save2` | pós-level-up no build AOT, 7F, HP 26/26 e 27/27, Yumiko `POISON` |
 | `save9` | pós-level-up (boost), dungeon 7F, HP 30/30 e 27/27, Yumiko `POISON` |
 
 Esses saves são artefatos locais de `build-debug/saves/` e **não** são

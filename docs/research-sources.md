@@ -18,8 +18,9 @@ mapa, imagem, ROM ou save de terceiros é versionado no repositório.
   - baú do 8F: 500 Macca + 宝玉.
 - Ressalva: a tabela não lista batalhas fixas no 7F. O detonado e o mapa da
   Sion listam Basim e Gnome como encontros não aleatórios no 7F; os tiles
-  exatos ainda não foram confirmados. No jogo, o primeiro evento scripted
-  observado no 7F foi **Heket** em `(8,2)` (WRAM), não Basim/Gnome.
+  exatos ainda não foram confirmados. No jogo, o primeiro encontro observado
+  no 7F foi **aleatório**, com **Heket** em `(8,2)` (WRAM); uma besta verde
+  (provável Basim) também apareceu aleatoriamente no mesmo trecho.
 
 ### 2. Sion’s Runs — rota de speedrun (SNES)
 
@@ -28,8 +29,10 @@ mapa, imagem, ROM ou save de terceiros é versionado no repositório.
   - rota do 8F em anel até o bloco central;
   - recomendação de comprar Jack Knife, Nunchaku e Combat Suits;
   - 7F: Basim e Gnome como encontros fixos; evitar Zombie no início;
-  - Heket é recrutável apenas no 7F; no jogo, Heket apareceu como evento
-    scripted em `(8,2)` (WRAM) e pôde ser dispensado pela opção `TALK` → `NO`.
+  - Heket é recrutável apenas no 7F; no jogo, Heket apareceu como encontro
+    aleatório em `(8,2)` (WRAM) e pôde ser dispensado pela opção `TALK` → `NO`.
+  - Uma besta verde (provável Basim) também apareceu como encontro aleatório;
+    `TALK` respondeu `グルルルルル...` e `ESCAPE` falhou duas vezes.
 - Ressalva: as notas são de speedrun; algumas indicações de “tile de encontro
   fixo” não têm coordenada explícita.
 
@@ -108,9 +111,9 @@ mapa, imagem, ROM ou save de terceiros é versionado no repositório.
   `おい、坊主！…`; o velho de verde em `(3,3)` é outro NPC.
 - A escada foi acionada em `(2,3)` (WRAM), com `階段を降りますか？` → `YES`,
   e desceu para o 7F em `(10,2)` (HUD `7F`).
-- A primeira batalha foi validada no 7F em `(8,2)` (WRAM): evento scripted
-  `妖魔ヘケットが現れた！`, menu de batalha, ataques/dano, revide e negociação
-  `TALK` → `NO` encerrando a batalha em paz.
+- A primeira batalha foi validada no 7F em `(8,2)` (WRAM): encontro aleatório
+  com `妖魔ヘケットが現れた！`, menu de batalha, ataques/dano, revide e
+  negociação `TALK` → `NO` encerrando a batalha em paz.
 - O save/load real foi validado (CP-013): o elder grava o slot, o flush no
   shutdown persiste `save.srm`, o boot natural relê o arquivo e o `CONTINUE`
   do título carrega o estado no 8F. Save states antigos podem restaurar SRAM

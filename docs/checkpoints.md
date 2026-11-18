@@ -14,7 +14,7 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
 | CP-007 | Primeira dungeon | confirmar os status (~frame 14861) | OK — corredor inicial |
 | CP-008 | Movimento | setas na dungeon | OK — câmera muda de célula |
 | CP-009 | Interação com baú | andar até o baú (~frame 15100) | OK — diálogo YES/NO; loot `500` + `宝玉` |
-| CP-010 | Primeira batalha | rota confirmada em `docs/route-8f.md`: Gate Keeper `(2,2)`, escada `(2,3)`, 7F `(10,2)`, batalha em `(8,2)` | **OK** — evento scripted de Heket; menu `FIGHT`/`ESCAPE`/`TALK`/`AUTO`, ataques, dano, revide, negociação `TALK`→`NO` e derrota/game over via `AUTO`; vitória ainda pendente |
+| CP-010 | Primeira batalha | rota confirmada em `docs/route-8f.md`: Gate Keeper `(2,2)`, escada `(2,3)`, 7F `(10,2)`, batalha em `(8,2)` | **OK** — primeiro encontro aleatório com Heket; menu `FIGHT`/`ESCAPE`/`TALK`/`AUTO`, ataques, dano, revide, negociação `TALK`→`NO` e derrota/game over via `AUTO`; vitória ainda pendente |
 | CP-011 | Menu de status | apertar A na passagem (~frame 16400) | OK — COMP/MAGIC/ITEM/STATUS; ficha em ~frame 16800 |
 | CP-012 | Auto-mapping | A → COMP → `オートマッピング` (5º item; down ×4); configurar `Fixed` | OK — minimapa local; modo Fixed norte-para-cima mostra posição/EV |
 | CP-013 | Salvar e carregar pelo jogo | salvar via SRAM, reiniciar, carregar | **OK** — gravação/flush e carregamento validados; o `CONTINUE` lista o arquivo e restaura o estado. O save state antigo `save1` restaurava SRAM zerada e foi regenerado. |
@@ -31,8 +31,12 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
   `おい、坊主！…` (o velho de verde em `(3,3)` é outro NPC).
 - **Escada:** WRAM `(2,3)`, pergunta `階段を降りますか？`; `YES` →
   HUD `7F`, WRAM `(10,2)` virado para o norte.
-- **Batalha:** WRAM `(8,2)`, mensagem `妖魔ヘケットが現れた！`; menu
-  `FIGHT`/`ESCAPE`/`TALK`/`AUTO`.
+- **Batalha (encontro aleatório):** WRAM `(8,2)`, mensagem
+  `妖魔ヘケットが現れた！`; menu `FIGHT`/`ESCAPE`/`TALK`/`AUTO`.
+- **Segundo encontro (besta verde, provável Basim):** ao voltar para
+  `(8,2)`, apareceu uma besta verde (provável Basim); `TALK` respondeu
+  `グルルルルル...` e `ESCAPE` falhou duas vezes; o inimigo causou 3 de
+  dano em Nakajima. O gatilho fixo de Basim/Gnome continua não confirmado.
 - **Combate:** ataques físicos causaram 0–1 de dano; o inimigo revidou com
   2–3 de dano. A negociação `TALK` → `わたしと対等に話すつもりか？` → `NO`
   → `はははっ、よく分かっているようだな` →

@@ -143,9 +143,11 @@ ao entrar, o jogo pergunta `階段を降りますか？` e `YES` desce ao 7F em
   `(3,2)`; ele é uma mensagem/loja, não o Gate Keeper nem a escada;
 - loja de armaduras em `(1,5)`: 2 Combat Suits; loja de armas em `(2,5)`:
   Jack Knife + Nunchaku; elevador em `(3,5)` parado (“邪悪な力により…”)；
-- a tela de status/equipamento abre com **X**; a página `EQUIPMENTS` abre com
-  **direita**. O cursor de equipar ainda não foi dominado; o inventário contém
-  os itens comprados.
+- o menu de equipamento fica em **`ITEM → そうび`**, não em STATUS. Caminho:
+  `A` abre a janela de comandos; `B` volta do submenu COMP para a lista;
+  `↓` seleciona `ITEM`; `A`; `↓×3` até `そうび`; `A`. A tela `EQUIPMENTS`
+  mostra HEAD/BODY/HAND/SWD/ARM e os itens (Jack Knife, Nunchaku,
+  Combat Suit); o manual confirma que é preciso equipar explicitamente.
 
 ### Rota confirmada 8F → 7F (2026-11-17)
 
@@ -159,8 +161,8 @@ S×2 → (2,1) → (2,2)   # Gate Keeper
 S   → (2,3)           # 階段を降りますか？ YES → 7F (10,2)
 ```
 
-No 7F, a primeira batalha scripted foi encontrada em `(8,2)` (WRAM), ao
-descer do corredor superior e entrar na sala:
+No 7F, o primeiro encontro foi **aleatório**, com Heket em `(8,2)` (WRAM),
+ao descer do corredor superior e entrar na sala:
 
 ```text
 (10,2) --W--> (9,2) --N--> (9,1) --W--> (8,1) --S--> (8,2)
@@ -172,11 +174,13 @@ O menu de batalha é `FIGHT`/`ESCAPE`/`TALK`/`AUTO`; cada personagem escolhe
 A negociação `TALK` → `わたしと対等に話すつもりか？` → `NO` →
 `はははっ、よく分かっているようだな` →
 `悪魔は満足そうに去っていった` encerra a batalha em paz e devolve o controle
-ao dungeon em `(8,2)`.
+ao dungeon em `(8,2)`. Um segundo encontro aleatório no mesmo trecho trouxe
+uma besta verde (provável Basim): `TALK` respondeu `グルルルルル...` e
+`ESCAPE` falhou duas vezes.
 
-> **Cuidado com `A`:** no dungeon, `A` abre o menu `COMP`. Depois de fechar um
-> diálogo, use `B` para sair de menus; não pressione `A` repetidamente. Foi
-> assim que o menu `COMP → MAGIC` abriu durante a validação.
+> **Cuidado com `A`/`B`:** no dungeon, `A` abre a janela de comandos; `B`
+> volta do submenu para a lista de comandos e `B` de novo fecha. Para
+> equipar: `A` → `B` → `↓` até `ITEM` → `A` → `↓×3` até `そうび` → `A`.
 
 ### SRAM e save/load (2026-11-17)
 

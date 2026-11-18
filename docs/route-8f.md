@@ -113,7 +113,7 @@ O 8F tem 64 células conectadas. A escada `(3,3)` leva ao 7F `(11,3)`.
   Keeper. A pergunta `階段を降りますか？` apareceu; `YES` levou ao 7F, com o HUD
   `7F` e WRAM `(10,2)`.
 - A **primeira batalha** foi validada no 7F em `(8,2)` (WRAM), ao descer do
-  corredor superior e entrar na sala. O evento scripted mostra
+  corredor superior e entrar na sala. O encontro aleatório mostra
   `妖魔ヘケットが現れた！` e abre o menu de batalha
   `FIGHT`/`ESCAPE`/`TALK`/`AUTO`, com as ações
   `ATTACK`/`COMP`/`ITEM`/`DEFEND` por personagem e confirmação `YES`/`NO`.
@@ -141,9 +141,11 @@ A tabela do ROM lista 7 eventos no 7F, em duas componentes:
 A escada do 8F cai na componente #1. O elevador do 7F **não para** (flag 0).
 O detonado e o mapa da Sion listam **batalhas não aleatórias contra Basim e
 Gnome** no 7F; a tabela do ROM não as lista como eventos fixos. O primeiro
-evento scripted observado nesta rodada foi **Heket** em `(8,2)` (WRAM), não
-Basim/Gnome. O guia também recomenda recrutar Heket/Gnome; a negociação
-respeitosa com Heket funcionou.
+encontro observado foi **aleatório**, com **Heket** em `(8,2)` (WRAM), não um
+evento fixo. Um segundo encontro aleatório trouxe uma **besta verde
+(provável Basim)** no mesmo trecho: `TALK` respondeu `グルルルルル...` e
+`ESCAPE` falhou duas vezes, com 3 de dano em Nakajima. Os gatilhos fixos de
+Basim/Gnome continuam não confirmados.
 
 Para repetir a validação, os save states locais são:
 
@@ -151,9 +153,9 @@ Para repetir a validação, os save states locais são:
 |---|---|
 | `save10` | 8F, `(1,4)`, equipado, 10 Macca |
 | `save11` | 7F, `(10,2)`, chegada da escada |
-| `save9` | 7F, `(8,2)`, mensagem `妖魔ヘケットが現れた！` |
-| `save8` | 7F, `(8,2)`, menu inicial da batalha (HP cheio) |
-| `save7` | 7F, `(8,2)`, menu da batalha após o primeiro turno |
+| `save9` | 7F, `(8,2)`, mensagem `妖魔ヘケットが現れた！` (encontro aleatório) |
+| `save8` | 7F, `(8,2)`, menu inicial da batalha de Heket (HP cheio) |
+| `save7` | 7F, `(8,2)`, menu da batalha de Heket após o primeiro turno |
 | `save6` | 7F, `(8,2)`, pós-batalha, dungeon |
 
 Esses saves são artefatos locais de `build-debug/saves/` e **não** são
@@ -162,7 +164,8 @@ versionados.
 ## O que ainda falta
 
 - Confirmar as coordenadas e os gatilhos exatos de Basim, Gnome e Dryad no 7F
-  (o evento de Heket já foi confirmado em `(8,2)`).
+  (o encontro aleatório de Heket em `(8,2)` já foi confirmado; a besta verde
+  provável Basim também apareceu aleatoriamente).
 - Descer do 7F para o 6F e validar a continuação da torre.
 - CP-013 concluído: gravação/flush e load pelo título validados. O antigo
   `save1` restaurava SRAM zerada e foi regenerado com a SRAM válida.

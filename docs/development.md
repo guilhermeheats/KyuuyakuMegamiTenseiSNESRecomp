@@ -242,8 +242,9 @@ limpo e re-promover as duas funções.
    `$00:86C0`/`$00:88CE`; detalhes em `docs/coverage.md`.
 2. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
    ingerir com `tier2_ingest.py` e adicionar os novos roots.
-3. Investigar as 12 variantes LLE-only, começando por `$00:9397` e
-   `$01:8EAB`.
+3. Resolver o ciclo de frame wait (`$00:8014`/`$00:820E`/`$00:9397`/
+   `$01:8EAB`) com suporte a JSL terminal/entrada; depois promover
+   `$00:9397`, `$00:93F2`, `$01:8EAB` e `LevelUp_Apply`.
 4. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
    `$38` e `$3F`, e continuar a separação código/dados.
 5. Manter gameplay, save states e comparação com emulador como regressão.

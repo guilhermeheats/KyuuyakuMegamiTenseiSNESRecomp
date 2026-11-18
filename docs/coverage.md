@@ -144,6 +144,35 @@ funções. Uma tentativa inicial de `indirect_dispatch ... ptrtail targets:...`
 elevou a análise para 131 variantes, mas o link-closure rejeitou 28 variantes
 chamadas e não definidas; as diretivas foram revertidas.
 
+## LLEs restantes: o ciclo do frame wait
+
+Os 12 nós LLE-only do build atual formam um **ciclo de recursão mútua** em
+torno da espera de frame:
+
+```text
+$00:8014 --JSL $820E--> $00:820E --JSL $9397--> $00:9397
+   ^                                                  |
+   |                                                  JSL $018EAB ($93B4)
+   +---------------------- JSL $008014 ($8EBE) <------ $01:8EAB
+```
+
+Nós LLE-only: `$00:8014` (M1X1), `$00:820E` (M1X0),
+`$00:9397` (M0X0/M1X0/M1X1), `$00:93F2` (M0X0/M1X0),
+`$01:8078` (M1X0), `$01:8EAB` (M1X0), `$01:B3C6` (M1X1),
+`$02:EDE8` (M1X0) e `$02:F835` (M0X0).
+
+O analyzer propaga `unproven_callee_exit` e
+`truncated_call_continuation` por esse ciclo: `$00:9397` chama
+`$01:8EAB` em `$93B4`, que chama `$00:8014` em `$8EBE`, que chama
+`$00:820E`, que volta a `$00:9397`. O `LevelUp_Apply` (`$01:B3C6`) entra
+no mesmo ciclo porque também chama `$00:9397`.
+
+O cfg atual só oferece `noreturn_jsr`/`terminal_jsr` para JSR de 2 bytes;
+o site `$8EBE` é um **JSL** de 3 bytes. O próximo passo de framework é
+modelar esse JSL como transferência terminal/entrada (ou fornecer fatos de
+saída para o ciclo) e então promover `$00:9397`, `$00:93F2`, `$01:8EAB` e
+`LevelUp_Apply`.
+
 ## Próximos passos
 
 1. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter, reativar
@@ -151,9 +180,9 @@ chamadas e não definidas; as diretivas foram revertidas.
    `$00:86C0`/`$00:88CE`.
 2. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
    ingerir com `tier2_ingest.py` e adicionar os novos roots.
-3. Investigar os 12 variantes LLE-only, começando por `$00:9397`
-   (`truncated_call_continuation`, `unproven_call_at_0093B4_to_018EAB_m1x0`,
-   `unproven_callee_exit`) e `$01:8EAB`.
+3. Resolver o ciclo de frame wait (`$00:8014`/`$00:820E`/`$00:9397`/
+   `$01:8EAB`) com suporte a JSL terminal/entrada; depois promover
+   `$00:9397`, `$00:93F2`, `$01:8EAB` e `LevelUp_Apply`.
 4. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
    `$38` e `$3F`, e continuar a separação código/dados.
 5. Manter gameplay, save states e comparação com emulador como regressão.

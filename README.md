@@ -20,8 +20,8 @@ the opening story, accepts the two character names, allocates stats, enters
 the first dungeon and the 7F floor**, and validates movement, chest looting,
 the status menu, auto-mapping, random and fixed battles, negotiation, game
 over, victory/EXP/level-up, equipment and in-game SRAM save/load. The current
-focus is **decompilation coverage**: the static graph now emits 616 AOT
-variants across 12 banks (from 54 across 8), with 700 exact variants and 84
+focus is **decompilation coverage**: the static graph now emits 784 AOT
+variants across 12 banks (from 54 across 8), with 849 exact variants and 65
 LLE-only, and reaches **99.4–99.9% AOT** on the save4/save9 route. The two
 HDMA live-pointer dispatchers (`$00:86C0`/`$00:88CE`) remain LLE until the
 emitter models their `JMP ($0100)` dispatch. See `docs/coverage.md` and
@@ -67,10 +67,16 @@ revision fails immediately instead of producing subtly wrong output.
 
 ```sh
 git submodule update --init --recursive
-bash tools/regen.sh --rom /path/to/kyuuyaku.sfc
+bash tools/apply-snesrecomp-patch.sh
+PATH="$HOME/.cargo/bin:$PATH" bash tools/regen.sh --rom /path/to/kyuuyaku.sfc
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
 ```
+
+`tools/apply-snesrecomp-patch.sh` applies the project's portable
+`noreturn_jsl`/`terminal_jsl` patch to the pinned `snesrecomp` submodule; the
+submodule itself stays at its public upstream commit. The regen rebuilds the
+native analyzer, so the Rust toolchain (`cargo`) must be available.
 
 The ROM does not have to live in the repository — keeping it on your own
 drive is the better habit, and `SNESRECOMP_ROM` sets the path once for a

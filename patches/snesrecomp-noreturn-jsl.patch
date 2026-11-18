@@ -1,0 +1,442 @@
+diff --git a/recompiler-rs/src/bin/analyze.rs b/recompiler-rs/src/bin/analyze.rs
+index d7836a06..384fa991 100644
+--- a/recompiler-rs/src/bin/analyze.rs
++++ b/recompiler-rs/src/bin/analyze.rs
+@@ -386,6 +386,23 @@ fn load_inputs(cfg_dir: &Path, rom: &mut Vec<u8>, all_cfg_roots: bool) -> Result
+                 terminal_jsr_sites.insert(mirror);
+             }
+         }
++        // Direct JSL call sites use the same terminal-call set in the
++        // analyzer: both JSR and JSL sever lexical fall-through.  The
++        // Python emitter keeps noreturn vs terminal stack semantics.
++        for &site_pc16 in &cfg.terminal_jsl {
++            let site = (bank << 16) | (site_pc16 & 0xFFFF);
++            terminal_jsr_sites.insert(site);
++            if let Some(mirror) = mirror_pc24(mapping, site) {
++                terminal_jsr_sites.insert(mirror);
++            }
++        }
++        for &site_pc16 in &cfg.noreturn_jsl {
++            let site = (bank << 16) | (site_pc16 & 0xFFFF);
++            terminal_jsr_sites.insert(site);
++            if let Some(mirror) = mirror_pc24(mapping, site) {
++                terminal_jsr_sites.insert(mirror);
++            }
++        }
+         for &site_pc16 in &cfg.live_operand {
+             let site = (bank << 16) | (site_pc16 & 0xFFFF);
+             live_operand_sites.insert(site);
+diff --git a/recompiler-rs/src/cfg.rs b/recompiler-rs/src/cfg.rs
+index d678c6ac..57b211bb 100644
+--- a/recompiler-rs/src/cfg.rs
++++ b/recompiler-rs/src/cfg.rs
+@@ -130,6 +130,8 @@ pub struct BankCfg {
+     pub inline_dispatch_loops: BTreeSet<u32>,
+     pub terminal_jsr: BTreeSet<u32>,
+     pub noreturn_jsr: BTreeSet<u32>,
++    pub terminal_jsl: BTreeSet<u32>,
++    pub noreturn_jsl: BTreeSet<u32>,
+     /// `live_operand <site_pc16>`: the immediate at this site is read from
+     /// the ROM image at run time. The analyzer keeps the instruction (its
+     /// width and control flow do not depend on the value) but must not fold
+@@ -644,6 +646,48 @@ pub fn parse_bank_cfg(text: &str, path: &str) -> Result<BankCfg, String> {
+             }
+             continue;
+         }
++        // terminal_jsl <site_pc16>
++        if head == "terminal_jsl" {
++            if tokens.len() != 2 {
++                return Err(format!(
++                    "{path}: terminal_jsl needs exactly one <site_pc16>, got: {stripped:?}"
++                ));
++            }
++            let site_pc16 =
++                parse_hex(tokens[1]).map_err(|e| format!("{path}: terminal_jsl {e}"))? & 0xFFFF;
++            if cfg.noreturn_jsl.contains(&site_pc16) {
++                return Err(format!(
++                    "{path}: JSL site ${site_pc16:04X} cannot be both terminal_jsl and noreturn_jsl"
++                ));
++            }
++            if !cfg.terminal_jsl.insert(site_pc16) {
++                return Err(format!(
++                    "{path}: terminal_jsl duplicate site ${site_pc16:04X}"
++                ));
++            }
++            continue;
++        }
++        // noreturn_jsl <site_pc16>
++        if head == "noreturn_jsl" {
++            if tokens.len() != 2 {
++                return Err(format!(
++                    "{path}: noreturn_jsl needs exactly one <site_pc16>, got: {stripped:?}"
++                ));
++            }
++            let site_pc16 =
++                parse_hex(tokens[1]).map_err(|e| format!("{path}: noreturn_jsl {e}"))? & 0xFFFF;
++            if cfg.terminal_jsl.contains(&site_pc16) {
++                return Err(format!(
++                    "{path}: JSL site ${site_pc16:04X} cannot be both terminal_jsl and noreturn_jsl"
++                ));
++            }
++            if !cfg.noreturn_jsl.insert(site_pc16) {
++                return Err(format!(
++                    "{path}: noreturn_jsl duplicate site ${site_pc16:04X}"
++                ));
++            }
++            continue;
++        }
+         // live_operand <site_pc16>
+         if head == "live_operand" {
+             if tokens.len() != 2 {
+@@ -1329,6 +1373,14 @@ exit_mx_set 028000 M0X0 M0X1
+         assert_eq!(cfg.noreturn_jsr, BTreeSet::from([0x9C36]));
+     }
+ 
++    #[test]
++    fn noreturn_jsl_parse() {
++        let cfg = parse_bank_cfg("bank = 01\nnoreturn_jsl 8EBE\n", "test.cfg").unwrap();
++        assert_eq!(cfg.noreturn_jsl, BTreeSet::from([0x8EBE]));
++        let cfg = parse_bank_cfg("bank = 00\nterminal_jsl 93B4\n", "test.cfg").unwrap();
++        assert_eq!(cfg.terminal_jsl, BTreeSet::from([0x93B4]));
++    }
++
+     #[test]
+     fn noreturn_jsr_rejects_terminal_contract_at_same_site() {
+         for directives in [
+diff --git a/recompiler-rs/src/decoder.rs b/recompiler-rs/src/decoder.rs
+index 4c59fb34..9b3b48df 100644
+--- a/recompiler-rs/src/decoder.rs
++++ b/recompiler-rs/src/decoder.rs
+@@ -1138,8 +1138,9 @@ pub fn decode_function(
+             .is_some_and(|sites| sites.contains(&(insn.addr & 0xFFFFFF)))
+         {
+             assert!(
+-                insn.mnem == "JSR" && insn.mode != Mode::IndirX && insn.length == 3,
+-                "terminal_jsr at ${:06X} does not name a direct three-byte JSR",
++                (insn.mnem == "JSR" && insn.mode != Mode::IndirX && insn.length == 3)
++                    || (insn.mnem == "JSL" && insn.length == 4),
++                "terminal call at ${:06X} does not name a direct JSR or JSL",
+                 insn.addr & 0xFFFFFF
+             );
+             insn.terminal_jsr = true;
+diff --git a/recompiler/v2/cfg_loader.py b/recompiler/v2/cfg_loader.py
+index a8c01f5f..01861dfd 100644
+--- a/recompiler/v2/cfg_loader.py
++++ b/recompiler/v2/cfg_loader.py
+@@ -174,6 +174,13 @@ class BankCfg:
+     # terminal_jsr, the callee does not consume the call frame as inline data;
+     # emission preserves the real frame and hands the exceptional path to LLE.
+     noreturn_jsr: set = field(default_factory=set)
++    # `terminal_jsl <site_pc16>` / `noreturn_jsl <site_pc16>` — the same
++    # call-site contracts for a direct four-byte JSL.  A JSL that enters a
++    # main loop which never returns must sever lexical fall-through exactly
++    # like a noreturn JSR, otherwise the decoder analyses dead code and the
++    # caller's exit-width fact becomes wrong.
++    terminal_jsl: set = field(default_factory=set)
++    noreturn_jsl: set = field(default_factory=set)
+     # `live_operand <site_pc16>` — the immediate operand of the instruction at
+     # this site is read from the ROM image at run time instead of being
+     # folded into the generated C. For an operand the host edits in the
+@@ -528,6 +535,51 @@ def load_bank_cfg(path: str) -> BankCfg:
+                 cfg.noreturn_jsr.add(site_pc16)
+                 continue
+ 
++            # terminal_jsl <site_pc16> — direct four-byte JSL with the same
++            # terminal-entry semantics as terminal_jsr.
++            if head == 'terminal_jsl':
++                if len(tokens) != 2:
++                    raise ValueError(
++                        f"{path}: terminal_jsl needs exactly one <site_pc16>, "
++                        f"got: {stripped!r}")
++                try:
++                    site_pc16 = _parse_hex(tokens[1]) & 0xFFFF
++                except ValueError as e:
++                    raise ValueError(
++                        f"{path}: terminal_jsl bad site {tokens[1]!r}: {e}")
++                if site_pc16 in cfg.terminal_jsl:
++                    raise ValueError(
++                        f"{path}: terminal_jsl duplicate site ${site_pc16:04X}")
++                if site_pc16 in cfg.noreturn_jsl:
++                    raise ValueError(
++                        f"{path}: JSL site ${site_pc16:04X} cannot be both "
++                        "terminal_jsl and noreturn_jsl")
++                cfg.terminal_jsl.add(site_pc16)
++                continue
++
++            # noreturn_jsl <site_pc16> — direct four-byte JSL that enters a
++            # path which never returns.  The decoder validates the opcode;
++            # emission preserves the real frame and hands the path to LLE.
++            if head == 'noreturn_jsl':
++                if len(tokens) != 2:
++                    raise ValueError(
++                        f"{path}: noreturn_jsl needs exactly one <site_pc16>, "
++                        f"got: {stripped!r}")
++                try:
++                    site_pc16 = _parse_hex(tokens[1]) & 0xFFFF
++                except ValueError as e:
++                    raise ValueError(
++                        f"{path}: noreturn_jsl bad site {tokens[1]!r}: {e}")
++                if site_pc16 in cfg.noreturn_jsl:
++                    raise ValueError(
++                        f"{path}: noreturn_jsl duplicate site ${site_pc16:04X}")
++                if site_pc16 in cfg.terminal_jsl:
++                    raise ValueError(
++                        f"{path}: JSL site ${site_pc16:04X} cannot be both "
++                        "terminal_jsl and noreturn_jsl")
++                cfg.noreturn_jsl.add(site_pc16)
++                continue
++
+             # live_operand <site_pc16> — read this site's immediate from ROM
+             # at run time. The emitter validates the opcode against its
+             # supported set (data operands only: never REP/SEP/MVN/MVP).
+diff --git a/recompiler/v2/decoder.py b/recompiler/v2/decoder.py
+index 0308e7b6..9ab6d503 100644
+--- a/recompiler/v2/decoder.py
++++ b/recompiler/v2/decoder.py
+@@ -1911,6 +1911,8 @@ def decode_function(rom: bytes, bank: int, start: int,
+                      inline_arg_map: Optional[Dict[int, int]] = None,
+                      terminal_jsr_sites: Optional[set] = None,
+                      noreturn_jsr_sites: Optional[set] = None,
++                     terminal_jsl_sites: Optional[set] = None,
++                     noreturn_jsl_sites: Optional[set] = None,
+                      brk_rti_sites: Optional[set] = None,
+                      stop_on_unknown_callee_exit: bool = False,
+                      hle_entry_pcs: Optional[set] = None,
+@@ -1939,6 +1941,8 @@ def decode_function(rom: bytes, bank: int, start: int,
+             inline_arg_map=inline_arg_map,
+             terminal_jsr_sites=terminal_jsr_sites,
+             noreturn_jsr_sites=noreturn_jsr_sites,
++            terminal_jsl_sites=terminal_jsl_sites,
++            noreturn_jsl_sites=noreturn_jsl_sites,
+             brk_rti_sites=brk_rti_sites,
+             stop_on_unknown_callee_exit=stop_on_unknown_callee_exit,
+             hle_entry_pcs=hle_entry_pcs,
+@@ -1958,6 +1962,8 @@ def decode_function(rom: bytes, bank: int, start: int,
+         _identity(inline_arg_map),
+         _identity(terminal_jsr_sites),
+         _identity(noreturn_jsr_sites),
++        _identity(terminal_jsl_sites),
++        _identity(noreturn_jsl_sites),
+         _identity(brk_rti_sites),
+         bool(stop_on_unknown_callee_exit),
+         frozenset(pc & 0xFFFF for pc in (hle_entry_pcs or ())),
+@@ -1985,6 +1991,8 @@ def decode_function(rom: bytes, bank: int, start: int,
+         inline_arg_map=inline_arg_map,
+         terminal_jsr_sites=terminal_jsr_sites,
+         noreturn_jsr_sites=noreturn_jsr_sites,
++        terminal_jsl_sites=terminal_jsl_sites,
++        noreturn_jsl_sites=noreturn_jsl_sites,
+         brk_rti_sites=brk_rti_sites,
+         stop_on_unknown_callee_exit=stop_on_unknown_callee_exit,
+         hle_entry_pcs=hle_entry_pcs,
+@@ -2009,6 +2017,8 @@ def _decode_function_uncached(rom: bytes, bank: int, start: int,
+                      inline_arg_map: Optional[Dict[int, int]] = None,
+                      terminal_jsr_sites: Optional[set] = None,
+                      noreturn_jsr_sites: Optional[set] = None,
++                     terminal_jsl_sites: Optional[set] = None,
++                     noreturn_jsl_sites: Optional[set] = None,
+                      brk_rti_sites: Optional[set] = None,
+                      stop_on_unknown_callee_exit: bool = False,
+                      hle_entry_pcs: Optional[set] = None,
+@@ -2241,6 +2251,28 @@ def _decode_function_uncached(rom: bytes, bank: int, start: int,
+                     f"JSR at ${insn.addr & 0xFFFFFF:06X} cannot be both "
+                     "terminal_jsr and noreturn_jsr")
+             insn.noreturn_jsr = True
++        if (terminal_jsl_sites
++                and (insn.addr & 0xFFFFFF) in terminal_jsl_sites):
++            if not (insn.mnem == 'JSL' and insn.length == 4):
++                raise ValueError(
++                    f"terminal_jsl at ${insn.addr & 0xFFFFFF:06X} does not "
++                    f"name a direct four-byte JSL (decoded {insn.mnem})")
++            if insn.terminal_jsr or insn.noreturn_jsr:
++                raise ValueError(
++                    f"call at ${insn.addr & 0xFFFFFF:06X} cannot be both "
++                    "JSR and JSL terminal contracts")
++            insn.terminal_jsr = True
++        if (noreturn_jsl_sites
++                and (insn.addr & 0xFFFFFF) in noreturn_jsl_sites):
++            if not (insn.mnem == 'JSL' and insn.length == 4):
++                raise ValueError(
++                    f"noreturn_jsl at ${insn.addr & 0xFFFFFF:06X} does not "
++                    f"name a direct four-byte JSL (decoded {insn.mnem})")
++            if insn.terminal_jsr or insn.noreturn_jsr:
++                raise ValueError(
++                    f"call at ${insn.addr & 0xFFFFFF:06X} cannot be both "
++                    "terminal and noreturn JSL contracts")
++            insn.noreturn_jsr = True
+         if brk_rti_sites and (insn.addr & 0xFFFFFF) in brk_rti_sites:
+             from v2.brk_rti import check_brk_rti_site
+             check_brk_rti_site(rom, insn.addr)
+diff --git a/recompiler/v2/emit_bank.py b/recompiler/v2/emit_bank.py
+index f94ddc43..86c436ff 100644
+--- a/recompiler/v2/emit_bank.py
++++ b/recompiler/v2/emit_bank.py
+@@ -81,6 +81,8 @@ def emit_bank(rom: bytes, bank: int,
+               indirect_dispatch=None,
+               terminal_jsr_sites=None,
+               noreturn_jsr_sites=None,
++              terminal_jsl_sites=None,
++              noreturn_jsl_sites=None,
+               live_operand_sites=None,
+               entry_hooks=None,
+               brk_rti_sites=None,
+@@ -209,6 +211,8 @@ def emit_bank(rom: bytes, bank: int,
+             indirect_dispatch=indirect_dispatch,
+             terminal_jsr_sites=terminal_jsr_sites,
+             noreturn_jsr_sites=noreturn_jsr_sites,
++            terminal_jsl_sites=terminal_jsl_sites,
++            noreturn_jsl_sites=noreturn_jsl_sites,
+             live_operand_sites=live_operand_sites,
+             entry_hooks=entry_hooks,
+             brk_rti_sites=brk_rti_sites,
+diff --git a/recompiler/v2/emit_function.py b/recompiler/v2/emit_function.py
+index 82598b41..a959185c 100644
+--- a/recompiler/v2/emit_function.py
++++ b/recompiler/v2/emit_function.py
+@@ -533,6 +533,8 @@ def emit_function(rom: bytes, bank: int, start: int,
+                   inline_arg_map=None,
+                   terminal_jsr_sites=None,
+                   noreturn_jsr_sites=None,
++                  terminal_jsl_sites=None,
++                  noreturn_jsl_sites=None,
+                   live_operand_sites=None,
+                   entry_hooks=None,
+                   brk_rti_sites=None,
+@@ -666,6 +668,8 @@ def emit_function(rom: bytes, bank: int, start: int,
+                             inline_arg_map=inline_arg_map,
+                             terminal_jsr_sites=terminal_jsr_sites,
+                             noreturn_jsr_sites=noreturn_jsr_sites,
++                            terminal_jsl_sites=terminal_jsl_sites,
++                            noreturn_jsl_sites=noreturn_jsl_sites,
+                             brk_rti_sites=brk_rti_sites,
+                             hle_entry_pcs=(set(hle_func or ()) |
+                                            set(hle_spc_upload or ())),
+diff --git a/recompiler/v2/program_emit.py b/recompiler/v2/program_emit.py
+index 6a750a02..ba30b603 100644
+--- a/recompiler/v2/program_emit.py
++++ b/recompiler/v2/program_emit.py
+@@ -899,6 +899,18 @@ def emit_program(*, rom: bytes, parsed, manifest: ProgramManifest,
+                     (bank << 16) | (site & 0xFFFF)
+                     for site in cfg.noreturn_jsr
+                 }
++            terminal_jsl_sites = None
++            if cfg is not None and getattr(cfg, "terminal_jsl", None):
++                terminal_jsl_sites = {
++                    (bank << 16) | (site & 0xFFFF)
++                    for site in cfg.terminal_jsl
++                }
++            noreturn_jsl_sites = None
++            if cfg is not None and getattr(cfg, "noreturn_jsl", None):
++                noreturn_jsl_sites = {
++                    (bank << 16) | (site & 0xFFFF)
++                    for site in cfg.noreturn_jsl
++                }
+             live_operand_sites = None
+             if cfg is not None and getattr(cfg, "live_operand", None):
+                 live_operand_sites = {
+@@ -944,6 +956,8 @@ def emit_program(*, rom: bytes, parsed, manifest: ProgramManifest,
+                 indirect_dispatch=indirect_dispatch or None,
+                 terminal_jsr_sites=terminal_jsr_sites,
+                 noreturn_jsr_sites=noreturn_jsr_sites,
++                terminal_jsl_sites=terminal_jsl_sites,
++                noreturn_jsl_sites=noreturn_jsl_sites,
+                 live_operand_sites=live_operand_sites,
+                 entry_hooks=entry_hooks,
+                 brk_rti_sites=brk_rti_sites,
+diff --git a/tests/v2/test_cfg_loader.py b/tests/v2/test_cfg_loader.py
+index 9ea74010..805a6a6d 100644
+--- a/tests/v2/test_cfg_loader.py
++++ b/tests/v2/test_cfg_loader.py
+@@ -99,6 +99,48 @@ def test_noreturn_jsr_rejects_terminal_contract_at_same_site():
+             os.unlink(path)
+ 
+ 
++def test_terminal_jsl_call_site_contract_parses():
++    path = _write("""\
++bank = 01
++terminal_jsl 8ebe
++func FrameWaitInit 8eab end:8ec2 entry_mx:1,0
++""")
++    try:
++        cfg = load_bank_cfg(path)
++        assert cfg.terminal_jsl == {0x8EBE}
++    finally:
++        os.unlink(path)
++
++
++def test_noreturn_jsl_call_site_contract_parses():
++    path = _write("""\
++bank = 01
++noreturn_jsl 8ebe
++func FrameWaitInit 8eab end:8ec2 entry_mx:1,0
++""")
++    try:
++        cfg = load_bank_cfg(path)
++        assert cfg.noreturn_jsl == {0x8EBE}
++    finally:
++        os.unlink(path)
++
++
++def test_noreturn_jsl_rejects_terminal_contract_at_same_site():
++    for directives in (
++            "terminal_jsl 8ebe\nnoreturn_jsl 8ebe",
++            "noreturn_jsl 8ebe\nterminal_jsl 8ebe"):
++        path = _write(f"bank = 01\n{directives}\n")
++        try:
++            try:
++                load_bank_cfg(path)
++            except ValueError as exc:
++                assert "cannot be both terminal_jsl and noreturn_jsl" in str(exc)
++            else:
++                raise AssertionError("conflicting JSL contracts were accepted")
++        finally:
++            os.unlink(path)
++
++
+ def test_func_with_end_directive_parses_end():
+     path = _write("""\
+ bank = 00
+diff --git a/tests/v2/test_decoder_callee_exit_mx.py b/tests/v2/test_decoder_callee_exit_mx.py
+index a8bab054..4d39c84d 100644
+--- a/tests/v2/test_decoder_callee_exit_mx.py
++++ b/tests/v2/test_decoder_callee_exit_mx.py
+@@ -371,6 +371,39 @@ def test_noreturn_jsr_has_no_lexical_fallthrough_or_unknown_exit():
+     assert graph.unknown_callee_exit_sites == []
+ 
+ 
++def test_terminal_jsl_has_no_lexical_fallthrough_or_unknown_exit():
++    rom = make_lorom_bank0({
++        0x8000: bytes([0x22, 0x00, 0x81, 0x00, 0xEA]),  # JSL $008100; NOP
++        0x8100: bytes([0x6B]),                          # RTL
++    })
++    graph = decode_function(
++        rom, bank=0, start=0x8000, entry_m=0, entry_x=0,
++        terminal_jsl_sites={0x008000},
++        stop_on_unknown_callee_exit=True)
++
++    assert {key.pc for key in graph.insns} == {0x008000}
++    insn = next(iter(graph.insns.values())).insn
++    assert insn.terminal_jsr
++    assert graph.unknown_callee_exit_sites == []
++
++
++def test_noreturn_jsl_has_no_lexical_fallthrough_or_unknown_exit():
++    rom = make_lorom_bank0({
++        0x8000: bytes([0x22, 0x00, 0x81, 0x00, 0xEA]),  # JSL $008100; NOP
++        0x8100: bytes([0x6B]),                          # RTL
++    })
++    graph = decode_function(
++        rom, bank=0, start=0x8000, entry_m=0, entry_x=0,
++        noreturn_jsl_sites={0x008000},
++        stop_on_unknown_callee_exit=True)
++
++    assert {key.pc for key in graph.insns} == {0x008000}
++    insn = next(iter(graph.insns.values())).insn
++    assert insn.noreturn_jsr
++    assert not insn.terminal_jsr
++    assert graph.unknown_callee_exit_sites == []
++
++
+ def test_analyze_function_exit_mx_inherits_natural_boundary_fallthrough():
+     """Falling through ``end:`` is a tail edge, not a missing exit."""
+     rom = make_lorom_bank0({

@@ -214,7 +214,10 @@ versionados.
 - Confirmar os gatilhos exatos de **Gnome** e **Dryad** no 7F; o **Basim
   fixo** foi confirmado em `(9,3)` (ver acima). A rota para a escada do 6F a
   partir desse lado ainda não está mapeada.
-- Descer do 7F para o 6F e validar a continuação da torre.
+- Descer do 7F para o 6F e validar a continuação da torre. As tentativas a
+  partir de `(8,2)`/`(9,1)` mudaram a área para `0x0002`/`0x0003` e foram
+  bloqueadas, sugerindo portas de mão única; mapear com o auto-map antes de
+  repetir.
 - CP-013 concluído: gravação/flush e load pelo título validados. O antigo
   `save1` restaurava SRAM zerada e foi regenerado com a SRAM válida.
 - Mapear o 7F e o 6F com o auto-map `Fixed` para as próximas batalhas.

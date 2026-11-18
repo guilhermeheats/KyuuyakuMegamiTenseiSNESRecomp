@@ -4,6 +4,14 @@
 
 Port nativo jogável de **Kyuuyaku Megami Tensei** usando recompilação estática (snesrecomp), com a ROM japonesa original fornecida pelo usuário.
 
+## Foco atual (2026-11-18)
+
+O foco passou a ser **decompilação/cobertura estática**: aumentar o grafo que
+o `snesrecomp` descobre e emite em `src/gen/*.c`, resolver dispatches
+indiretos e separar código de dados. Gameplay, save states e comparação com
+emulador continuam como **regressão**, não como objetivo principal. Ver
+`docs/coverage.md`.
+
 ## Escopo do MVP
 
 - Megami Tensei I do início ao fim.
@@ -65,7 +73,9 @@ Fora do MVP: widescreen, tradução, MSU-1, netplay, mods de conteúdo.
 - [x] Testar o auto-mapping.
 - [x] Documentar o caminho e os símbolos descobertos.
 - [x] Atualizar `docs/checkpoints.md`.
-- [ ] Primeira batalha.
+- [x] Primeira batalha (Heket, Mad Slug e Basim fixo).
+- [x] Captura de cobertura tier-2 e promoção dos primeiros roots estáticos
+  (`docs/coverage.md`).
 
 ## Critério de aceite do vertical slice
 

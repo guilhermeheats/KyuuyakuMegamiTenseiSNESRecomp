@@ -15,12 +15,15 @@
 
 ## Status
 
-Scaffolded on 2026-11-16. The build now **boots, reaches the title screen,
-plays the opening story, accepts the two character names, allocates stats and
-enters the first dungeon**. Movement, chest interaction, looting, the status menu and
-auto-mapping work. It is **not yet a full port**: the first battle and in-game
-save/load still need to be validated. See [Porting from here](#porting-from-here)
-and `docs/checkpoints.md`.
+Scaffolded on 2026-11-16. The build **boots, reaches the title screen, plays
+the opening story, accepts the two character names, allocates stats, enters
+the first dungeon and the 7F floor**, and validates movement, chest looting,
+the status menu, auto-mapping, random and fixed battles, negotiation, game
+over, victory/EXP/level-up, equipment and in-game SRAM save/load. The current
+focus is **decompilation coverage**: the static graph now emits 107 AOT
+variants across 10 banks (from 54 across 8) and reaches roughly 95% AOT on
+the tested boot/title/dungeon/battle/level-up route. Two boot-time indirect
+dispatch stubs remain. See `docs/coverage.md` and `docs/checkpoints.md`.
 
 ## ROM identity
 
@@ -50,6 +53,7 @@ revision fails immediately instead of producing subtly wrong output.
 - [Bring-up log](docs/bring-up-log.md) — o que já foi feito e o que bloqueia.
 - [Route 8F](docs/route-8f.md) — rota até a escada para o 7F e a primeira batalha.
 - [Debugging](docs/debugging.md) — build com servidor TCP, leitura de WRAM e screenshots.
+- [Coverage](docs/coverage.md) — captura tier-2, roots estáticos e stubs de dispatch.
 - [Input scripts](tools/scripts/README.md) — cadeia de save states e testes.
 - [Linux build deps](docs/linux-build-deps.md) — pacotes no openSUSE Leap 16.
 - [Sources](docs/sources.md) — links e projetos de referência.

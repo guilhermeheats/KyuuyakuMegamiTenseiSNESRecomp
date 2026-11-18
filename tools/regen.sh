@@ -15,6 +15,10 @@
 #   --no-verify   skip the ROM digest check (for a revision this project has
 #                 not been pinned to yet — expect the generated C to differ)
 #   --cfg-roots   seed analysis from every func declaration in recomp/*.cfg
+#                 (on by default; kept for compatibility)
+#   --profile-manifest <path>
+#                 optional tier-2 coverage manifest/journal to seed AOT roots
+#                 from clean call landings (repeatable)
 #   -h|--help     this message
 set -euo pipefail
 
@@ -23,13 +27,15 @@ ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$ROOT"
 
 VERIFY=1
-CFG_ROOTS=0
+CFG_ROOTS=1
 ROM=""
+PROFILES=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --rom) ROM=$2; shift 2 ;;
     --no-verify) VERIFY=0; shift ;;
     --cfg-roots) CFG_ROOTS=1; shift ;;
+    --profile-manifest|--profile) PROFILES+=("$2"); shift 2 ;;
     -h|--help) sed -n '2,/^set -euo/p' "$0" | sed -n '/^# /p' | sed 's/^# //'; exit 0 ;;
     *) echo "regen.sh: unknown flag: $1 (try --help)" >&2; exit 2 ;;
   esac
@@ -76,6 +82,13 @@ if ! ROM=$("$PYTHON" "$CLI" "${RESOLVE[@]}"); then
 fi
 ROM=${ROM%$'\r'}  # Windows Python ends lines with CRLF
 
+# Keep funcs.h outside the project root during analysis. The analysis root
+# scanner otherwise sees the previous variant declarations and seeds duplicate
+# roots, which trips the link-closure check. Copy the fresh header back after
+# a successful generate.
+FUNCS_H_TMP="$(mktemp "${TMPDIR:-/tmp}/kyuuyakuten-funcs-h.XXXXXX")"
+trap 'rm -f "$FUNCS_H_TMP"' EXIT
+
 VERIFY_ARGS=()
 if [ "$VERIFY" -eq 1 ]; then
   VERIFY_ARGS=(--expected-crc32 "$EXPECTED_CRC32" --expected-sha256 "$EXPECTED_SHA256")
@@ -86,12 +99,21 @@ else
 fi
 
 GEN_ARGS=(--rom "$ROM" --cfg-dir recomp --out-dir src/gen
-          --funcs-h recomp/funcs.h --project-root "$ROOT")
+          --funcs-h "$FUNCS_H_TMP" --project-root "$ROOT"
+          --no-host-root-scan)
 if [ "$CFG_ROOTS" -eq 1 ]; then GEN_ARGS+=(--cfg-roots); fi
+for profile in "${PROFILES[@]}"; do
+  GEN_ARGS+=(--profile-manifest "$profile")
+done
 if [ "$VERIFY" -eq 1 ]; then GEN_ARGS+=("${VERIFY_ARGS[@]}"); fi
 
 echo "== Generating src/gen =="
+# The previous funcs.h is an analysis input when it lives under the project
+# root. Remove it for the analysis window, then install the freshly synced
+# header after a successful generate.
+rm -f recomp/funcs.h
 "$PYTHON" "$CLI" generate "${GEN_ARGS[@]}"
+cp "$FUNCS_H_TMP" recomp/funcs.h
 
 echo
 echo "Done. Build with:"

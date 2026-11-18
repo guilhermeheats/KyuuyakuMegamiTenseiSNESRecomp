@@ -33,3 +33,14 @@ An unchanged cfg file is not by itself evidence of failed code generation:
 `src/gen/bank*_v2.c` contains code discovered from the ROM, while `bank*.cfg`
 contains analysis inputs. Discovery does not copy every reached function back
 into the configs.
+
+`tools/regen.sh` seeds every `func` in `bank*.cfg` (`--cfg-roots` is the
+default) and accepts `--profile-manifest <path>` for a tier-2 coverage
+capture. Coverage roots discovered from a capture are kept as
+`func Coverage_<bank>_<addr>_V<mx>` lines outside the generated block; rename
+them as the functions are identified. If a manual coverage root already owns
+the same address/M/X, the generated block can contain a `symbol` alias even
+for an `emit = true` entry; the AOT body is emitted under the coverage root
+name. The generated `funcs.h` is written to a temporary path outside the
+project root and copied back after analysis, so stale declarations are not
+re-read as analysis roots.

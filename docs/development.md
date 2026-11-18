@@ -5,13 +5,14 @@ fluxo de teste. Para o diário cronológico, veja `docs/bring-up-log.md`.
 
 ## Estado atual
 
-Atualizado em 2026-11-16.
+Atualizado em 2026-11-18.
 
 | Etapa | Estado |
 |---|---|
 | ROM japonesa limpa verificada | OK — CRC32 `c8d286c9` |
-| Scaffold do snesrecomp | OK — 4 roots, 1 banco |
-| Build nativo | OK — 514 alvos, binário de 8,0 MB |
+| Scaffold do snesrecomp | OK — 4 roots iniciais |
+| Cobertura estática atual | OK — 73 roots, 10 bancos |
+| Build nativo | OK — build-debug e release |
 | Boot / tela de título | OK |
 | Introdução do MT1 | OK |
 | Nome do protagonista e da Yumiko | OK |
@@ -21,8 +22,10 @@ Atualizado em 2026-11-16.
 | Interação com baú | OK — loot `500` + `宝玉` |
 | Menu de status | OK — COMP/MAGIC/ITEM/STATUS e ficha |
 | Auto-mapping | OK — mapa da dungeon pelo menu COMP |
-| Primeira batalha | pendente |
-| Save/load via SRAM do jogo | pendente |
+| Primeira batalha | OK — Heket, Mad Slug, Basim fixo, negociação, game over, vitória/EXP/level-up |
+| Save/load via SRAM do jogo | OK — gravação, flush, boot e reload |
+| Cobertura estática | 107 variantes AOT, 10 bancos; ~95% AOT na rota testada |
+| Comparação de referência | OK no título via snesref; MesenCE pendente |
 
 Marcos de frame observados com `--framedump`:
 
@@ -211,13 +214,34 @@ AOT: alocação de Nakajima e Yumiko, `YES`/`NO`, `ユミコは魔法を憶え�
 retorno à dungeon (HP 26/26 e 27/27), sem crash. O estado resultante está no
 `save2`.
 
+### Cobertura estática (2026-11-18)
+
+A captura tier-2 do boot/título e dos save states de 8F/7F/batalha/level-up
+foi ingerida com `tier2_ingest.py`; os PCs quentes foram promovidos a roots
+permanentes. Com `tools/regen.sh` usando `--cfg-roots` por padrão, o grafo
+passou de **11 roots / 54 variantes AOT / 8 bancos** para **73 roots / 107
+variantes AOT / 10 bancos** (119 variantes exatas, 12 LLE-only). No mesmo
+build, a rota testada ficou em **~94,7% AOT / 5,3% interpretado**, com zero
+dispatch misses. O relatório completo, comandos e a lista de roots está em
+`docs/coverage.md`.
+
+O regen também recebeu `--profile-manifest`, `--no-host-root-scan` e um
+`funcs.h` temporário fora da raiz do projeto; sem isso o scanner readicionava
+declarações antigas e o link-closure falhava com 28 variantes pendentes.
+
+Restam dois `dispatch_oob` no boot/título: `$00:86E9` e `$00:88E9`, ambos
+`JMP ($0100)` através de um ponteiro de HDMA que chega a `$00:FFFF`. São o
+próximo alvo; os detalhes e as tentativas de `indirect_dispatch` estão em
+`docs/coverage.md`.
+
 ## Próximos passos
 
-1. Reviver a Yumiko (Kaifuku/8F ou magia/item) e repetir a batalha com ela
-   viva; o recrutamento segue pendente (o manual exige nível maior que o do
-   demônio).
-2. Comparar boot/dungeon/batalha com o MesenCE usando frames e WRAM.
-3. Nomear/avaliar as rotinas do caminho de batalha no `symbols.toml`; a tela
-   de level-up já foi promovida (`LevelUp_PrintStat` AOT, `LevelUp_Apply`
-   LLE-only). Promover apenas as variantes que o analyzer provar seguras.
-4. Expandir a cobertura para o restante do MT1 (7F, 6F, ...).
+1. Resolver os dois dispatch stubs de HDMA (`$00:86E9`/`$00:88E9`) e
+   reativar os hints de `indirect_dispatch` com link-closure limpo.
+2. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
+   ingerir com `tier2_ingest.py` e adicionar os novos roots.
+3. Investigar as 12 variantes LLE-only, começando por `$00:9397` e
+   `$01:8EAB`.
+4. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
+   `$38` e `$3F`, e continuar a separação código/dados.
+5. Manter gameplay, save states e comparação com emulador como regressão.

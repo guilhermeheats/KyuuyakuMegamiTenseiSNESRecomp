@@ -87,3 +87,130 @@ emit = true
 entry_m = 1
 entry_x = 0
 note = "Validate the four SRAM save slots"
+
+# Permanent coverage roots discovered by the boot coverage audit (2026-11-18).
+[[func]]
+name = "MainFrameWait"
+addr = "C411"
+bank = 63
+emit = true
+entry_m = 0
+entry_x = 0
+note = "VBlank/joypad frame driver in bank $3F"
+
+[[func]]
+name = "FrameUpdate"
+addr = "C4AA"
+bank = 63
+emit = true
+entry_m = 0
+entry_x = 1
+note = "Frame update helper called from MainFrameWait"
+
+[[func]]
+name = "PPUUpdate"
+addr = "C4C7"
+bank = 63
+emit = true
+entry_m = 0
+entry_x = 0
+note = "PPU/VRAM update helper in bank $3F"
+
+[[func]]
+name = "APUUpdate"
+addr = "C5B8"
+bank = 63
+emit = true
+entry_m = 0
+entry_x = 0
+note = "APU update helper in bank $3F"
+
+[[func]]
+name = "CopyBlock"
+addr = "D61B"
+bank = 1
+emit = true
+entry_m = 1
+entry_x = 0
+note = "Block copy/decompress helper called from many banks"
+
+[[func]]
+name = "TextHelperD419"
+addr = "D419"
+bank = 1
+emit = true
+entry_m = 0
+entry_x = 0
+note = "Text/menu helper (JSR target at $01:D666)"
+
+[[func]]
+name = "TextHelperD581"
+addr = "D581"
+bank = 1
+emit = true
+entry_m = 0
+entry_x = 0
+note = "Text/menu helper (JSR target at $01:D66C / $06:D2A8)"
+
+[[func]]
+name = "TextHelperD5B3"
+addr = "D5B3"
+bank = 1
+emit = true
+entry_m = 0
+entry_x = 0
+note = "Text/menu helper (JSR target at $01:D65B)"
+
+[[func]]
+name = "ScreenOff"
+addr = "8066"
+bank = 1
+emit = true
+entry_m = 1
+entry_x = 1
+note = "Forced-blank / NMI disable helper"
+
+[[func]]
+name = "InitPPU"
+addr = "80C9"
+bank = 1
+emit = true
+entry_m = 1
+entry_x = 0
+note = "PPU/VRAM initialization called from many banks"
+
+[[func]]
+name = "AddLongCounter"
+addr = "8E92"
+bank = 1
+emit = true
+entry_m = 1
+entry_x = 0
+note = "24-bit counter add helper called from many banks"
+
+[[func]]
+name = "ApuCommand"
+addr = "EBA5"
+bank = 1
+emit = true
+entry_m = 1
+entry_x = 0
+note = "APU command/ack helper called from many banks"
+
+[[func]]
+name = "FrameWaitWrapper"
+addr = "8EAB"
+bank = 1
+emit = true
+entry_m = 1
+entry_x = 0
+note = "Wrapper around ApuCommand; callee blocking FrameWait analysis"
+
+[[func]]
+name = "FrameWait"
+addr = "9397"
+bank = 0
+emit = true
+entry_m = 1
+entry_x = 0
+note = "Per-frame wait/sync routine"

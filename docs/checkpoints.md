@@ -2,6 +2,10 @@
 
 Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guarde: frame, screenshot, estado do input e, se possível, um hash da WRAM.
 
+> **Foco atual (2026-11-18):** decompilação/cobertura estática. Estes
+> checkpoints são a suíte de regressão; o trabalho principal está em
+> `docs/coverage.md` e `recomp/`.
+
 | ID | Cena | Como chegar | Estado |
 |---|---|---|---|
 | CP-000 | Boot / primeiro frame | iniciar o jogo | OK — boot executa; frame 600 ainda preto |

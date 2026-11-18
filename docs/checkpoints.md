@@ -14,7 +14,7 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
 | CP-007 | Primeira dungeon | confirmar os status (~frame 14861) | OK — corredor inicial |
 | CP-008 | Movimento | setas na dungeon | OK — câmera muda de célula |
 | CP-009 | Interação com baú | andar até o baú (~frame 15100) | OK — diálogo YES/NO; loot `500` + `宝玉` |
-| CP-010 | Primeira batalha | rota confirmada em `docs/route-8f.md`: Gate Keeper `(2,2)`, escada `(2,3)`, 7F `(10,2)`, batalha em `(8,2)` | **OK** — encontros aleatórios de Heket (negociação) e besta verde (provável Basim), derrota/game over e vitória contra 2 Mad Slugs com 100 EXP/65 Macca/20 MAG e level-up (com boost de debug); alocação do bônus de level-up pendente |
+| CP-010 | Primeira batalha | rota confirmada em `docs/route-8f.md`: Gate Keeper `(2,2)`, escada `(2,3)`, 7F `(10,2)`, batalha em `(8,2)` | **OK** — encontros aleatórios de Heket (negociação) e besta verde (provável Basim), derrota/game over e vitória contra 2 Mad Slugs com 100 EXP/65 Macca/20 MAG; level-up, alocação de `BONUS` e magia aprendida validados (com boost de debug) |
 | CP-011 | Menu de status | apertar A na passagem (~frame 16400) | OK — COMP/MAGIC/ITEM/STATUS; ficha em ~frame 16800 |
 | CP-012 | Auto-mapping | A → COMP → `オートマッピング` (5º item; down ×4); configurar `Fixed` | OK — minimapa local; modo Fixed norte-para-cima mostra posição/EV |
 | CP-013 | Salvar e carregar pelo jogo | salvar via SRAM, reiniciar, carregar | **OK** — gravação/flush e carregamento validados; o `CONTINUE` lista o arquivo e restaura o estado. O save state antigo `save1` restaurava SRAM zerada e foi regenerado. |
@@ -41,8 +41,21 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
   HP/stats elevados via debug (999 HP, 99 stats). A batalha terminou com
   `外道マッドスラッグを倒した！`, **100 EXP**, **65 Macca** e **20 MAG**;
   Nakajima subiu para **LV 2** e a tela `レベルアップ：ナカジマあああ`
-  apareceu com `BONUS 1`. A alocação do bônus não foi concluída.
-  A vitória em dificuldade normal ainda não foi obtida; o grupo no nível 1
+  apareceu com `BONUS 1`.
+- **Alocação do BONUS:** a tela de level-up funciona. `Cima`/`Baixo` mudam a
+  linha; `Direita` ou `A` somam 1 ao atributo selecionado e descontam o
+  bônus; `Esquerda` reduz; depois aparece `YES`/`NO`. Em `YES`, Nakajima
+  recebeu o ponto (5º atributo, `$0D0D` 0x20→0x21); a tela passou para
+  `レベルアップ：ユミコ`, que também recebeu 1 ponto (`$0D19`
+  0x20→0x21), confirmou `YES` e mostrou `ユミコは魔法を憶えた`.
+  O jogo voltou à dungeon com HP normalizado para **30/30** e **27/27**.
+  Yumiko terminou com `POISON` no painel de status.
+- **Causa do travamento anterior:** o boost de debug deixou os atributos em
+  99, acima do teto de 0x23 (35) da tela; como o valor base também era 99,
+  `A`/`Direita` não conseguiam somar e `Esquerda` não conseguia reduzir. A
+  tela exibia todos os atributos limitados a **35**. Reduzir o atributo
+  selecionado para 0x20 destravou a alocação; não era bug do recomp.
+- A vitória em dificuldade normal ainda não foi obtida; o grupo no nível 1
   não conseguiu ferir o Mad Slug.
 - **Combate:** ataques físicos causaram 0–1 de dano; o inimigo revidou com
   2–3 de dano. A negociação `TALK` → `わたしと対等に話すつもりか？` → `NO`

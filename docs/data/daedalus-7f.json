@@ -131,7 +131,25 @@
         "macca": 65,
         "mag": 20
       },
-      "level_up": "Nakajima LV2; bonus allocation pending"
+      "level_up": {
+        "nakajima": {
+          "level": 2,
+          "bonus": 1,
+          "allocated_stat": "$0D0D (fifth stat, luck)",
+          "value_change": "0x20 -> 0x21",
+          "confirmation": "YES"
+        },
+        "yumiko": {
+          "level": 2,
+          "bonus": 1,
+          "allocated_stat": "$0D19 (first stat, endurance)",
+          "value_change": "0x20 -> 0x21",
+          "confirmation": "YES",
+          "learned_magic": "ユミコは魔法を憶えた"
+        },
+        "after": "HP normalized to 30/30 and 27/27; Yumiko is POISONed",
+        "debug_note": "The 99-stat boost exceeded the screen's 0x23 (35) cap and matched the base value, blocking allocation until the selected stat was lowered to 0x20. The display clamps all stats to 35. This was a debug artifact, not a recomp hang."
+      }
     }
   },
   "notes": [

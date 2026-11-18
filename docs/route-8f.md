@@ -127,9 +127,20 @@ O 8F tem 64 células conectadas. A escada `(3,3)` leva ao 7F `(11,3)`.
   `志半ばに力尽きた`, seguidos da cena do barco; o recomp não crashou.
 - A **vitória/level-up** foi validada contra 2 Mad Slugs, com boost de debug
   (999 HP/99 stats): `外道マッドスラッグを倒した！`, **100 EXP**, **65 Macca**,
-  **20 MAG** e `レベルアップ：ナカジマあああ` (LV 2, `BONUS 1`). A alocação
-  do bônus ficou pendente. Em dificuldade normal, o grupo no nível 1 não
-  conseguiu ferir o Mad Slug; o grinding/equipamento ainda é necessário.
+  **20 MAG** e `レベルアップ：ナカジマあああ` (LV 2, `BONUS 1`).
+- A **alocação do bônus** também foi concluída: `Cima`/`Baixo` mudam a linha,
+  `Direita`/`A` somam 1 e descontam o bônus, `Esquerda` reduz, e um diálogo
+  `YES`/`NO` confirma. Nakajima recebeu 1 ponto e a tela passou para
+  `レベルアップ：ユミコ`; ela recebeu 1 ponto, confirmou `YES` e o jogo
+  mostrou `ユミコは魔法を憶えた`, voltando à dungeon com HP **30/30** e
+  **27/27**. Yumiko ficou com `POISON`.
+- O travamento anterior da tela de bônus era efeito do boost de debug: os
+  atributos em 99 ficavam acima do teto de 0x23 (35) e iguais ao valor base.
+  A tela os exibia limitados a 35 e `A`/`Direita` não somavam nada. Baixar o
+  atributo selecionado para 0x20 destravou a alocação; o código da tela está
+  em `$01:B4F6` (loop), `$01:B431` (desenho) e `$01:B5D5` (impressão/limite).
+  Em dificuldade normal, o grupo no nível 1 ainda não conseguiu ferir o Mad
+  Slug; o grinding/equipamento continua necessário.
 - **Equipamento:** o caminho é `A` → `B` (duas vezes) → `ITEM` → `そうび`;
   a tela `EQUIPMENTS` mostra Jack Knife, Nunchaku e Combat Suit. O manual
   confirma que é preciso equipar explicitamente; a interação de slot ainda
@@ -157,19 +168,22 @@ Para repetir a validação, os save states locais são:
 | Slot | Conteúdo |
 |---|---|
 | `save10` | 8F, `(1,4)`, equipado, 10 Macca |
-| `save11` | 7F, `(10,2)`, chegada da escada |
-| `save9` | 7F, `(8,2)`, mensagem `妖魔ヘケットが現れた！` (encontro aleatório) |
-| `save8` | 7F, `(8,2)`, menu inicial da batalha de Heket (HP cheio) |
-| `save7` | 7F, `(8,2)`, menu da batalha de Heket após o primeiro turno |
-| `save6` | 7F, `(8,2)`, pós-batalha, dungeon |
+| `save6` | 7F, `(8,2)`, pós-batalha de Heket, dungeon |
+| `save4` | 7F, `(8,1)`, pós-vitória contra 2 Mad Slugs, ainda com boost |
+| `save11` | tela `レベルアップ：ユミコ`, antes da alocação |
+| `save9` | pós-level-up, dungeon 7F, HP 30/30 e 27/27, Yumiko `POISON` |
+| `save3` | tela de level-up antiga com atributos 99 (artefato do boost) |
 
 Esses saves são artefatos locais de `build-debug/saves/` e **não** são
 versionados.
 
 ## O que ainda falta
 
-- Concluir a alocação do bônus de level-up e repetir a vitória sem boost de
-  debug; o grinding/equipamento em dificuldade normal ainda é necessário.
+- Curar o `POISON` da Yumiko (não há item de cura no inventário; a opção
+  `MAGIC` fora de batalha responde `魔法を使える者がいません`) ou confirmar
+  que o veneno não drena HP fora de batalha.
+- Repetir a vitória sem boost de debug; o grinding/equipamento em dificuldade
+  normal ainda é necessário.
 - Confirmar as coordenadas e os gatilhos exatos de Basim, Gnome e Dryad no 7F
   (o encontro aleatório de Heket em `(8,2)` já foi confirmado; a besta verde
   provável Basim também apareceu aleatoriamente).

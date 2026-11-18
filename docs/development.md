@@ -160,10 +160,12 @@ independente é o próximo passo de validação.
 ## Limitações conhecidas
 
 - O menu de status, o auto-mapping, os encontros de batalha, a negociação, o
-  game over e a vitória/EXP/level-up já foram validados. A vitória foi obtida
-  com boost de debug (999 HP/99 stats); em dificuldade normal, o grupo no
-  nível 1 ainda não consegue ferir o Mad Slug. A alocação do bônus de level-up
-  ficou pendente.
+  game over, a vitória/EXP/level-up e a alocação de `BONUS` já foram
+  validados. A vitória e o level-up foram obtidos com boost de debug
+  (999 HP/99 stats); a tela de bônus limita os atributos a 35 (0x23) e o boost
+  em 99 travava a alocação até o atributo ser reduzido para 0x20. Em
+  dificuldade normal, o grupo no nível 1 ainda não consegue ferir o Mad Slug.
+  Yumiko saiu da batalha com `POISON` e não há item de cura no inventário.
 - A rota do 8F está confirmada em `docs/route-8f.md`: Gate Keeper em `(2,2)`,
   escada em `(2,3)` e chegada ao 7F em `(10,2)`.
 - O servidor de debug funciona e `0x877`/`0x878`/`0x865` dão a posição; a
@@ -190,10 +192,10 @@ o load; ele foi regenerado com a SRAM válida.
 
 ## Próximos passos
 
-1. Concluir a alocação do bônus de level-up e repetir a vitória em dificuldade
-   normal; o recrutamento segue pendente (o manual exige nível maior que o do
-   demônio).
+1. Curar o `POISON` da Yumiko e repetir a vitória em dificuldade normal; o
+   recrutamento segue pendente (o manual exige nível maior que o do demônio).
 2. Comparar boot/dungeon/batalha com o MesenCE usando frames e WRAM.
 3. Nomear as rotinas descobertas em `recomp/symbols.toml` — começando pelo
-   caminho da batalha — e promover as seguras para AOT (`emit = true`).
+   caminho da batalha e pela tela de level-up (`$01:B4F6`, `$01:B431`,
+   `$01:B5D5`) — e promover as seguras para AOT (`emit = true`).
 4. Expandir a cobertura para o restante do MT1 (7F, 6F, ...).

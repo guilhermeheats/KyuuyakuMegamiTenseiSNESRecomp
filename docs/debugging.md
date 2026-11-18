@@ -178,6 +178,40 @@ ao dungeon em `(8,2)`. Um segundo encontro aleatório no mesmo trecho trouxe
 uma besta verde (provável Basim): `TALK` respondeu `グルルルルル...` e
 `ESCAPE` falhou duas vezes.
 
+### Tela de level-up (2026-11-18)
+
+A tela `レベルアップ` é funcional; o travamento observado antes era efeito do
+boost de debug. O código fica em bank `$01`:
+
+| Endereço | Função |
+|---|---|
+| `$01:B431` | desenha os cinco atributos e o `BONUS` |
+| `$01:B4F6` | loop de input da alocação |
+| `$01:B5D5` | imprime o valor e aplica o teto de `0x23` (35) |
+| `$01:B581` | finaliza e aplica HP/MP do level-up |
+
+Variáveis:
+
+- `$08` = bônus restante; `$09` = linha do cursor (0–4); `$0A` = offset do
+  personagem (0x00 Nakajima, 0x10 Yumiko);
+- atributos atuais em `$0D09..$0D0D` (Nakajima) e `$0D19..$0D1D` (Yumiko);
+  valores base em `$100D..$1011` e `$101D..$1021`;
+- `$1012` recarrega o bônus ao passar para o próximo personagem;
+- `$020E`: Cima=0x08, Baixo=0x04, Esquerda=0x02, Direita=0x01;
+- `$0210`: A=0x80 (também soma), B=0x08 (reduz).
+
+Fluxo validado: Cima/Baixo mudam a linha; Direita/A somam 1 e descontam o
+bônus; Esquerda reduz; com o bônus em 0 aparece `YES`/`NO`; `YES` aplica e
+passa para o próximo personagem. Nakajima recebeu 1 ponto em `$0D0D`
+(0x20→0x21) e Yumiko 1 ponto em `$0D19` (0x20→0x21); depois do `YES` dela,
+`ユミコは魔法を憶えた` e o retorno à dungeon com HP 30/30 e 27/27.
+
+O boost de debug deixou os atributos em 99, acima do teto 0x23; a tela os
+exibia como 35 e `Direita`/`A` não somavam porque o valor já era maior que o
+teto. Além disso, o valor base também era 99, então `Esquerda` não reduzia.
+Baixar o atributo selecionado (e o base correspondente) para 0x20 permitiu
+alocar o ponto. Não é bug do recomp.
+
 > **Cuidado com `A`/`B`:** no dungeon, `A` abre a janela de comandos; `B`
 > volta do submenu para a lista de comandos e `B` de novo fecha. Para
 > equipar: `A` → `B` → `↓` até `ITEM` → `A` → `↓×3` até `そうび` → `A`.

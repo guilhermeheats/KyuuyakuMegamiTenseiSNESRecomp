@@ -116,7 +116,10 @@ mapa, imagem, ROM ou save de terceiros é versionado no repositório.
   negociação `TALK` → `NO` encerrando a batalha em paz.
 - A vitória/level-up foi validada contra 2 Mad Slugs, com boost de debug:
   `外道マッドスラッグを倒した！`, 100 EXP, 65 Macca, 20 MAG e
-  `レベルアップ：ナカジマあああ` (LV 2). A alocação do bônus ficou pendente.
+  `レベルアップ：ナカジマあああ` (LV 2). A alocação do `BONUS` também foi
+  validada (Nakajima e Yumiko, `YES`/`NO`); Yumiko aprendeu magia e o jogo
+  voltou à dungeon com HP 30/30 e 27/27. O travamento inicial era artefato
+  dos atributos 99 acima do teto de 35 da tela, não bug do recomp.
 - O save/load real foi validado (CP-013): o elder grava o slot, o flush no
   shutdown persiste `save.srm`, o boot natural relê o arquivo e o `CONTINUE`
   do título carrega o estado no 8F. Save states antigos podem restaurar SRAM

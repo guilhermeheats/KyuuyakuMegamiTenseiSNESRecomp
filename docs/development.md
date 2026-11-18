@@ -24,7 +24,7 @@ Atualizado em 2026-11-18.
 | Auto-mapping | OK — mapa da dungeon pelo menu COMP |
 | Primeira batalha | OK — Heket, Mad Slug, Basim fixo, negociação, game over, vitória/EXP/level-up |
 | Save/load via SRAM do jogo | OK — gravação, flush, boot e reload |
-| Cobertura estática | 1029 variantes AOT, 12 bancos; 99,4–99,9% AOT no save4/save9 |
+| Cobertura estática | 1031 variantes AOT, 12 bancos; 99,4–99,9% AOT no save4/save9 |
 | Comparação de referência | OK no título via snesref; MesenCE pendente |
 
 Marcos de frame observados com `--framedump`:
@@ -219,8 +219,8 @@ retorno à dungeon (HP 26/26 e 27/27), sem crash. O estado resultante está no
 A captura tier-2 do boot/título e dos save states de 8F/7F/batalha/level-up
 foi ingerida com `tier2_ingest.py`; os PCs quentes foram promovidos a roots
 permanentes. Com `tools/regen.sh` usando `--cfg-roots` por padrão, o grafo
-passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 1029
-variantes AOT / 12 bancos** (1081 variantes exatas, 52 LLE-only). Na rota
+passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 1031
+variantes AOT / 12 bancos** (1081 variantes exatas, 50 LLE-only). Na rota
 longa, o build ficou em **~94,7% AOT / 5,3% interpretado**, com zero dispatch
 misses; nos testes frescos, **save4 99,80% AOT** e **save9 99,91% AOT**, com
 zero stubs. O relatório completo, comandos e a lista de roots está em
@@ -317,6 +317,11 @@ entra no main loop e não tem saída local) promoveram o `$00:94C3`.
 Resultado: **1081 nós / 1029 AOT / 52 LLE**, A/B 99,91% e 1,03–1,12s, zero
 stubs, boot/título/save4/save9 válidos.
 
+O décimo terceiro lote fechou os handlers `$9A85`/`$A1D8`: o `$00:A29D` é
+um `JSL $05:A718`, que não tem nenhuma saída local (terminal). O
+`noreturn_jsl a29d` removeu o último truncamento e os dois handlers viraram
+AOT: **1081 nós / 1031 AOT / 50 LLE**, A/B 99,91% e 1,03–1,04s, zero stubs.
+
 O regen também recebeu `--profile-manifest`, `--no-host-root-scan` e um
 `funcs.h` temporário fora da raiz do projeto; sem isso o scanner readicionava
 declarações antigas e o link-closure falhava com 28 variantes pendentes.
@@ -336,11 +341,10 @@ limpo e re-promover as duas funções.
 
 ## Próximos passos
 
-1. Resolver o bloqueio `$05:A718` para promover `$9A85`/`$A1D8`, depois o
-   bloco `$30` e o cluster `$01:97C6`/`$01:986D`. Cada mudança precisa de
-   `save4`/`save9`, `snesref` e **tempo de parede**. Se a análise expuser
-   outro BRK de caminho de erro, usar uma fronteira `data_region` como
-   `$04:BEC6` ou `$05:E5DB`.
+1. Atacar o bloco `$30`, o cluster `$01:97C6`/`$01:986D` e o restante do
+   banco `$03`. Cada mudança precisa de `save4`/`save9`, `snesref` e
+   **tempo de parede**. Se a análise expuser outro BRK de caminho de erro,
+   usar uma fronteira `data_region` como `$04:BEC6` ou `$05:E5DB`.
 2. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter e re-promover
    `$00:86C0`/`$00:88CE`; detalhes em `docs/coverage.md`.
 3. Declarar as tabelas indiretas restantes (`$01:C72B`/`CD9C`/`EF15`,

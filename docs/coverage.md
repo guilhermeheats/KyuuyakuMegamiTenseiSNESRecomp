@@ -75,12 +75,12 @@ Com `tools/regen.sh` (agora com `--cfg-roots` por padrão):
 |---|---:|---:|
 | Roots | 11 | 72 |
 | Variantes exatas | 60 | 1081 |
-| Variantes AOT-eligible | 54 | 1029 |
-| Variantes LLE-only | 6 | 52 |
+| Variantes AOT-eligible | 54 | 1031 |
+| Variantes LLE-only | 6 | 50 |
 | Bancos emitidos | 8 | 12 |
 | Entradas de dispatch | 51 | 816 |
-| Entradas com AOT | 46 | 767 |
-| Variantes AOT no dispatch | 54 | 1029 |
+| Entradas com AOT | 46 | 769 |
+| Variantes AOT no dispatch | 54 | 1031 |
 
 No mesmo build, após carregar os save states de 8F/7F/batalha/level-up, o
 `interp_stats` acumulado mostrou **~94,7% AOT / ~5,3% interpretado** (o boot
@@ -314,6 +314,15 @@ Resultado final: **1081 nós / 1029 AOT / 52 LLE**. A/B save9 em **99,91%
 AOT** e **1,03–1,12s**, zero stubs; boot/título/save4/save9 válidos; título
 com os mesmos 6 bytes/SRAM/AE 2353/RMSE 30,29.
 
+### Destravamento 13: handlers `$9A85`/`$A1D8`
+
+`$00:A29D` é um `JSL $05:A718`; o `$05:A718` não tem **nenhuma** saída local
+(é terminal). O `noreturn_jsl a29d` removeu o último truncamento dos handlers
+`$9A85`/`$A1D8`, que passaram a AOT.
+
+Resultado: **1081 nós / 1031 AOT / 50 LLE**. A/B save9 em **99,91% AOT** e
+**1,03–1,04s**, zero stubs; boot/título/save4/save9 válidos.
+
 ## Correções no `tools/regen.sh`
 
 O ganho depende de o regen realmente semear os `func` dos cfgs:
@@ -355,10 +364,10 @@ marcadas com `force_lle 0086C0`/`force_lle 0088CE` em `recomp/bank00.cfg`.
 Agora o interpretador executa o `JMP ($0100)` com o ponteiro vivo,
 `unresolved_stub_get` retorna **zero** e a rota save4/save9 fica em
 **99,4–99,9% AOT / 0,1–0,6% interpretado**. O custo continua sendo duas
-funções em LLE; o resto do grafo cresceu para 1029 variantes AOT com os
+funções em LLE; o resto do grafo cresceu para 1031 variantes AOT com os
 contratos de saída, as fronteiras `$04:BEC6`/`$05:E5DB`, o frame wait AOT,
-o dispatch `$00:9B04` e os lotes do bloco `$30`/`$00:9077` e do hub
-`$9A85`/`$94C3`.
+o dispatch `$00:9B04` e os lotes do bloco `$30`/`$00:9077`, do hub
+`$9A85`/`$94C3` e dos handlers `$9A85`/`$A1D8`.
 
 O próximo passo de decompilação é **modelar esse dispatch vivo no emitter**
 (ou declarar `indirect_dispatch` de forma que o link-closure aceite os 8+4
@@ -367,27 +376,27 @@ funções. Uma tentativa inicial de `indirect_dispatch ... ptrtail targets:...`
 elevou a análise para 131 variantes, mas o link-closure rejeitou 28 variantes
 chamadas e não definidas; as diretivas foram revertidas.
 
-## Fronteira atual: 52 nós LLE-only
+## Fronteira atual: 50 nós LLE-only
 
-Os 52 nós LLE-only (49 bases) restantes se distribuem em poucos clusters.
-As razões são 58 `unproven_call`, 52 `truncated_call_continuation`, 50
-`unproven_callee_exit` (mais 63 razões detalhadas `truncated_call_at_*`) e uma
+Os 50 nós LLE-only (47 bases) restantes se distribuem em poucos clusters.
+As razões são 58 `unproven_call`, 50 `truncated_call_continuation`, 50
+`unproven_callee_exit` (mais 61 razões detalhadas `truncated_call_at_*`) e uma
 aresta indireta:
 
 | Cluster | Bases/variantes | Bloqueio |
 |---|---|---|
 | Main loop | `$00:8014`, `$00:80FB`, `$00:80FF` | nunca retornam; chamam `$05:8CB1`/`$00:94C3` |
-| Handlers do dispatch `$9B04` | `$00:9A85`, `$00:A1D8` | truncados em `$00:A29D` → `$05:A718` |
 | Texto/menus banco `$03` | `$03:9DBD`, `$03:AD87`, `$03:B3AB`, `$03:B43B` | chamadas não provadas |
 | Helpers `$00`/`$01` | `$00:BF53`; `$01:91DA`, `$01:979C`, `$01:97C6`, `$01:986D`, `$01:99B8`, `$01:AE08`, `$01:EE96` | texto/input; maioria `unproven_call` |
 | Banco `$05` | `$05:8CB1`, `$05:931F`, `$05:962D` | chamadas não provadas |
-| Bloco `$30` | ~25 bases, incl. `$30:8BF0`, `$30:95CA`, `$30:A20D`, `$30:DD34`, `$30:ECF4`, `$30:D4BF`, `$30:D809`, `$30:BA74`–`$30:C15A` | som/gráficos; dispatcher `$0080AE` |
+| Bloco `$30` | ~30 bases, incl. `$30:8BF0`, `$30:95CA`, `$30:A20D`, `$30:DD34`, `$30:ECF4`, `$30:D4BF`, `$30:D809`, `$30:BA74`–`$30:C15A` | som/gráficos; dispatcher `$0080AE` |
 
 O main loop `$00:8014`/`$00:80FB`/`$00:80FF` continua LLE (nunca retorna). O
 frame wait `$00:9397`, `$01:8EAB`, `$02:DBB7`, `$03:983C`, `$00:9077`,
-`$00:9188`, `$00:947D`, `$03:A630`, `$02:AFF9`, `$02:AFB6`, `$04:BE39` e o
-`$00:94C3` agora são AOT. O próximo foco é o par `$9A85`/`$A1D8` (bloqueado
-por `$05:A718`) e o bloco `$30`; depois os sites indiretos e a rota até o 6F.
+`$00:9188`, `$00:947D`, `$03:A630`, `$02:AFF9`, `$02:AFB6`, `$04:BE39`,
+`$00:94C3`, `$9A85` e `$A1D8` agora são AOT. O próximo foco é o bloco `$30`,
+o cluster `$01:97C6`/`$01:986D` e o restante do banco `$03`; depois os sites
+indiretos e a rota até o 6F.
 
 ### Histórico: o gargalo do `$03:983C`
 

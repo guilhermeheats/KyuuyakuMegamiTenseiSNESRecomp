@@ -74,13 +74,13 @@ Com `tools/regen.sh` (agora com `--cfg-roots` por padrão):
 | Métrica | Linha de base | Depois dos contratos |
 |---|---:|---:|
 | Roots | 11 | 72 |
-| Variantes exatas | 60 | 860 |
-| Variantes AOT-eligible | 54 | 782 |
-| Variantes LLE-only | 6 | 78 |
+| Variantes exatas | 60 | 952 |
+| Variantes AOT-eligible | 54 | 876 |
+| Variantes LLE-only | 6 | 76 |
 | Bancos emitidos | 8 | 12 |
-| Entradas de dispatch | 51 | 640 |
-| Entradas com AOT | 46 | 575 |
-| Variantes AOT no dispatch | 54 | 782 |
+| Entradas de dispatch | 51 | 722 |
+| Entradas com AOT | 46 | 658 |
+| Variantes AOT no dispatch | 54 | 876 |
 
 No mesmo build, após carregar os save states de 8F/7F/batalha/level-up, o
 `interp_stats` acumulado mostrou **~94,7% AOT / ~5,3% interpretado** (o boot
@@ -268,6 +268,24 @@ Isso provou o retorno para `$03:983C`, que passou a AOT nas três variantes
 save9 em **99,91% AOT** e **1,02–1,03s**, zero stubs. Boot/título/save4/save9
 passaram; título com os mesmos 6 bytes/SRAM/AE 2353/RMSE 30,29.
 
+### Destravamento 10: bloco `$30` e a ponte `$00:9077`
+
+Contratos de saída para `$00:9188`, `$00:947D`, `$00:9077`,
+`$30:D226`/`D237`/`D4BF`/`8BF0`/`95CA`/`A20D`/`DD34`/`ECF4` (M1X0),
+`$30:D586`/`$30:AFA0` (M0X0), `$05:96A0`, `$01:91DA` e `$02:AFB6`
+(M0X0/M1X0), mais `noreturn_jsl b10e` para o `$02:DC53` terminal.
+
+Resultado: `$00:9188`, `$00:947D`, `$00:9077` e `$30:D226` viraram AOT; o
+grafo foi para **952 nós / 876 AOT / 76 LLE**. A/B save9 em **99,91% AOT** e
+**~1,08s** (um trial inicial 1,27s), zero stubs; boot/título/save4/save9
+válidos.
+
+Ainda restam `$03:A630`, `$02:AFF9` e `$02:AFB6` com apenas
+`truncated_call_continuation`: o analyzer não trata como terminal uma chamada
+a um callee sem saída (por exemplo `$02:DC53` e o JSL `$03:A754`), mesmo com
+`noreturn_jsl`. É um falso positivo de ferramenta; o próximo passo é corrigir
+esse critério no analyzer.
+
 ## Correções no `tools/regen.sh`
 
 O ganho depende de o regen realmente semear os `func` dos cfgs:
@@ -309,9 +327,9 @@ marcadas com `force_lle 0086C0`/`force_lle 0088CE` em `recomp/bank00.cfg`.
 Agora o interpretador executa o `JMP ($0100)` com o ponteiro vivo,
 `unresolved_stub_get` retorna **zero** e a rota save4/save9 fica em
 **99,4–99,9% AOT / 0,1–0,6% interpretado**. O custo continua sendo duas
-funções em LLE; o resto do grafo cresceu para 782 variantes AOT com os
+funções em LLE; o resto do grafo cresceu para 876 variantes AOT com os
 contratos de saída, a fronteira de `$05:E5DB`, o frame wait AOT, o dispatch
-`$00:9B04` e o contrato de `$03:A630`.
+`$00:9B04` e o lote do bloco `$30`/`$00:9077`.
 
 O próximo passo de decompilação é **modelar esse dispatch vivo no emitter**
 (ou declarar `indirect_dispatch` de forma que o link-closure aceite os 8+4
@@ -320,30 +338,31 @@ funções. Uma tentativa inicial de `indirect_dispatch ... ptrtail targets:...`
 elevou a análise para 131 variantes, mas o link-closure rejeitou 28 variantes
 chamadas e não definidas; as diretivas foram revertidas.
 
-## Fronteira atual: 78 nós LLE-only
+## Fronteira atual: 76 nós LLE-only
 
-Os 78 nós LLE-only (65 bases) restantes se distribuem em poucos clusters.
-As razões ainda são 129 `unproven_call`, 75
-`truncated_call_continuation`, 67 `unproven_callee_exit`, três
+Os 76 nós LLE-only (64 bases) restantes se distribuem em poucos clusters.
+As razões ainda são 96 `unproven_call`, 73
+`truncated_call_continuation`, 57 `unproven_callee_exit`, três
 `brk_at_*`/`structural_poison` e uma aresta indireta:
 
 | Cluster | Bases/variantes | Bloqueio |
 |---|---|---|
-| Main loop | `$00:8014` | nunca retorna; chama `$05:8CB1`/`$00:94C3` sem saída provada |
-| Handlers do dispatch `$9B04` | `$00:9A85`, `$00:9B55`, `$00:9C1B`, `$00:9C3A`, `$00:9C59`, `$00:9D6E`, `$00:9DE9`, `$00:9EFB`, `$00:9F81`, `$00:A04A`, `$00:A051`, `$00:A1D8`, `$00:A4BA`, `$00:A507`, `$00:B241`, `$00:B534` | dispatch autorizado; handlers ainda têm callees não provados |
-| Lógica do banco `$02` | `$02:AFF9` (4), `$02:AFB6` | `$02:DC53`/`$01:91DA` ainda sem saída provada |
-| Texto/menus e continuação do banco `$03` | `$03:A630` (2), `$03:9C66`, `$03:8834`, `$03:9DBD`, `$03:AD87`, `$03:B3AB`, `$03:B43B` | `$03:A630` volta para `$00:9077`/`$30:D226`; `$03:983C` já é AOT |
-| Helpers `$00`/`$01` | `$00:9077`, `$00:90EB`, `$00:9188`, `$00:947D`, `$00:94C3`, `$00:BF53`, `$00:F160`; `$01:91DA`, `$01:D672`–`$01:D9A2`, `$01:979C`–`$01:99B8`, `$01:AA30`, `$01:AE08`, `$01:EE96` | cluster de texto/input; maioria `unproven_call` |
+| Main loop | `$00:8014`, `$00:80FF` | nunca retornam; chamam `$05:8CB1`/`$00:94C3` |
+| Handlers do dispatch `$9B04` | `$00:9A85`, `$00:9C1B`, `$00:9C3A`, `$00:9D6E`, `$00:9EFB`, `$00:9F81`, `$00:A04A`, `$00:A051`, `$00:A1D8`, `$00:A4BA`, `$00:A507`, `$00:B241` | dispatch autorizado; callees ainda não provados |
+| Lógica do banco `$02` | `$02:AFF9` (4), `$02:AFB6` | só `truncated_call_continuation` (falso positivo) |
+| Texto/menus e continuação do banco `$03` | `$03:A630` (2), `$03:8834`, `$03:9DBD`, `$03:AD87`, `$03:AEF7`, `$03:B2F6`, `$03:B3AB`, `$03:B43B`, `$03:BA49`, `$03:C24C` | `$03:A630` só truncado; `$03:983C` já é AOT |
+| Helpers `$00`/`$01` | `$00:90EB`, `$00:94C3`, `$00:F160`; `$01:91DA`, `$01:979C`–`$01:99B8`, `$01:AA30`, `$01:AE08`, `$01:EE96`, `$01:D672`–`$01:D9A2` | texto/input; maioria `unproven_call` |
 | Banco `$05` | `$05:8CB1`, `$05:931F`, `$05:962D`, `$05:96A0` | chamadas não provadas |
-| Bloco `$30` | 16 bases (`$30:8416`…`$30:F424`) | provável motor de som/gráficos; dispatcher `$0080AE` |
+| Bloco `$30` | ~24 bases, incl. `$30:8BF0`, `$30:95CA`, `$30:A20D`, `$30:DD34`, `$30:ECF4`, `$30:D4BF`, `$30:D809` | som/gráficos; dispatcher `$0080AE` |
 | `$04:BE39` | 1 | `brk_at_04BEC6`/`structural_poison`; separar código/dados |
 
-O main loop `$00:8014` continua LLE (nunca retorna). O frame wait `$00:9397`
-(quatro variantes), `$01:8EAB`, `$02:DBB7` e `$03:983C` agora são AOT. O
-dispatch `$00:9B04` está autorizado; os handlers novos ainda são LLE porque
-chamam funções sem saída provada. O `$03:A630` continua LLE e é a ponte para
-`$00:9077`/`$30:D226`; esses dois são os próximos contratos de maior
-alavancagem.
+O main loop `$00:8014`/`$00:80FF` continua LLE (nunca retorna). O frame wait
+`$00:9397`, `$01:8EAB`, `$02:DBB7`, `$03:983C`, `$00:9077`, `$00:9188`,
+`$00:947D` e `$30:D226` agora são AOT. O `$03:A630`, `$02:AFF9` e `$02:AFB6`
+têm apenas `truncated_call_continuation`: o analyzer não marca como terminal
+a chamada a um callee sem saída, mesmo com `noreturn_jsl`. Corrigir esse
+critério é o próximo passo de ferramenta; depois vêm os handlers `$9B04` e o
+resto do bloco `$30`.
 
 ### Histórico: o gargalo do `$03:983C`
 
@@ -407,12 +426,12 @@ não a promoção AOT.
 
 ## Próximos passos
 
-1. Atacar `$00:9077`/`$00:9188` e o bloco `$30` (a cadeia que mantém
-   `$03:A630` em LLE), depois `$02:DC53`/`$01:91DA` (promovem
-   `$02:AFF9`/`$02:AFB6`). Cada contrato precisa de `save4`/`save9`,
-   `snesref` e **tempo de parede**. Se a análise expuser outro `BRK` de
-   caminho de erro, adicionar uma fronteira `data_region` como a de
-   `$05:E5DB`.
+1. Corrigir o falso positivo de `truncated_call_continuation` no analyzer
+   para chamadas a callees sem saída; isso deve promover `$03:A630`,
+   `$02:AFF9` e `$02:AFB6`. Depois, atacar os handlers `$9B04` e o resto do
+   bloco `$30`. Cada mudança precisa de `save4`/`save9`, `snesref` e
+   **tempo de parede**. Se a análise expuser outro `BRK` de caminho de erro,
+   adicionar uma fronteira `data_region` como a de `$05:E5DB`.
 2. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter, reativar
    `indirect_dispatch` com link-closure limpo e re-promover
    `$00:86C0`/`$00:88CE`.

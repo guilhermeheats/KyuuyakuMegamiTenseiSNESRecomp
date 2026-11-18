@@ -24,7 +24,7 @@ Atualizado em 2026-11-18.
 | Auto-mapping | OK — mapa da dungeon pelo menu COMP |
 | Primeira batalha | OK — Heket, Mad Slug, Basim fixo, negociação, game over, vitória/EXP/level-up |
 | Save/load via SRAM do jogo | OK — gravação, flush, boot e reload |
-| Cobertura estática | 782 variantes AOT, 12 bancos; 99,4–99,9% AOT no save4/save9 |
+| Cobertura estática | 876 variantes AOT, 12 bancos; 99,4–99,9% AOT no save4/save9 |
 | Comparação de referência | OK no título via snesref; MesenCE pendente |
 
 Marcos de frame observados com `--framedump`:
@@ -219,8 +219,8 @@ retorno à dungeon (HP 26/26 e 27/27), sem crash. O estado resultante está no
 A captura tier-2 do boot/título e dos save states de 8F/7F/batalha/level-up
 foi ingerida com `tier2_ingest.py`; os PCs quentes foram promovidos a roots
 permanentes. Com `tools/regen.sh` usando `--cfg-roots` por padrão, o grafo
-passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 782
-variantes AOT / 12 bancos** (860 variantes exatas, 78 LLE-only). Na rota
+passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 876
+variantes AOT / 12 bancos** (952 variantes exatas, 76 LLE-only). Na rota
 longa, o build ficou em **~94,7% AOT / 5,3% interpretado**, com zero dispatch
 misses; nos testes frescos, **save4 99,80% AOT** e **save9 99,91% AOT**, com
 zero stubs. O relatório completo, comandos e a lista de roots está em
@@ -292,6 +292,15 @@ o que provou o retorno do `$03:983C` e o promoveu nas três variantes. O grafo
 foi para **860 nós / 782 AOT / 78 LLE**; A/B em 99,91% e 1,02–1,03s, zero
 stubs; boot/título/save4/save9 válidos.
 
+O décimo lote atacou o bloco `$30` e a ponte `$00:9077`: contratos para
+`$00:9188`/`$00:947D`/`$00:9077`, as folhas do banco `$30`,
+`$05:96A0`, `$01:91DA` e `$02:AFB6` (M0X0/M1X0), mais `noreturn_jsl b10e`
+para o `$02:DC53` terminal. Isso promoveu `$00:9188`, `$00:947D`,
+`$00:9077` e `$30:D226`: **952 nós / 876 AOT / 76 LLE**, A/B 99,91% e
+~1,08s (um trial 1,27s), zero stubs. `$03:A630`, `$02:AFF9` e `$02:AFB6`
+ficaram com apenas `truncated_call_continuation` — um falso positivo do
+analyzer para chamadas a callees sem saída.
+
 O regen também recebeu `--profile-manifest`, `--no-host-root-scan` e um
 `funcs.h` temporário fora da raiz do projeto; sem isso o scanner readicionava
 declarações antigas e o link-closure falhava com 28 variantes pendentes.
@@ -311,11 +320,12 @@ limpo e re-promover as duas funções.
 
 ## Próximos passos
 
-1. Atacar `$00:9077`/`$00:9188` e o bloco `$30` (a cadeia que mantém
-   `$03:A630` em LLE), depois `$02:DC53`/`$01:91DA` (promovem
-   `$02:AFF9`/`$02:AFB6`). Cada contrato precisa de `save4`/`save9`,
-   `snesref` e **tempo de parede**. Se um contrato expuser outro BRK de
-   caminho de erro, adicionar uma fronteira `data_region` como `$05:E5DB`.
+1. Corrigir o falso positivo de `truncated_call_continuation` no analyzer
+   para chamadas a callees sem saída; isso deve promover `$03:A630`,
+   `$02:AFF9` e `$02:AFB6`. Depois, atacar os handlers `$9B04` e o resto do
+   bloco `$30`. Cada mudança precisa de `save4`/`save9`, `snesref` e
+   **tempo de parede**. Se um contrato expuser outro BRK de caminho de erro,
+   adicionar uma fronteira `data_region` como `$05:E5DB`.
 2. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter e re-promover
    `$00:86C0`/`$00:88CE`; detalhes em `docs/coverage.md`.
 3. Declarar as tabelas indiretas restantes (`$01:C72B`/`CD9C`/`EF15`,

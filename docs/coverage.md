@@ -73,26 +73,26 @@ Com `tools/regen.sh` (agora com `--cfg-roots` por padrão):
 
 | Métrica | Antes | Depois |
 |---|---:|---:|
-| Roots | 11 | 73 |
-| Variantes exatas | 60 | 119 |
-| Variantes AOT-eligible | 54 | 107 |
+| Roots | 11 | 71 |
+| Variantes exatas | 60 | 117 |
+| Variantes AOT-eligible | 54 | 105 |
 | Variantes LLE-only | 6 | 12 |
 | Bancos emitidos | 8 | 10 |
-| Entradas de dispatch | 51 | 97 |
-| Entradas com AOT | 46 | 88 |
-| Variantes AOT no dispatch | 54 | 107 |
+| Entradas de dispatch | 51 | 95 |
+| Entradas com AOT | 46 | 86 |
+| Variantes AOT no dispatch | 54 | 105 |
 
 No mesmo build, após carregar os save states de 8F/7F/batalha/level-up, o
-`interp_stats` acumulado mostrou **94,7% AOT / 5,3% interpretado** (o boot
+`interp_stats` acumulado mostrou **~94,7% AOT / ~5,3% interpretado** (o boot
 isolado fica mais baixo porque a inicialização de APU/PPU é dominada por
-esperas de hardware). O `dispatch_total` ficou em 60.643, com `found1` em
-100% e zero dispatch misses.
+esperas de hardware). O `dispatch_total` ficou na casa dos 60 mil, com
+`found1` em 100% e zero dispatch misses.
 
-No teste final carregando apenas `save4` (level-up) e `save9` (pós-Basim), o
-acumulado ficou em **99,14% AOT / 0,86% interpretado**. Nesse caminho o stub
-`$0086E9` reapareceu durante o desenho do texto de level-up, com o histórico
-`$01:D581 → $01:D5B3 → ... → $00:86C0`; ou seja, o ponteiro de HDMA também
-passa por `$FFFF` fora do boot.
+No teste final carregando `save4` (level-up) e `save9` (pós-Basim), o
+acumulado ficou em **98,8% AOT / 1,2% interpretado**. Os dois dispatchers de
+HDMA (`$00:86C0`/`$00:88CE`) estão em LLE nesse build, então o
+`unresolved_stub_get` retorna **zero**: o fallback AOT que registrava
+`dispatch_oob` não é mais usado.
 
 ## Correções no `tools/regen.sh`
 
@@ -108,9 +108,9 @@ O ganho depende de o regen realmente semear os `func` dos cfgs:
   de roots readicionava as declarações antigas e o link-closure falhava com
   28 variantes pendentes.
 
-## Stubs de dispatch pendentes
+## Dispatchers de HDMA (mitigados por LLE)
 
-O boot/título ainda registra dois `dispatch_oob` no `unresolved_stub_get`:
+O build anterior registrava dois `dispatch_oob` no `unresolved_stub_get`:
 
 | Site | Alvo | Frame | Stack top |
 |---|---|---:|---|
@@ -125,24 +125,35 @@ Os dois sites são `JMP ($0100)` através de um ponteiro em WRAM:
 - `$00:88CE` é o dispatcher de modo de HDMA; lê `$0901` e a tabela `$88EC`
   (`$8916`, `$8908`, `$8910`, `$88F4`).
 
-O ponteiro vivo em `$0100` chega a `$FFFF` nesses caminhos de boot. É o
-próximo alvo de decompilação: comparar com o `snesref`/MesenCE, confirmar se
-o `$FFFF` é um sentinela intencional ou um ponteiro ainda não inicializado,
-e então declarar `indirect_dispatch`/tabela ou corrigir o emitter. Uma
-tentativa inicial de `indirect_dispatch ... ptrtail targets:...` elevou a
-análise para 131 variantes, mas o link-closure rejeitou 28 variantes
-chamadas e não definidas; as diretivas foram revertidas até o caso ser
-entendido.
+O `dispatch_oob` era o **fallback estático** do emitter: o corpo AOT não
+materializava o alvo vivo e caía no interpretador em `$86E9`/`$88E9`, com um
+trace fixo em `$FFFF`. O ponteiro vivo podia ser válido; o aviso não era uma
+prova de crash.
+
+Para manter o build honesto e sem falso alarme, as duas funções foram
+marcadas com `force_lle 0086C0`/`force_lle 0088CE` em `recomp/bank00.cfg`.
+Agora o interpretador executa o `JMP ($0100)` com o ponteiro vivo,
+`unresolved_stub_get` retorna **zero** e a rota save4/save9 fica em **98,8%
+AOT / 1,2% interpretado**. O custo é duas variantes AOT a menos (105 em vez
+de 107).
+
+O próximo passo de decompilação é **modelar esse dispatch vivo no emitter**
+(ou declarar `indirect_dispatch` de forma que o link-closure aceite os 8+4
+alvos), comparar o caminho com `snesref`/MesenCE e então re-promover as duas
+funções. Uma tentativa inicial de `indirect_dispatch ... ptrtail targets:...`
+elevou a análise para 131 variantes, mas o link-closure rejeitou 28 variantes
+chamadas e não definidas; as diretivas foram revertidas.
 
 ## Próximos passos
 
-1. Resolver `$00:86E9` e `$00:88E9` (ponteiro/HDMA) e reativar os hints de
-   dispatch com link-closure limpo.
+1. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter, reativar
+   `indirect_dispatch` com link-closure limpo e re-promover
+   `$00:86C0`/`$00:88CE`.
 2. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
-   ingerir e adicionar os novos roots.
+   ingerir com `tier2_ingest.py` e adicionar os novos roots.
 3. Investigar os 12 variantes LLE-only, começando por `$00:9397`
    (`truncated_call_continuation`, `unproven_call_at_0093B4_to_018EAB_m1x0`,
    `unproven_callee_exit`) e `$01:8EAB`.
 4. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
-   `$38` e `$3F`.
+   `$38` e `$3F`, e continuar a separação código/dados.
 5. Manter gameplay, save states e comparação com emulador como regressão.

@@ -11,7 +11,7 @@ Atualizado em 2026-11-18.
 |---|---|
 | ROM japonesa limpa verificada | OK — CRC32 `c8d286c9` |
 | Scaffold do snesrecomp | OK — 4 roots iniciais |
-| Cobertura estática atual | OK — 73 roots, 10 bancos |
+| Cobertura estática atual | OK — 71 roots, 10 bancos |
 | Build nativo | OK — build-debug e release |
 | Boot / tela de título | OK |
 | Introdução do MT1 | OK |
@@ -24,7 +24,7 @@ Atualizado em 2026-11-18.
 | Auto-mapping | OK — mapa da dungeon pelo menu COMP |
 | Primeira batalha | OK — Heket, Mad Slug, Basim fixo, negociação, game over, vitória/EXP/level-up |
 | Save/load via SRAM do jogo | OK — gravação, flush, boot e reload |
-| Cobertura estática | 107 variantes AOT, 10 bancos; ~95% AOT na rota testada |
+| Cobertura estática | 105 variantes AOT, 10 bancos; ~94,7–98,8% AOT na rota testada |
 | Comparação de referência | OK no título via snesref; MesenCE pendente |
 
 Marcos de frame observados com `--framedump`:
@@ -219,25 +219,27 @@ retorno à dungeon (HP 26/26 e 27/27), sem crash. O estado resultante está no
 A captura tier-2 do boot/título e dos save states de 8F/7F/batalha/level-up
 foi ingerida com `tier2_ingest.py`; os PCs quentes foram promovidos a roots
 permanentes. Com `tools/regen.sh` usando `--cfg-roots` por padrão, o grafo
-passou de **11 roots / 54 variantes AOT / 8 bancos** para **73 roots / 107
-variantes AOT / 10 bancos** (119 variantes exatas, 12 LLE-only). No mesmo
-build, a rota testada ficou em **~94,7% AOT / 5,3% interpretado**, com zero
-dispatch misses. O relatório completo, comandos e a lista de roots está em
-`docs/coverage.md`.
+passou de **11 roots / 54 variantes AOT / 8 bancos** para **71 roots / 105
+variantes AOT / 10 bancos** (117 variantes exatas, 12 LLE-only). Na rota
+longa, o build ficou em **~94,7% AOT / 5,3% interpretado**, com zero dispatch
+misses; no teste save4/save9, **98,8% AOT / 1,2% interpretado**. O relatório
+completo, comandos e a lista de roots está em `docs/coverage.md`.
 
 O regen também recebeu `--profile-manifest`, `--no-host-root-scan` e um
 `funcs.h` temporário fora da raiz do projeto; sem isso o scanner readicionava
 declarações antigas e o link-closure falhava com 28 variantes pendentes.
 
-Restam dois `dispatch_oob` no boot/título: `$00:86E9` e `$00:88E9`, ambos
-`JMP ($0100)` através de um ponteiro de HDMA que chega a `$00:FFFF`. São o
-próximo alvo; os detalhes e as tentativas de `indirect_dispatch` estão em
-`docs/coverage.md`.
+Os dois dispatchers de HDMA (`$00:86C0`/`$00:88CE`) foram mantidos em
+**LLE** (`force_lle 0086C0`/`force_lle 0088CE`) porque o emitter ainda não
+materializa o `JMP ($0100)` com alvo vivo; o `unresolved_stub_get` fica zero
+e o custo é duas variantes AOT. O próximo passo de decompilação é modelar
+esse dispatch no emitter, reativar `indirect_dispatch` com link-closure
+limpo e re-promover as duas funções.
 
 ## Próximos passos
 
-1. Resolver os dois dispatch stubs de HDMA (`$00:86E9`/`$00:88E9`) e
-   reativar os hints de `indirect_dispatch` com link-closure limpo.
+1. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter e re-promover
+   `$00:86C0`/`$00:88CE`; detalhes em `docs/coverage.md`.
 2. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
    ingerir com `tier2_ingest.py` e adicionar os novos roots.
 3. Investigar as 12 variantes LLE-only, começando por `$00:9397` e

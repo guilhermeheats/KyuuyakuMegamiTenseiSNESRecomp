@@ -20,10 +20,11 @@ the opening story, accepts the two character names, allocates stats, enters
 the first dungeon and the 7F floor**, and validates movement, chest looting,
 the status menu, auto-mapping, random and fixed battles, negotiation, game
 over, victory/EXP/level-up, equipment and in-game SRAM save/load. The current
-focus is **decompilation coverage**: the static graph now emits 107 AOT
-variants across 10 banks (from 54 across 8) and reaches roughly 95% AOT on
-the tested boot/title/dungeon/battle/level-up route. Two boot-time indirect
-dispatch stubs remain. See `docs/coverage.md` and `docs/checkpoints.md`.
+focus is **decompilation coverage**: the static graph now emits 105 AOT
+variants across 10 banks (from 54 across 8) and reaches roughly 95–99% AOT
+depending on the route. The two HDMA live-pointer dispatchers
+(`$00:86C0`/`$00:88CE`) remain LLE until the emitter models their
+`JMP ($0100)` dispatch. See `docs/coverage.md` and `docs/checkpoints.md`.
 
 ## ROM identity
 

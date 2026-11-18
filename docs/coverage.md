@@ -234,12 +234,23 @@ Os nós do ciclo de boot continuam LLE: `$00:9397` (M0X0/M0X1/M1X0/M1X1),
 não há retorno para provar. O `$00:820E` foi promovido porque seu loop
 `JSL $9397; BRA $8274` agora tem largura de retorno conhecida.
 
+### Experimento pendente: `$03:983C`
+
+O contrato `exit_mx_variant 03983C 1 0 1 0` / `1 1 1 1` foi testado e é
+correto: o grafo sobe para **677 nós / 596 AOT / 81 LLE**. Porém, no save9
+fresco o AOT cai de **99,75% para 98,59%**; o `interp_profile` mostra a
+página `$00:9300` (frame wait `$9397`) com **35M ciclos** (1,26% do CPU),
+contra ~7M no build de 511. O contrato promove o caminho de menu/texto do
+banco `$03`, que passa a esperar mais frames. Antes de adotar, investigar se
+é timing normal do menu ou um loop de espera incorreto; o contrato foi
+revertido para manter o build 511 validado.
+
 O próximo passo de maior alavancagem é declarar contratos de saída para
-`$03:983C`, `$03:E91A`/`$03:E9B1`, `$02:D13B` e o bloco `$30`, **um de cada
-vez**. Depois de cada contrato, verificar se a análise expôs outro
-`BRK`/caminho de erro como o de `$05:E5DB`; esses casos pedem uma fronteira
-`data_region`, não a reversão do contrato. Caminhos com `brk_at_*` devem ser
-tratados como separação código/dados antes de qualquer promoção.
+`$03:E91A`/`$03:E9B1`, `$02:D13B` e o bloco `$30`, **um de cada vez**.
+Depois de cada contrato, verificar se a análise expôs outro `BRK`/caminho de
+erro como o de `$05:E5DB`; esses casos pedem uma fronteira `data_region`, não
+a reversão do contrato. Caminhos com `brk_at_*` devem ser tratados como
+separação código/dados antes de qualquer promoção.
 
 ## Sonda `v2_regen`: dispatches restantes
 

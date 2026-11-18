@@ -126,7 +126,9 @@ O 8F tem 64 células conectadas. A escada `(3,3)` leva ao 7F `(11,3)`.
   chegou a 0/10 e 0/9, apareceram `パーティーは敵に敗れて...` e
   `志半ばに力尽きた`, seguidos da cena do barco; o recomp não crashou.
 - **Vitória** ainda pendente: os ataques físicos causam 0–1 e Yumiko não tem
-  magia utilizável neste ponto (`使える魔法はありません`).
+  magia utilizável neste ponto (`使える魔法はありません`). O grupo tem Jack
+  Knife, Nunchaku e Combat Suits no inventário, mas o menu de equipamentos
+  ainda não foi dominado; equipar deve aumentar o dano.
 
 ## 7F — primeira batalha
 

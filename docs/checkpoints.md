@@ -41,7 +41,9 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
   `パーティーは敵に敗れて...` / `志半ばに力尽きた` e a cena do barco
   (game over); o jogo não crashou.
 - **Vitória:** ainda não obtida; os ataques físicos causam 0–1 e Yumiko não
-  tem magia utilizável neste ponto (`使える魔法はありません`).
+  tem magia utilizável neste ponto (`使える魔法はありません`). O grupo tem
+  Jack Knife, Nunchaku e Combat Suits no inventário, mas o menu de
+  equipamentos ainda não foi dominado — provável motivo do dano baixo.
 - **Pós-batalha:** retorno ao dungeon do 7F em `(8,2)`, party em 10/10 e 9/9.
 - **Saves locais:** `save10` (8F equipado), `save11` (chegada ao 7F),
   `save9` (mensagem de Heket), `save8` (menu inicial da batalha),

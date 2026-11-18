@@ -71,16 +71,16 @@ bancos `$00`, `$01`, `$02`, `$03`, `$30`, `$38` e `$3F`.
 
 Com `tools/regen.sh` (agora com `--cfg-roots` por padrão):
 
-| Métrica | Antes | Depois |
+| Métrica | Linha de base | Depois do contrato `$00:9397` |
 |---|---:|---:|
-| Roots | 11 | 71 |
-| Variantes exatas | 60 | 117 |
-| Variantes AOT-eligible | 54 | 105 |
-| Variantes LLE-only | 6 | 12 |
+| Roots | 11 | 72 |
+| Variantes exatas | 60 | 339 |
+| Variantes AOT-eligible | 54 | 292 |
+| Variantes LLE-only | 6 | 47 |
 | Bancos emitidos | 8 | 10 |
-| Entradas de dispatch | 51 | 95 |
-| Entradas com AOT | 46 | 86 |
-| Variantes AOT no dispatch | 54 | 105 |
+| Entradas de dispatch | 51 | 279 |
+| Entradas com AOT | 46 | 239 |
+| Variantes AOT no dispatch | 54 | 292 |
 
 No mesmo build, após carregar os save states de 8F/7F/batalha/level-up, o
 `interp_stats` acumulado mostrou **~94,7% AOT / ~5,3% interpretado** (o boot
@@ -88,11 +88,45 @@ isolado fica mais baixo porque a inicialização de APU/PPU é dominada por
 esperas de hardware). O `dispatch_total` ficou na casa dos 60 mil, com
 `found1` em 100% e zero dispatch misses.
 
-No teste final carregando `save4` (level-up) e `save9` (pós-Basim), o
-acumulado ficou em **98,8% AOT / 1,2% interpretado**. Os dois dispatchers de
-HDMA (`$00:86C0`/`$00:88CE`) estão em LLE nesse build, então o
+Antes do contrato de saída, o teste carregando `save4` (level-up) e `save9`
+(pós-Basim) ficava em **98,8% AOT / 1,2% interpretado**. Os dois dispatchers
+de HDMA (`$00:86C0`/`$00:88CE`) estão em LLE, então o
 `unresolved_stub_get` retorna **zero**: o fallback AOT que registrava
-`dispatch_oob` não é mais usado.
+`dispatch_oob` não é mais usado. O contrato abaixo levou o mesmo teste a
+**99,4% AOT**.
+
+### Contrato de saída de `$00:9397` (2026-11-18)
+
+`$00:9397` é a primitiva de espera de frame. Ela empilha `PHP` na entrada e
+restaura com `PLP` em `$93F0`; `PLX` restaura o X do chamador. Portanto a
+largura de saída **espelha a largura de entrada**, embora o corpo use
+`REP/SEP` internamente. O cfg agora declara:
+
+```text
+exit_mx_variant 009397 0 0 0 0
+exit_mx_variant 009397 1 0 1 0
+exit_mx_variant 009397 1 1 1 1
+```
+
+Isso prova o retorno para todos os chamadores e destrava a análise que antes
+parava em `unproven_callee_exit`. O grafo saltou de **118 para 339 variantes
+exatas** e de **105 para 292 variantes AOT**; o `$02:B0B6` (que chama
+`$00:9397`) passou a AOT nas variantes M1X0/M1X1. O custo é que a análise
+passou a seguir caminhos pós-chamada que antes ficavam truncados, expondo
+**47 nós LLE-only** (a fronteira atual, descrita abaixo).
+
+Validação de runtime com o build de debug:
+
+- `save4` (level-up): **99,43% AOT / 0,57% interpretado**, zero stubs;
+- `save9` (pós-Basim): **99,34% AOT / 0,66% interpretado**, zero stubs;
+- título contra o `snesref`: mesmos **6 bytes** de WRAM, SRAM idêntica e
+  framebuffer AE 2353 / RMSE 30,29;
+- `$02:B0B6` agora tem variantes AOT M1X0 e M1X1 no manifesto.
+
+Os próprios nós do ciclo de boot continuam LLE: `$00:9397`, `$00:8014` e
+`$01:8EAB` (o `$00:820E` foi promovido). O caminho de inicialização
+`$9397 → $8EAB → $8014` é terminal, então não há contrato de retorno a
+inventar para ele.
 
 ## Correções no `tools/regen.sh`
 
@@ -133,9 +167,10 @@ prova de crash.
 Para manter o build honesto e sem falso alarme, as duas funções foram
 marcadas com `force_lle 0086C0`/`force_lle 0088CE` em `recomp/bank00.cfg`.
 Agora o interpretador executa o `JMP ($0100)` com o ponteiro vivo,
-`unresolved_stub_get` retorna **zero** e a rota save4/save9 fica em **98,8%
-AOT / 1,2% interpretado**. O custo é duas variantes AOT a menos (105 em vez
-de 107).
+`unresolved_stub_get` retorna **zero** e a rota save4/save9 fica em
+**99,4% AOT / 0,6% interpretado**. O custo continua sendo duas funções em
+LLE; o resto do grafo cresceu para 292 variantes AOT com o contrato de
+`$00:9397`.
 
 O próximo passo de decompilação é **modelar esse dispatch vivo no emitter**
 (ou declarar `indirect_dispatch` de forma que o link-closure aceite os 8+4
@@ -144,41 +179,50 @@ funções. Uma tentativa inicial de `indirect_dispatch ... ptrtail targets:...`
 elevou a análise para 131 variantes, mas o link-closure rejeitou 28 variantes
 chamadas e não definidas; as diretivas foram revertidas.
 
-## LLEs restantes: o ciclo do frame wait
+## Fronteira atual: 47 nós LLE-only
 
-Os 12 nós LLE-only do build atual formam um **ciclo de recursão mútua** em
-torno da espera de frame:
+O contrato de `$00:9397` promoveu todos os seus chamadores, mas também
+expôs o código pós-chamada que antes ficava truncado. Os 47 nós LLE-only
+restantes se agrupam em poucas cadeias:
 
-```text
-$00:8014 --JSL $820E--> $00:820E --JSL $9397--> $00:9397
-   ^                                                  |
-   |                                                  JSL $018EAB ($93B4)
-   +---------------------- JSL $008014 ($8EBE) <------ $01:8EAB
-```
+| Cadeia | Bloqueio | Observação |
+|---|---|---|
+| `$00:8014` → `$05:D6BF` → `$05:D731` → `$02:AFF9` | `unproven_callee_exit` | loop principal; `$05:DD6D` tem `brk_at_05E5DB` |
+| `$00:9077` → `$00:9188` → `$30:8BF0`/`$30:95CA`/`$30:A20D`/`$30:DD34`/`$30:ECF4` | `unproven_callee_exit` | bloco do banco `$30` (provável motor de som/gráficos) |
+| `$01:8613`/`$01:91DA` → `$03:983C` | `unproven_callee_exit` | `$03:983C` é chamado por vários bancos e é o maior gargalo único |
+| `$03:983C` → `$03:9C66`/`$01:DF34`/`$03:A630` | `unproven_callee_exit` | `$03:A630` volta para `$00:9077` e `$30:D226` |
+| `$02:AFF9` → `$02:DC53`/`$03:E91A`/`$01:91DA`/`$03:A2EA` | `unproven_callee_exit` | lógica do banco `$02`; variantes M0X1/M1X0/M1X1 |
+| `$04:BE39`/`$05:DD6D` | `brk_at_*` / `structural_poison` | provável dados lidos como código; separar antes de promover |
 
-Nós LLE-only: `$00:8014` (M1X1), `$00:820E` (M1X0),
-`$00:9397` (M0X0/M1X0/M1X1), `$00:93F2` (M0X0/M1X0),
-`$01:8078` (M1X0), `$01:8EAB` (M1X0), `$01:B3C6` (M1X1),
-`$02:EDE8` (M1X0) e `$02:F835` (M0X0).
+Os nós do ciclo de boot continuam LLE: `$00:9397` (M0X0/M0X1/M1X0/M1X1),
+`$00:8014` (M1X1) e `$01:8EAB` (M1X0). O caminho
+`$9397 → $8EAB → $8014` é terminal (o `$8014` termina em `BRA $8113`), então
+não há retorno para provar. O `$00:820E` foi promovido porque seu loop
+`JSL $9397; BRA $8274` agora tem largura de retorno conhecida.
 
-O analyzer propaga `unproven_callee_exit` e
-`truncated_call_continuation` por esse ciclo: `$00:9397` chama
-`$01:8EAB` em `$93B4`, que chama `$00:8014` em `$8EBE`, que chama
-`$00:820E`, que volta a `$00:9397`. O `LevelUp_Apply` (`$01:B3C6`) entra
-no mesmo ciclo porque também chama `$00:9397`.
-
-O cfg atual só oferece `noreturn_jsr`/`terminal_jsr` para JSR de 2 bytes;
-o site `$8EBE` é um **JSL** de 3 bytes. O próximo passo de framework é
-modelar esse JSL como transferência terminal/entrada (ou fornecer fatos de
-saída para o ciclo) e então promover `$00:9397`, `$00:93F2`, `$01:8EAB` e
-`LevelUp_Apply`.
+O próximo passo de maior alavancagem é declarar contratos de saída para os
+chamados repetidos `$03:983C` e `$02:AFF9`, **um de cada vez**, validando
+save4/save9 e a comparação com o `snesref` após cada contrato. Os caminhos
+com `brk_at_*` devem ser tratados como separação código/dados, não como AOT.
 
 ## Sonda `v2_regen`: dispatches restantes
 
-O pipeline `v2_regen.py` (com o fixpoint de auto-promote/reference-taint) foi
+O pipeline `v2_regen.py` (com o fixpoint de auto-promote/reference-taint) é
 rodado como sonda com `--tier-down-stubs`; ele não é o pipeline padrão do
-projeto e falhou no banco `$02` por `max_insns=12000` em `$02B0B6`, mas
-listou os dispatches indiretos que ainda não têm tabela declarada:
+projeto. O antigo overrun `max_insns=12000` em `$02:B0B6` **não era dados
+lidos como código**: era uma variante fantasma **M0X1** promovida por um
+caller de largura errada, que deslocava os imediatos e decodificava até
+estourar. A correção no cfg é explícita:
+
+```text
+func Clamp_024E_TierWait b0b6 end:b0fa entry_mx:1,1
+force_variant_at 02B0B0 1 1
+force_variant_at 02BD87 1 1
+```
+
+Com isso o probe emite **7/7 bancos** e 797 entradas de dispatch. Ele ainda
+lista 31 sites indiretos sem tabela declarada (o banco `$02` agora contribui
+`$02:DC74`):
 
 | Site | Forma | Ocorrências | Observação |
 |---|---|---:|---|
@@ -186,6 +230,7 @@ listou os dispatches indiretos que ainda não têm tabela declarada:
 | `$01:C72B` | JMP (abs) | 4 | banco `$01` |
 | `$01:CD9C` | JMP (abs) | 4 | banco `$01` |
 | `$01:EF15` | JMP (abs) | 4 | banco `$01` |
+| `$02:DC74` | JMP (abs) | 4 | banco `$02`, dentro de `$02:DC53` |
 | `$30:969C` | JMP [abs] | 2 | operand `$0080AE` |
 | `$30:A33C` | JMP [abs] | 2 | operand `$0080AE` |
 | `$30:C078` | JMP [abs] | 2 | operand `$0080AE` |
@@ -197,23 +242,27 @@ Os sites `$30:*` compartilham o ponteiro `$0080AE`, provavelmente um
 dispatcher comum do motor de som. O probe também rejeitou três alvos
 JSR/JSL fora do LoROM (`$30:00A0`, `$30:00BD`, `$30:7EA9`) e registrou um
 fold constante-Z em `$00:AA11` (BEQ → fall-through, alvo morto `$00:A998`).
+Os dois sites de HDMA (`$00:86E9`/`$00:88E9`) não aparecem nessa lista porque
+as diretivas `indirect_dispatch ... ptrtail` os resolvem no probe.
 
-O build padrão (`v2_emit`) ainda usa o fallback LLE nesses sites; eles são os
-próximos candidatos a `indirect_dispatch`/tabela e a separação código/dados
-(principalmente o overrun de `$02:B0B6`).
+O build padrão (`v2_emit`) ainda usa o fallback LLE nesses 31 sites; eles são
+os próximos candidatos a `indirect_dispatch`/tabela. Os caminhos com
+`brk_at_*` (`$04:BE39`, `$05:DD6D`) são candidatos a separação código/dados,
+não a promoção AOT.
 
 ## Próximos passos
 
-1. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter, reativar
+1. Declarar contratos de saída para os gargalos repetidos `$03:983C` e
+   `$02:AFF9`, um de cada vez, validando `save4`/`save9` e a comparação com
+   o `snesref` depois de cada contrato.
+2. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter, reativar
    `indirect_dispatch` com link-closure limpo e re-promover
    `$00:86C0`/`$00:88CE`.
-2. Declarar as tabelas dos sites `$00:9B04`, `$01:C72B`/`CD9C`/`EF15` e
-   `$30:*` (ponteiro `$0080AE`) e separar o código dos dados em `$02:B0B6`.
-3. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
+3. Declarar as tabelas dos sites `$00:9B04`, `$01:C72B`/`CD9C`/`EF15`,
+   `$02:DC74` e `$30:*` (ponteiro `$0080AE`); separar os caminhos
+   `brk_at_*` (`$04:BE39`, `$05:DD6D`) como código/dados.
+4. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
    ingerir com `tier2_ingest.py` e adicionar os novos roots.
-4. Resolver o ciclo de frame wait (`$00:8014`/`$00:820E`/`$00:9397`/
-   `$01:8EAB`) com suporte a JSL terminal/entrada; depois promover
-   `$00:9397`, `$00:93F2`, `$01:8EAB` e `LevelUp_Apply`.
 5. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
    `$38` e `$3F`, e continuar a separação código/dados.
 6. Manter gameplay, save states e comparação com emulador como regressão.

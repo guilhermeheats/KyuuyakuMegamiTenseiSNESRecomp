@@ -11,7 +11,7 @@ Atualizado em 2026-11-18.
 |---|---|
 | ROM japonesa limpa verificada | OK — CRC32 `c8d286c9` |
 | Scaffold do snesrecomp | OK — 4 roots iniciais |
-| Cobertura estática atual | OK — 71 roots, 10 bancos |
+| Cobertura estática atual | OK — 72 roots, 10 bancos |
 | Build nativo | OK — build-debug e release |
 | Boot / tela de título | OK |
 | Introdução do MT1 | OK |
@@ -24,7 +24,7 @@ Atualizado em 2026-11-18.
 | Auto-mapping | OK — mapa da dungeon pelo menu COMP |
 | Primeira batalha | OK — Heket, Mad Slug, Basim fixo, negociação, game over, vitória/EXP/level-up |
 | Save/load via SRAM do jogo | OK — gravação, flush, boot e reload |
-| Cobertura estática | 105 variantes AOT, 10 bancos; ~94,7–98,8% AOT na rota testada |
+| Cobertura estática | 292 variantes AOT, 10 bancos; até 99,4% AOT no save4/save9 |
 | Comparação de referência | OK no título via snesref; MesenCE pendente |
 
 Marcos de frame observados com `--framedump`:
@@ -219,11 +219,20 @@ retorno à dungeon (HP 26/26 e 27/27), sem crash. O estado resultante está no
 A captura tier-2 do boot/título e dos save states de 8F/7F/batalha/level-up
 foi ingerida com `tier2_ingest.py`; os PCs quentes foram promovidos a roots
 permanentes. Com `tools/regen.sh` usando `--cfg-roots` por padrão, o grafo
-passou de **11 roots / 54 variantes AOT / 8 bancos** para **71 roots / 105
-variantes AOT / 10 bancos** (117 variantes exatas, 12 LLE-only). Na rota
+passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 292
+variantes AOT / 10 bancos** (339 variantes exatas, 47 LLE-only). Na rota
 longa, o build ficou em **~94,7% AOT / 5,3% interpretado**, com zero dispatch
-misses; no teste save4/save9, **98,8% AOT / 1,2% interpretado**. O relatório
+misses; no teste save4/save9, **99,4% AOT / 0,6% interpretado**. O relatório
 completo, comandos e a lista de roots está em `docs/coverage.md`.
+
+O salto veio do contrato de saída de `$00:9397`: a rotina empilha `PHP` e
+restaura com `PLP`/`PLX`, então a largura de saída espelha a de entrada. As
+três diretivas `exit_mx_variant 009397 ...` provaram o retorno para todos os
+chamadores e destravaram a análise pós-chamada que antes parava em
+`unproven_callee_exit`. O `$02:B0B6` também foi corrigido com uma fronteira
+explícita (`func Clamp_024E_TierWait b0b6 end:b0fa entry_mx:1,1`) e
+`force_variant_at` nos dois call sites; o overrun do `v2_regen` era uma
+variante fantasma M0X1, não dados lidos como código.
 
 O regen também recebeu `--profile-manifest`, `--no-host-root-scan` e um
 `funcs.h` temporário fora da raiz do projeto; sem isso o scanner readicionava
@@ -232,19 +241,19 @@ declarações antigas e o link-closure falhava com 28 variantes pendentes.
 Os dois dispatchers de HDMA (`$00:86C0`/`$00:88CE`) foram mantidos em
 **LLE** (`force_lle 0086C0`/`force_lle 0088CE`) porque o emitter ainda não
 materializa o `JMP ($0100)` com alvo vivo; o `unresolved_stub_get` fica zero
-e o custo é duas variantes AOT. O próximo passo de decompilação é modelar
+e o custo é duas funções em LLE. O próximo passo de decompilação é modelar
 esse dispatch no emitter, reativar `indirect_dispatch` com link-closure
 limpo e re-promover as duas funções.
 
 ## Próximos passos
 
-1. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter e re-promover
+1. Declarar contratos de saída para os gargalos repetidos `$03:983C` e
+   `$02:AFF9`, um de cada vez, validando `save4`/`save9` e o `snesref` após
+   cada contrato.
+2. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter e re-promover
    `$00:86C0`/`$00:88CE`; detalhes em `docs/coverage.md`.
-2. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
+3. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
    ingerir com `tier2_ingest.py` e adicionar os novos roots.
-3. Resolver o ciclo de frame wait (`$00:8014`/`$00:820E`/`$00:9397`/
-   `$01:8EAB`) com suporte a JSL terminal/entrada; depois promover
-   `$00:9397`, `$00:93F2`, `$01:8EAB` e `LevelUp_Apply`.
 4. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
    `$38` e `$3F`, e continuar a separação código/dados.
 5. Manter gameplay, save states e comparação com emulador como regressão.

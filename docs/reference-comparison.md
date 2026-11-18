@@ -79,11 +79,13 @@ A comparação foi repetida depois da varredura de cobertura/AOT (105 variantes
 em 10 bancos), de novo depois dos contratos de saída e da fronteira
 `$05:E5DB` (511 variantes AOT), de novo depois do contrato `$01:8613`
 (529 variantes AOT), de novo depois do cluster `$03:E91A`/`$03:E9B1` (532
-variantes AOT) e de novo depois do cluster `$03:EB06`/`$03:EEE4` + `$02:AFF9
-M0X0` (**603 variantes AOT** em 12 bancos, com `$00:86C0`/`$00:88CE` em
-LLE): os mesmos **6 bytes** de WRAM, a mesma SRAM e o mesmo framebuffer
-(AE 2353 / RMSE 30,29). O `unresolved_stub_get` ficou **zero** no título. A
-promoção de 105 para 603 variantes AOT não alterou o estado de referência.
+variantes AOT), de novo depois do cluster `$03:EB06`/`$03:EEE4` + `$02:AFF9
+M0X0` (603 variantes AOT) e de novo depois do cluster
+`$03:8834`/`$00:90EB`/`$00:F160` (**616 variantes AOT** em 12 bancos, com
+`$00:86C0`/`$00:88CE` em LLE): os mesmos **6 bytes** de WRAM, a mesma SRAM e
+o mesmo framebuffer (AE 2353 / RMSE 30,29). O `unresolved_stub_get` ficou
+**zero** no título. A promoção de 105 para 616 variantes AOT não alterou o
+estado de referência.
 
 ## Limitações e próximo passo
 

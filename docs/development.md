@@ -164,9 +164,9 @@ independente é o próximo passo de validação.
   escada em `(2,3)` e chegada ao 7F em `(10,2)`.
 - O servidor de debug funciona e `0x877`/`0x878`/`0x865` dão a posição; a
   grade do mapa ainda não está totalmente mapeada para o 7F.
-- A gravação/flush do save real (SRAM de 8 KiB) foi validada; o carregamento
-  pelo título ainda falha (CP-013). Os save states do host são apenas para
-  desenvolvimento.
+- O save real (SRAM de 8 KiB) foi validado de ponta a ponta (CP-013):
+  gravação, flush, boot e load pelo título. Save states antigos podem
+  restaurar SRAM zerada; o `save1` foi regenerado com a SRAM válida.
 - O state `save2` tem o nome `ナカジマあああ` por causa do avanço automático
   com A. É artefato de teste, não bug do recomp.
 - Os scripts de input dependem do timing atual; ajustes de `wait` podem ser
@@ -180,22 +180,15 @@ As primeiras rotinas de jogo promovidas para AOT são as de SRAM em bank `$03`:
 `Sram_SaveSlot` (`$A35B`), `Sram_LoadSlot` (`$A3BF`), `Sram_CheckHeader`
 (`$A397`), `Sram_Checksum` (`$ACFB`) e `Sram_ValidateChecksums` (`$AD20`), com
 `entry_m = 1` e `entry_x = 0`. O analyzer gerou 14 variantes AOT e 0 LLE-only.
-O save AOT produziu o mesmo hash de SRAM do save LLE; o load pelo título ainda
-está bloqueado. O diagnóstico GDB mostrou que o validador calcula `0x5A` para
-o slot 0, mas o título ainda rejeita mesmo com `0xEF=0x5A`; falta identificar
-a tabela/metadata que o save do elder não preenche. A instrumentação local de
-`cpu_write8`, `cart_write*`, `RtlReset`, `SnesInit` e `RtlReadSram` não
-capturou o zeroing; o próximo alvo é `cart_load`/`memset`/DMA ou um save de
-emulador para comparar.
+O save AOT produziu o mesmo hash de SRAM do save LLE e o load pelo título foi
+validado no boot natural. O antigo `save1` restaurava SRAM zerada e mascarava
+o load; ele foi regenerado com a SRAM válida.
 
 ## Próximos passos
 
-1. Fechar CP-013: achar por que o `CONTINUE` do título rejeita o save e zera a
-   SRAM; comparar com um save válido de emulador e instrumentar as leituras de
-   SRAM do caminho de load.
-2. Completar a validação de batalha: vitória/derrota/recrutamento, recompensas
-   e level-up, além do `TALK` já validado.
-3. Comparar boot/dungeon/batalha com o MesenCE usando frames e WRAM.
-4. Nomear as rotinas descobertas em `recomp/symbols.toml` — começando pelo
+1. Completar a validação de batalha: vitória/recrutamento, recompensas e
+   level-up, além do `TALK` e do game over já validados.
+2. Comparar boot/dungeon/batalha com o MesenCE usando frames e WRAM.
+3. Nomear as rotinas descobertas em `recomp/symbols.toml` — começando pelo
    caminho da batalha — e promover as seguras para AOT (`emit = true`).
-5. Expandir a cobertura para o restante do MT1 (7F, 6F, ...).
+4. Expandir a cobertura para o restante do MT1 (7F, 6F, ...).

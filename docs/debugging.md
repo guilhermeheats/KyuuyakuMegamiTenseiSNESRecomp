@@ -180,8 +180,7 @@ ao dungeon em `(8,2)`.
 
 ### SRAM e save/load (2026-11-17)
 
-O caminho de gravação do save do jogo foi validado, mas o carregamento pelo
-título ainda não:
+O caminho de save/load foi **validado**:
 
 - o elder do 8F grava em quatro slots de `0x800` bytes, em `0x0000`,
   `0x0800`, `0x1000` e `0x1800`;
@@ -193,25 +192,22 @@ título ainda não:
   `a0ca482fe5919969a94c51e9073d1b25527a05b06b273f56ec5493ca56aa100a`,
   idêntico à SRAM em memória;
 - no boot seguinte, o arquivo foi relido e a SRAM em memória voltou com o
-  mesmo hash; o elder reconheceu o save e mostrou
-  `0 ダイダロス L1 ナカジマあああ ユミコ`;
-- porém, no título, `CONTINUE` mostra `セーブされたデータがありません` e
-  zera a SRAM. Duplicar o slot para os quatro offsets e corrigir o checksum
-  (`0x5A`) não resolveu.
+  mesmo hash;
+- **boot natural** → título → `START`/`CONTINUE` → `CONTINUE`: a lista
+  mostrou `0 ダイダロス L1 ナカジマあああ ユミコ`; selecionar e confirmar
+  `ロードしますか？` carregou o jogo no 8F `(1,4)`, com 10 Macca, party
+  10/10/9/9 e 6 MP;
+- o checksum em `0x00EF` fica `0x00`; o jogo aceita o save assim mesmo.
 
-O bloqueio está no caminho de validação/carregamento do título, não na
-gravação. O próximo passo é comparar com um save válido de emulador
-(Mesen/Snes9x) ou instrumentar as leituras de SRAM desse caminho.
+> **Cuidado com save states:** o antigo `save1` restaurava uma SRAM zerada.
+> Testes que faziam `loadstate 1` antes do `CONTINUE` viam
+> `セーブされたデータがありません` e zeravam a SRAM. O `save1` foi regenerado
+> no título com a SRAM válida. Para validar o load, faça boot natural com o
+> `save.srm` ou use um save state capturado **depois** do save.
 
-Diagnóstico com GDB nos símbolos AOT:
-
-- no boot, `Sram_ValidateChecksums_M1X0` chamou `Sram_Checksum_M1X0` para o
-  slot 0 e o checksum calculado foi `0x5A`; o save tinha `0x00` em `0xEF`;
-- gravar manualmente `0xEF=0x5A` e manter o resto do save igual **ainda**
-  fez o `CONTINUE` zerar a SRAM;
-- logo, a rejeição não é só o checksum. O título deve validar também uma
-  tabela/metadata de arquivos que o save do elder não preenche (ou preenche
-  em outro formato).
+As cinco rotinas de SRAM foram promovidas para AOT (`emit = true`,
+`entry_m = 1`, `entry_x = 0`): 14 variantes AOT, 0 LLE-only; o save AOT
+produz o mesmo hash do save LLE.
 
 ## Exploração BFS (2026-11-17)
 
@@ -296,8 +292,9 @@ arquivos e valide o screenshot antes de explorar).
 1. Carregar `save11` (chegada ao 7F) ou `save6` (pós-batalha) para continuar.
 2. Usar o auto-map `Fixed` e `0x877`/`0x878`/`0x865` para mapear o 7F.
 3. Confirmar as coordenadas/gatilhos de Basim, Gnome e Dryad e descer ao 6F.
-4. Validar o carregamento do SRAM pelo menu do elder (CP-013) e o início do
-   Megami Tensei II (CP-014).
+4. Validar o início do Megami Tensei II (CP-014). Para testar save/load, faça
+   boot natural com o `save.srm`; save states antigos podem restaurar SRAM
+   zerada.
 
 Não use `write_ram` em um save real; use sempre um save state descartável e
 recarregue-o depois do teste.

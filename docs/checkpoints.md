@@ -17,7 +17,7 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
 | CP-010 | Primeira batalha | rota confirmada em `docs/route-8f.md`: Gate Keeper `(2,2)`, escada `(2,3)`, 7F `(10,2)`, batalha em `(8,2)` | **OK** — evento scripted de Heket; menu `FIGHT`/`ESCAPE`/`TALK`/`AUTO`, ataques, dano, revide, negociação `TALK`→`NO` e derrota/game over via `AUTO`; vitória ainda pendente |
 | CP-011 | Menu de status | apertar A na passagem (~frame 16400) | OK — COMP/MAGIC/ITEM/STATUS; ficha em ~frame 16800 |
 | CP-012 | Auto-mapping | A → COMP → `オートマッピング` (5º item; down ×4); configurar `Fixed` | OK — minimapa local; modo Fixed norte-para-cima mostra posição/EV |
-| CP-013 | Salvar e carregar pelo jogo | salvar via SRAM, reiniciar, carregar | **parcial** — gravação/flush OK: o elder grava os 4 slots; `save.srm` tem 8192 bytes e 93 bytes não-zero; o boot relê o arquivo. O carregamento pelo título (`CONTINUE`) ainda falha: mostra `セーブされたデータがありません` e zera o SRAM. |
+| CP-013 | Salvar e carregar pelo jogo | salvar via SRAM, reiniciar, carregar | **OK** — gravação/flush e carregamento validados; o `CONTINUE` lista o arquivo e restaura o estado. O save state antigo `save1` restaurava SRAM zerada e foi regenerado. |
 | CP-014 | Início do Megami Tensei II | completar o MT1 ou usar save de teste | pendente |
 
 ## CP-010 — detalhes da primeira batalha
@@ -65,33 +65,27 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
   (`a0ca482f…`).
 - **Leitura no boot:** o processo seguinte carregou o arquivo e a SRAM em
   memória voltou com o mesmo hash `a0ca482f…`.
-- **Bloqueio:** no título, `START`/`CONTINUE` → `CONTINUE` mostra
-  `セーブされたデータがありません` e zera a SRAM. O elder reconhece o mesmo
-  save, então o problema está no caminho de validação/carregamento do título,
-  não na gravação.
-- **Tentativas:** duplicar o slot válido para os quatro offsets e corrigir o
-  checksum (`0x5A`) não resolveu; o título continuou zerando a SRAM. A
-  comparação com emulador foi iniciada com Snes9x, mas a configuração de
-  input do emulador ainda não permitiu selecionar `CONTINUE`.
+- **Carregamento (boot natural):** com o `save.srm` válido, subir o jogo
+  **sem carregar save state** e ir ao título → `START`/`CONTINUE` →
+  `CONTINUE`. A lista mostrou
+  `0 ダイダロス L1 ナカジマあああ ユミコ`; `A` → `ロードしますか？` → `YES`
+  carregou o jogo no 8F em `(1,4)` virado para o sul, com 10 Macca
+  (`0x0A`), party 10/10, 9/9 e 6 MP. **CP-013 OK.**
+- **Causa da confusão:** o save state antigo `save1` restaurava uma SRAM
+  zerada; todos os testes que faziam `loadstate 1` antes do `CONTINUE`
+  viam `セーブされたデータがありません`. O `save1` foi regenerado no título
+  com a SRAM válida; `loadstate 1` agora preserva o save.
+- **Checksum:** o byte em `slot+0x00EF` fica `0x00`; o jogo aceita o save
+  assim mesmo. O valor `0x5A` calculado pelo validador não é exigido para
+  o load.
 - **AOT:** as cinco rotinas de SRAM (`$03:A35B` save, `$03:A3BF` load,
   `$03:A397` header, `$03:ACFB` checksum e `$03:AD20` validação) foram
   promovidas em `recomp/symbols.toml` com `emit = true`, `entry_m = 1`,
   `entry_x = 0`. O analyzer gerou 14 variantes AOT e 0 LLE-only; o save AOT
-  produziu o mesmo hash `a0ca482f…` do save LLE, mas o `CONTINUE` do título
-  continua rejeitando/zerando o SRAM.
-- **Diagnóstico GDB:** no boot, `Sram_ValidateChecksums_M1X0` chamou
-  `Sram_Checksum_M1X0` para o slot 0 e o checksum calculado foi `0x5A`;
-  o valor gravado no save era `0x00`. Mesmo gravando manualmente `0xEF=0x5A`
-  e deixando todo o resto igual, o `CONTINUE` ainda zerou a SRAM. Portanto a
-  rejeição **não é só o checksum**: o título deve checar outro campo/tabela
-  (provável tabela de arquivos/metadata) que o save do elder não preenche.
-- **Instrumentação local (revertida):** logs em `cpu_write8`/`cpu_write16`,
-  `cart_writeLorom`/`cart_writeHirom`, `RtlReset`, `SnesInit` e
-  `RtlReadSram` não dispararam no `CONTINUE`; a SRAM é zerada por um caminho
-  que não passa por esses pontos (provável `memset`/DMA/reinit de cart).
-- **Próximo passo:** instrumentar `cart_load`/`memset`/DMA ou comparar com
-  um save válido de emulador (para ver a tabela/metadata esperada) e achar a
-  condição exata que rejeita o save.
+  produziu o mesmo hash `a0ca482f…` do save LLE.
+- **Nota de teste:** não use um save state capturado antes do save para
+  validar o load; ele pode restaurar a SRAM zerada. Faça boot natural com o
+  `save.srm` ou regenere o save state depois do save.
 
 ## Formato sugerido de registro
 

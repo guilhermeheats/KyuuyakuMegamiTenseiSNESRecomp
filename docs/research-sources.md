@@ -111,12 +111,15 @@ mapa, imagem, ROM ou save de terceiros é versionado no repositório.
 - A primeira batalha foi validada no 7F em `(8,2)` (WRAM): evento scripted
   `妖魔ヘケットが現れた！`, menu de batalha, ataques/dano, revide e negociação
   `TALK` → `NO` encerrando a batalha em paz.
+- O save/load real foi validado (CP-013): o elder grava o slot, o flush no
+  shutdown persiste `save.srm`, o boot natural relê o arquivo e o `CONTINUE`
+  do título carrega o estado no 8F. Save states antigos podem restaurar SRAM
+  zerada; o `save1` foi regenerado.
 
 ## Próximos passos de pesquisa
 
 1. Confirmar as coordenadas/gatilhos de Basim, Gnome e Dryad no 7F e descer ao
    6F.
 2. Mapear o 7F com o auto-map `Fixed` e `0x877`/`0x878`/`0x865`.
-3. Fechar o CP-013: a gravação/flush do SRAM já foi validada, mas o
-   carregamento pelo `CONTINUE` do título ainda falha; depois validar o início
-   do Megami Tensei II (CP-014).
+3. Validar o início do Megami Tensei II (CP-014) e continuar a cobertura de
+   batalha/AOT no MT1.

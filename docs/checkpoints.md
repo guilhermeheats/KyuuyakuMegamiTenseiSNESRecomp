@@ -122,6 +122,11 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
   promovidas em `recomp/symbols.toml` com `emit = true`, `entry_m = 1`,
   `entry_x = 0`. O analyzer gerou 14 variantes AOT e 0 LLE-only; o save AOT
   produziu o mesmo hash `a0ca482f…` do save LLE.
+- **Comparação de referência (2026-11-18):** com o `snesref` (Snes9x
+  libretro) e a mesma SRAM, o frame 3660 do título teve apenas 6 bytes de
+  WRAM diferentes (animação/stack), SRAM idêntica e framebuffer com RMSE
+  0,046%. O MesenCE Linux não reconheceu `--testRunner`; ver
+  `docs/reference-comparison.md`.
 - **Nota de teste:** não use um save state capturado antes do save para
   validar o load; ele pode restaurar a SRAM zerada. Faça boot natural com o
   `save.srm` ou regenere o save state depois do save.

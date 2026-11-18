@@ -154,8 +154,12 @@ SNESRECOMP_FRAMEDUMP_PIXELS=1 \
 | `gh` | Publicação e manutenção do repositório |
 | Python | Scripts de análise, hashes e automação |
 
-O MesenCE ainda não foi usado neste projeto; a comparação com um emulador
-independente é o próximo passo de validação.
+A primeira comparação com referência externa foi feita com o **snesref**
+(Snes9x libretro): no frame 3660, a WRAM do título difere em apenas 6 bytes
+(animação/stack) e a SRAM é idêntica. O MesenCE 2.2.1 Linux foi baixado, mas
+o binário não reconheceu `--testRunner` (abriu a GUI e falhou em
+`XOpenDisplay`); a comparação com MesenCE fica pendente de um build com test
+runner funcional. Detalhes e comandos em `docs/reference-comparison.md`.
 
 ## Limitações conhecidas
 

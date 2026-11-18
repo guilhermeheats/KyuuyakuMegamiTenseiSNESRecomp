@@ -128,6 +128,11 @@ mapa, imagem, ROM ou save de terceiros é versionado no repositório.
   shutdown persiste `save.srm`, o boot natural relê o arquivo e o `CONTINUE`
   do título carrega o estado no 8F. Save states antigos podem restaurar SRAM
   zerada; o `save1` foi regenerado.
+- A primeira comparação com referência externa usou o snesref (Snes9x
+  libretro): no frame 3660, a WRAM do título difere em 6 bytes
+  (animação/stack) e a SRAM é idêntica; framebuffer com RMSE 0,046%. O
+  MesenCE 2.2.1 Linux não reconheceu `--testRunner`; ver
+  `docs/reference-comparison.md`.
 
 ## Próximos passos de pesquisa
 

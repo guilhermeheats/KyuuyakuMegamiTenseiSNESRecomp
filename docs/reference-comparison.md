@@ -83,12 +83,12 @@ variantes AOT), de novo depois do cluster `$03:EB06`/`$03:EEE4` + `$02:AFF9
 M0X0` (603 variantes AOT), de novo depois do cluster
 `$03:8834`/`$00:90EB`/`$00:F160` (616 variantes AOT) e de novo depois do
 frame wait AOT + `noreturn_jsl` + `$03:983C` (784 variantes AOT) e de novo
-depois da autorização do dispatch `$00:9B04` (**771 variantes AOT** em 12
-bancos, com `$00:86C0`/`$00:88CE` em LLE): os mesmos **6 bytes** de WRAM, a
-mesma SRAM e o mesmo framebuffer (AE 2353 / RMSE 30,29). O
-`unresolved_stub_get` ficou **zero** no título. O boot completo até o título
-também passou sem off-rails. A promoção de 105 para 771 variantes AOT não
-alterou o estado de referência.
+depois da autorização do dispatch `$00:9B04` (771 variantes AOT) e de novo
+depois do contrato de `$03:A630` (**782 variantes AOT** em 12 bancos, com
+`$00:86C0`/`$00:88CE` em LLE): os mesmos **6 bytes** de WRAM, a mesma SRAM e
+o mesmo framebuffer (AE 2353 / RMSE 30,29). O `unresolved_stub_get` ficou
+**zero** no título. O boot completo até o título também passou sem off-rails.
+A promoção de 105 para 782 variantes AOT não alterou o estado de referência.
 
 ## Limitações e próximo passo
 

@@ -24,7 +24,7 @@ Atualizado em 2026-11-18.
 | Auto-mapping | OK — mapa da dungeon pelo menu COMP |
 | Primeira batalha | OK — Heket, Mad Slug, Basim fixo, negociação, game over, vitória/EXP/level-up |
 | Save/load via SRAM do jogo | OK — gravação, flush, boot e reload |
-| Cobertura estática | 771 variantes AOT, 12 bancos; 99,4–99,9% AOT no save4/save9 |
+| Cobertura estática | 782 variantes AOT, 12 bancos; 99,4–99,9% AOT no save4/save9 |
 | Comparação de referência | OK no título via snesref; MesenCE pendente |
 
 Marcos de frame observados com `--framedump`:
@@ -219,8 +219,8 @@ retorno à dungeon (HP 26/26 e 27/27), sem crash. O estado resultante está no
 A captura tier-2 do boot/título e dos save states de 8F/7F/batalha/level-up
 foi ingerida com `tier2_ingest.py`; os PCs quentes foram promovidos a roots
 permanentes. Com `tools/regen.sh` usando `--cfg-roots` por padrão, o grafo
-passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 771
-variantes AOT / 12 bancos** (856 variantes exatas, 85 LLE-only). Na rota
+passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 782
+variantes AOT / 12 bancos** (860 variantes exatas, 78 LLE-only). Na rota
 longa, o build ficou em **~94,7% AOT / 5,3% interpretado**, com zero dispatch
 misses; nos testes frescos, **save4 99,80% AOT** e **save9 99,91% AOT**, com
 zero stubs. O relatório completo, comandos e a lista de roots está em
@@ -287,6 +287,11 @@ grafo ficou **856 nós / 771 AOT / 85 LLE** (o AOT caiu porque os handlers
 novos incluem LLE), A/B 99,91% e 1,03–1,09s, boot/título/save4/save9 válidos,
 zero stubs.
 
+O nono lote declarou a saída de `$03:A630`: ambas as variantes retornam M1X0,
+o que provou o retorno do `$03:983C` e o promoveu nas três variantes. O grafo
+foi para **860 nós / 782 AOT / 78 LLE**; A/B em 99,91% e 1,02–1,03s, zero
+stubs; boot/título/save4/save9 válidos.
+
 O regen também recebeu `--profile-manifest`, `--no-host-root-scan` e um
 `funcs.h` temporário fora da raiz do projeto; sem isso o scanner readicionava
 declarações antigas e o link-closure falhava com 28 variantes pendentes.
@@ -306,12 +311,11 @@ limpo e re-promover as duas funções.
 
 ## Próximos passos
 
-1. Declarar o contrato de `$03:A630` (promove `$03:983C`), depois
-   `$02:DC53`/`$01:91DA` (promovem `$02:AFF9`/`$02:AFB6`). Em paralelo, o
-   bloco `$30` e o cluster `$00:9077`/`$00:9188` são os próximos maiores.
-   Cada contrato precisa de `save4`/`save9`, `snesref` e **tempo de
-   parede**. Se um contrato expuser outro BRK de caminho de erro, adicionar
-   uma fronteira `data_region` como `$05:E5DB`.
+1. Atacar `$00:9077`/`$00:9188` e o bloco `$30` (a cadeia que mantém
+   `$03:A630` em LLE), depois `$02:DC53`/`$01:91DA` (promovem
+   `$02:AFF9`/`$02:AFB6`). Cada contrato precisa de `save4`/`save9`,
+   `snesref` e **tempo de parede**. Se um contrato expuser outro BRK de
+   caminho de erro, adicionar uma fronteira `data_region` como `$05:E5DB`.
 2. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter e re-promover
    `$00:86C0`/`$00:88CE`; detalhes em `docs/coverage.md`.
 3. Declarar as tabelas indiretas restantes (`$01:C72B`/`CD9C`/`EF15`,

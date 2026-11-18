@@ -24,7 +24,7 @@ Atualizado em 2026-11-18.
 | Auto-mapping | OK — mapa da dungeon pelo menu COMP |
 | Primeira batalha | OK — Heket, Mad Slug, Basim fixo, negociação, game over, vitória/EXP/level-up |
 | Save/load via SRAM do jogo | OK — gravação, flush, boot e reload |
-| Cobertura estática | 511 variantes AOT, 12 bancos; 99,40–99,75% AOT no save4/save9 |
+| Cobertura estática | 529 variantes AOT, 12 bancos; 99,4–99,9% AOT no save4/save9 |
 | Comparação de referência | OK no título via snesref; MesenCE pendente |
 
 Marcos de frame observados com `--framedump`:
@@ -219,10 +219,10 @@ retorno à dungeon (HP 26/26 e 27/27), sem crash. O estado resultante está no
 A captura tier-2 do boot/título e dos save states de 8F/7F/batalha/level-up
 foi ingerida com `tier2_ingest.py`; os PCs quentes foram promovidos a roots
 permanentes. Com `tools/regen.sh` usando `--cfg-roots` por padrão, o grafo
-passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 511
-variantes AOT / 12 bancos** (590 variantes exatas, 79 LLE-only). Na rota
+passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 529
+variantes AOT / 12 bancos** (614 variantes exatas, 85 LLE-only). Na rota
 longa, o build ficou em **~94,7% AOT / 5,3% interpretado**, com zero dispatch
-misses; nos testes frescos, **save4 99,40% AOT** e **save9 99,75% AOT**, com
+misses; nos testes frescos, **save4 99,80% AOT** e **save9 99,89% AOT**, com
 zero stubs. O relatório completo, comandos e a lista de roots está em
 `docs/coverage.md`.
 
@@ -243,8 +243,16 @@ imediato `LDA #$0001` como `BRK` em `$05:E5DB`. Como o analyzer trata
 qualquer BRK como `structural_poison` e descarta todas as demandas do nó, o
 SCC inteiro caía de 590 para 153 nós. A fronteira
 `data_region 05 e5db e5dc` em `recomp/bank05.cfg` marca só esse byte como
-não-código e preserva o caminho M=0 válido em `$E5DC`. O resultado é o grafo
-atual de 511 variantes AOT.
+não-código e preserva o caminho M=0 válido em `$E5DC`. O resultado foi o
+grafo de 511 variantes AOT.
+
+O terceiro contrato foi `$01:8613` (`018613`), que também preserva P/X. Ele
+destravou `$02:D13B` e outros chamadores sem tocar no caminho de menu do
+983C. O A/B de `step 60` no save9 ficou em **1,03–1,04s** (o mesmo tempo do
+baseline 511) e 99,89% AOT; o grafo subiu para **614 nós / 529 AOT / 85
+LLE**. O contrato de `$03:983C` foi testado e **rejeitado**: sobe para 596
+AOT, mas o `step 60` passa de 1,03s para 12,79s porque o frame wait
+`$00:9300` vira o gargalo interpretado (detalhes em `docs/coverage.md`).
 
 O regen também recebeu `--profile-manifest`, `--no-host-root-scan` e um
 `funcs.h` temporário fora da raiz do projeto; sem isso o scanner readicionava
@@ -259,13 +267,12 @@ limpo e re-promover as duas funções.
 
 ## Próximos passos
 
-1. Declarar contratos de saída para `$03:E91A`/`$03:E9B1`, `$02:D13B` e o
-   bloco `$30`, um de cada vez, validando `save4`/`save9`, o `snesref` e o
-   **tempo de parede** após cada contrato. O contrato de `$03:983C` já foi
-   testado: sobe para 596 AOT/677 nós, mas o `step 60` no save9 passa de
-   **1,03s para 12,79s** (12,4x) porque o frame wait `$00:9300` vira o
-   gargalo interpretado; foi rejeitado (detalhes em `docs/coverage.md`). Se
-   um contrato expuser outro BRK de caminho de erro, adicionar uma fronteira
+1. Declarar contratos de saída para `$03:E91A`/`$03:E9B1`, `$02:AFB6`/
+   `$02:DBB7`, `$00:947D`/`$00:90EB` e o bloco `$30`, um de cada vez,
+   validando `save4`/`save9`, o `snesref` e o **tempo de parede** após cada
+   contrato. O `$018613` foi adotado (529 AOT/614 nós, `step 60` inalterado);
+   o `$03:983C` foi rejeitado (596 AOT, mas `step 60` 12,79s vs 1,03s). Se um
+   contrato expuser outro BRK de caminho de erro, adicionar uma fronteira
    `data_region` como `$05:E5DB`.
 2. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter e re-promover
    `$00:86C0`/`$00:88CE`; detalhes em `docs/coverage.md`.

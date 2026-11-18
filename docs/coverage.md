@@ -71,16 +71,16 @@ bancos `$00`, `$01`, `$02`, `$03`, `$30`, `$38` e `$3F`.
 
 Com `tools/regen.sh` (agora com `--cfg-roots` por padrão):
 
-| Métrica | Linha de base | Depois dos contratos e da fronteira BRK |
+| Métrica | Linha de base | Depois dos contratos |
 |---|---:|---:|
 | Roots | 11 | 72 |
-| Variantes exatas | 60 | 590 |
-| Variantes AOT-eligible | 54 | 511 |
-| Variantes LLE-only | 6 | 79 |
+| Variantes exatas | 60 | 614 |
+| Variantes AOT-eligible | 54 | 529 |
+| Variantes LLE-only | 6 | 85 |
 | Bancos emitidos | 8 | 12 |
-| Entradas de dispatch | 51 | 456 |
-| Entradas com AOT | 46 | 389 |
-| Variantes AOT no dispatch | 54 | 511 |
+| Entradas de dispatch | 51 | 473 |
+| Entradas com AOT | 46 | 403 |
+| Variantes AOT no dispatch | 54 | 529 |
 
 No mesmo build, após carregar os save states de 8F/7F/batalha/level-up, o
 `interp_stats` acumulado mostrou **~94,7% AOT / ~5,3% interpretado** (o boot
@@ -93,7 +93,7 @@ Antes dos contratos de saída, o teste carregando `save4` (level-up) e `save9`
 de HDMA (`$00:86C0`/`$00:88CE`) estão em LLE, então o
 `unresolved_stub_get` retorna **zero**: o fallback AOT que registrava
 `dispatch_oob` não é mais usado. Os dois destravamentos abaixo levaram o
-mesmo teste a **99,4–99,7% AOT**.
+mesmo teste a **99,4–99,9% AOT**.
 
 ### Destravamento 1: contrato de saída de `$00:9397`
 
@@ -159,6 +159,23 @@ Os nós do ciclo de boot continuam LLE: `$00:9397`, `$00:8014` e `$01:8EAB`
 (o `$8014` termina em `BRA $8113`), então não há contrato de retorno a
 inventar para ele.
 
+### Destravamento 3: `$01:8613` (`018613`)
+
+`$01:8613` salva/restaura P e X; o `RTL` em `$8702` restaura ambos. As três
+variantes de entrada (M0X1/M1X0/M1X1) retornam com a largura de entrada:
+
+```text
+exit_mx_variant 018613 0 1 0 1
+exit_mx_variant 018613 1 0 1 0
+exit_mx_variant 018613 1 1 1 1
+```
+
+O contrato promoveu `$02:D13B` (M1X0/M1X1) e outros chamadores, sem tocar no
+caminho de menu do 983C. O A/B com `save9`/`step 60` mostrou **529 AOT / 614
+nós / 85 LLE**, AOT **99,89%** e `step 60` em **1,03–1,04s** — o mesmo tempo
+do baseline 511. Zero stubs; `save4` em 99,80% AOT e título com os mesmos
+6 bytes/SRAM/AE 2353/RMSE 30,29.
+
 ## Correções no `tools/regen.sh`
 
 O ganho depende de o regen realmente semear os `func` dos cfgs:
@@ -199,8 +216,8 @@ Para manter o build honesto e sem falso alarme, as duas funções foram
 marcadas com `force_lle 0086C0`/`force_lle 0088CE` em `recomp/bank00.cfg`.
 Agora o interpretador executa o `JMP ($0100)` com o ponteiro vivo,
 `unresolved_stub_get` retorna **zero** e a rota save4/save9 fica em
-**99,4–99,7% AOT / 0,3–0,6% interpretado**. O custo continua sendo duas
-funções em LLE; o resto do grafo cresceu para 511 variantes AOT com os
+**99,4–99,9% AOT / 0,1–0,6% interpretado**. O custo continua sendo duas
+funções em LLE; o resto do grafo cresceu para 529 variantes AOT com os
 contratos de saída e a fronteira de `$05:E5DB`.
 
 O próximo passo de decompilação é **modelar esse dispatch vivo no emitter**
@@ -210,19 +227,19 @@ funções. Uma tentativa inicial de `indirect_dispatch ... ptrtail targets:...`
 elevou a análise para 131 variantes, mas o link-closure rejeitou 28 variantes
 chamadas e não definidas; as diretivas foram revertidas.
 
-## Fronteira atual: 79 nós LLE-only
+## Fronteira atual: 85 nós LLE-only
 
-Os 79 nós LLE-only (67 bases) restantes se distribuem em poucos clusters.
-As razões ainda são 167 `unproven_call`, 78
-`truncated_call_continuation`, 77 `unproven_callee_exit` e um
-`brk_at_04BEC6`/`structural_poison`:
+Os 85 nós LLE-only (70 bases) restantes se distribuem em poucos clusters.
+As razões ainda são 179 `unproven_call`, 83
+`truncated_call_continuation`, 78 `unproven_callee_exit` e dois
+`brk_at_*`/`structural_poison`:
 
 | Cluster | Bases/variantes | Bloqueio |
 |---|---|---|
 | Ciclo de boot/frame wait | `$00:8014`, `$00:9397` (4), `$01:8EAB` | caminho terminal; não há retorno a provar |
-| Lógica do banco `$02` | `$02:AFF9` (4), `$02:D13B` (2), `$02:DBB7`, `$02:8183` | chamadas para `$03:E91A`/`$03:E9B1` ainda sem contrato |
+| Lógica do banco `$02` | `$02:AFF9` (4), `$02:DBB7`, `$02:AFB6`, `$02:8183` | chamadas para `$03:E91A`/`$03:E9B1` ainda sem contrato |
 | Texto/menus e continuação do banco `$03` | ~23 bases, incluindo `$03:983C` (2), `$03:9C66`, `$03:A630` (2), `$03:E91A`, `$03:E9B1`, `$03:EAEE`–`$03:EB06` | maior bloco; maioria `unproven_call` |
-| Helpers `$00`/`$01` | `$00:9077`, `$00:9188`, `$00:94C3`, `$00:BA04`, `$00:BA6B`; `$01:8613` (3), `$01:91DA`, `$01:D672`–`$01:D9A2` | inclui o cluster de texto `$01:D6xx` |
+| Helpers `$00`/`$01` | `$00:9077`, `$00:90EB`, `$00:947D`, `$00:9188`, `$00:9A85`, `$00:C0FE`, `$00:BA04`, `$00:BA6B`; `$018613` (3), `$01:D672`–`$01:D9A2` | inclui o cluster de texto `$01:D6xx` |
 | Banco `$05` | `$05:8CB1`, `$05:931F`, `$05:9421`, `$05:962D`, `$05:96A0` | chamadas não provadas |
 | Bloco `$30` | 16 bases (`$30:8416`…`$30:F424`) | provável motor de som/gráficos; dispatcher `$0080AE` |
 | `$04:BE39` | 1 | `brk_at_04BEC6`/`structural_poison`; separar código/dados |
@@ -255,7 +272,8 @@ promove o caminho de menu/texto do banco `$03`, que termina o trabalho e
 gasta o resto do frame girando no `$9397` interpretado. O AOT% e o tempo de
 parede apontam para o mesmo gargalo: o frame wait precisa ser promovido ou
 o caminho que o chama precisa ser contido antes de adotar este contrato.
-**O contrato foi rejeitado e o build 511 mantido**; os próximos contratos
+**O contrato foi rejeitado**; o baseline 511 foi mantido naquele momento e
+depois avançou para **529 com o contrato `$018613`**. Os próximos contratos
 devem passar pelo mesmo harness de tempo de parede, não só pelo AOT%.
 
 O próximo passo de maior alavancagem é declarar contratos de saída para
@@ -312,11 +330,12 @@ não a promoção AOT.
 
 ## Próximos passos
 
-1. Declarar contratos de saída para `$03:983C`, `$03:E91A`/`$03:E9B1`,
-   `$02:D13B` e o bloco `$30`, um de cada vez, validando `save4`/`save9` e a
-   comparação com o `snesref` depois de cada contrato. Se a análise expuser
-   outro `BRK` de caminho de erro, adicionar uma fronteira `data_region`
-   como a de `$05:E5DB`.
+1. Declarar contratos de saída para `$03:E91A`/`$03:E9B1`, `$02:AFB6`/
+   `$02:DBB7`, `$00:947D`/`$00:90EB` e o bloco `$30`, um de cada vez,
+   validando `save4`/`save9`, o `snesref` e o **tempo de parede** depois de
+   cada contrato. `$03:983C` fica rejeitado até o frame wait ser promovido
+   ou contido. Se a análise expuser outro `BRK` de caminho de erro, adicionar
+   uma fronteira `data_region` como a de `$05:E5DB`.
 2. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter, reativar
    `indirect_dispatch` com link-closure limpo e re-promover
    `$00:86C0`/`$00:88CE`.

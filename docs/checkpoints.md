@@ -14,7 +14,7 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
 | CP-007 | Primeira dungeon | confirmar os status (~frame 14861) | OK — corredor inicial |
 | CP-008 | Movimento | setas na dungeon | OK — câmera muda de célula |
 | CP-009 | Interação com baú | andar até o baú (~frame 15100) | OK — diálogo YES/NO; loot `500` + `宝玉` |
-| CP-010 | Primeira batalha | rota confirmada em `docs/route-8f.md`: Gate Keeper `(2,2)`, escada `(2,3)`, 7F `(10,2)`, batalha em `(8,2)` | **OK** — primeiro encontro aleatório com Heket; menu `FIGHT`/`ESCAPE`/`TALK`/`AUTO`, ataques, dano, revide, negociação `TALK`→`NO` e derrota/game over via `AUTO`; vitória ainda pendente |
+| CP-010 | Primeira batalha | rota confirmada em `docs/route-8f.md`: Gate Keeper `(2,2)`, escada `(2,3)`, 7F `(10,2)`, batalha em `(8,2)` | **OK** — encontros aleatórios de Heket (negociação) e besta verde (provável Basim), derrota/game over e vitória contra 2 Mad Slugs com 100 EXP/65 Macca/20 MAG e level-up (com boost de debug); alocação do bônus de level-up pendente |
 | CP-011 | Menu de status | apertar A na passagem (~frame 16400) | OK — COMP/MAGIC/ITEM/STATUS; ficha em ~frame 16800 |
 | CP-012 | Auto-mapping | A → COMP → `オートマッピング` (5º item; down ×4); configurar `Fixed` | OK — minimapa local; modo Fixed norte-para-cima mostra posição/EV |
 | CP-013 | Salvar e carregar pelo jogo | salvar via SRAM, reiniciar, carregar | **OK** — gravação/flush e carregamento validados; o `CONTINUE` lista o arquivo e restaura o estado. O save state antigo `save1` restaurava SRAM zerada e foi regenerado. |
@@ -37,6 +37,13 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
   `(8,2)`, apareceu uma besta verde (provável Basim); `TALK` respondeu
   `グルルルルル...` e `ESCAPE` falhou duas vezes; o inimigo causou 3 de
   dano em Nakajima. O gatilho fixo de Basim/Gnome continua não confirmado.
+- **Vitória/level-up (com boost de debug):** contra 2 Mad Slugs no 7F, com
+  HP/stats elevados via debug (999 HP, 99 stats). A batalha terminou com
+  `外道マッドスラッグを倒した！`, **100 EXP**, **65 Macca** e **20 MAG**;
+  Nakajima subiu para **LV 2** e a tela `レベルアップ：ナカジマあああ`
+  apareceu com `BONUS 1`. A alocação do bônus não foi concluída.
+  A vitória em dificuldade normal ainda não foi obtida; o grupo no nível 1
+  não conseguiu ferir o Mad Slug.
 - **Combate:** ataques físicos causaram 0–1 de dano; o inimigo revidou com
   2–3 de dano. A negociação `TALK` → `わたしと対等に話すつもりか？` → `NO`
   → `はははっ、よく分かっているようだな` →

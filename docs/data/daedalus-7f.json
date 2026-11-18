@@ -116,6 +116,22 @@
       "talk": "グルルルルル...",
       "escape": "failed twice",
       "damage": "Nakajima took 3 damage"
+    },
+    "victory": {
+      "type": "random_encounter",
+      "wram": {
+        "x": 8,
+        "y": 2
+      },
+      "demons": "2 Mad Slugs",
+      "debug_boost": "party HP 999 and stats 99 via the debugger",
+      "message": "外道マッドスラッグを倒した！",
+      "rewards": {
+        "exp": 100,
+        "macca": 65,
+        "mag": 20
+      },
+      "level_up": "Nakajima LV2; bonus allocation pending"
     }
   },
   "notes": [

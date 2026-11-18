@@ -114,6 +114,9 @@ mapa, imagem, ROM ou save de terceiros é versionado no repositório.
 - A primeira batalha foi validada no 7F em `(8,2)` (WRAM): encontro aleatório
   com `妖魔ヘケットが現れた！`, menu de batalha, ataques/dano, revide e
   negociação `TALK` → `NO` encerrando a batalha em paz.
+- A vitória/level-up foi validada contra 2 Mad Slugs, com boost de debug:
+  `外道マッドスラッグを倒した！`, 100 EXP, 65 Macca, 20 MAG e
+  `レベルアップ：ナカジマあああ` (LV 2). A alocação do bônus ficou pendente.
 - O save/load real foi validado (CP-013): o elder grava o slot, o flush no
   shutdown persiste `save.srm`, o boot natural relê o arquivo e o `CONTINUE`
   do título carrega o estado no 8F. Save states antigos podem restaurar SRAM

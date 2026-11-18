@@ -125,10 +125,15 @@ O 8F tem 64 células conectadas. A escada `(3,3)` leva ao 7F `(11,3)`.
 - O caminho de **derrota/game over** também foi validado com `AUTO`: a party
   chegou a 0/10 e 0/9, apareceram `パーティーは敵に敗れて...` e
   `志半ばに力尽きた`, seguidos da cena do barco; o recomp não crashou.
-- **Vitória** ainda pendente: os ataques físicos causam 0–1 e Yumiko não tem
-  magia utilizável neste ponto (`使える魔法はありません`). O grupo tem Jack
-  Knife, Nunchaku e Combat Suits no inventário, mas o menu de equipamentos
-  ainda não foi dominado; equipar deve aumentar o dano.
+- A **vitória/level-up** foi validada contra 2 Mad Slugs, com boost de debug
+  (999 HP/99 stats): `外道マッドスラッグを倒した！`, **100 EXP**, **65 Macca**,
+  **20 MAG** e `レベルアップ：ナカジマあああ` (LV 2, `BONUS 1`). A alocação
+  do bônus ficou pendente. Em dificuldade normal, o grupo no nível 1 não
+  conseguiu ferir o Mad Slug; o grinding/equipamento ainda é necessário.
+- **Equipamento:** o caminho é `A` → `B` (duas vezes) → `ITEM` → `そうび`;
+  a tela `EQUIPMENTS` mostra Jack Knife, Nunchaku e Combat Suit. O manual
+  confirma que é preciso equipar explicitamente; a interação de slot ainda
+  não foi concluída.
 
 ## 7F — primeira batalha
 
@@ -163,6 +168,8 @@ versionados.
 
 ## O que ainda falta
 
+- Concluir a alocação do bônus de level-up e repetir a vitória sem boost de
+  debug; o grinding/equipamento em dificuldade normal ainda é necessário.
 - Confirmar as coordenadas e os gatilhos exatos de Basim, Gnome e Dryad no 7F
   (o encontro aleatório de Heket em `(8,2)` já foi confirmado; a besta verde
   provável Basim também apareceu aleatoriamente).

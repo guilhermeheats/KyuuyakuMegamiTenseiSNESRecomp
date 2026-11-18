@@ -173,16 +173,47 @@ modelar esse JSL como transferência terminal/entrada (ou fornecer fatos de
 saída para o ciclo) e então promover `$00:9397`, `$00:93F2`, `$01:8EAB` e
 `LevelUp_Apply`.
 
+## Sonda `v2_regen`: dispatches restantes
+
+O pipeline `v2_regen.py` (com o fixpoint de auto-promote/reference-taint) foi
+rodado como sonda com `--tier-down-stubs`; ele não é o pipeline padrão do
+projeto e falhou no banco `$02` por `max_insns=12000` em `$02B0B6`, mas
+listou os dispatches indiretos que ainda não têm tabela declarada:
+
+| Site | Forma | Ocorrências | Observação |
+|---|---|---:|---|
+| `$00:9B04` | JMP (abs) | 4 | banco `$00` |
+| `$01:C72B` | JMP (abs) | 4 | banco `$01` |
+| `$01:CD9C` | JMP (abs) | 4 | banco `$01` |
+| `$01:EF15` | JMP (abs) | 4 | banco `$01` |
+| `$30:969C` | JMP [abs] | 2 | operand `$0080AE` |
+| `$30:A33C` | JMP [abs] | 2 | operand `$0080AE` |
+| `$30:C078` | JMP [abs] | 2 | operand `$0080AE` |
+| `$30:C19B` | JMP [abs] | 2 | operand `$0080AE` |
+| `$30:D266` | JMP [abs] | 2 | operand `$0080AE` |
+| `$30:D6DB` | JMP [abs] | 1 | operand `$0080AE` |
+
+Os sites `$30:*` compartilham o ponteiro `$0080AE`, provavelmente um
+dispatcher comum do motor de som. O probe também rejeitou três alvos
+JSR/JSL fora do LoROM (`$30:00A0`, `$30:00BD`, `$30:7EA9`) e registrou um
+fold constante-Z em `$00:AA11` (BEQ → fall-through, alvo morto `$00:A998`).
+
+O build padrão (`v2_emit`) ainda usa o fallback LLE nesses sites; eles são os
+próximos candidatos a `indirect_dispatch`/tabela e a separação código/dados
+(principalmente o overrun de `$02:B0B6`).
+
 ## Próximos passos
 
 1. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter, reativar
    `indirect_dispatch` com link-closure limpo e re-promover
    `$00:86C0`/`$00:88CE`.
-2. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
+2. Declarar as tabelas dos sites `$00:9B04`, `$01:C72B`/`CD9C`/`EF15` e
+   `$30:*` (ponteiro `$0080AE`) e separar o código dos dados em `$02:B0B6`.
+3. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
    ingerir com `tier2_ingest.py` e adicionar os novos roots.
-3. Resolver o ciclo de frame wait (`$00:8014`/`$00:820E`/`$00:9397`/
+4. Resolver o ciclo de frame wait (`$00:8014`/`$00:820E`/`$00:9397`/
    `$01:8EAB`) com suporte a JSL terminal/entrada; depois promover
    `$00:9397`, `$00:93F2`, `$01:8EAB` e `LevelUp_Apply`.
-4. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
+5. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
    `$38` e `$3F`, e continuar a separação código/dados.
-5. Manter gameplay, save states e comparação com emulador como regressão.
+6. Manter gameplay, save states e comparação com emulador como regressão.

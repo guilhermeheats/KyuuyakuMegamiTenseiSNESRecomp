@@ -74,13 +74,13 @@ Com `tools/regen.sh` (agora com `--cfg-roots` por padrão):
 | Métrica | Linha de base | Depois dos contratos |
 |---|---:|---:|
 | Roots | 11 | 72 |
-| Variantes exatas | 60 | 849 |
-| Variantes AOT-eligible | 54 | 784 |
-| Variantes LLE-only | 6 | 65 |
+| Variantes exatas | 60 | 856 |
+| Variantes AOT-eligible | 54 | 771 |
+| Variantes LLE-only | 6 | 85 |
 | Bancos emitidos | 8 | 12 |
-| Entradas de dispatch | 51 | 631 |
-| Entradas com AOT | 46 | 579 |
-| Variantes AOT no dispatch | 54 | 784 |
+| Entradas de dispatch | 51 | 637 |
+| Entradas com AOT | 46 | 567 |
+| Variantes AOT no dispatch | 54 | 771 |
 
 No mesmo build, após carregar os save states de 8F/7F/batalha/level-up, o
 `interp_stats` acumulado mostrou **~94,7% AOT / ~5,3% interpretado** (o boot
@@ -233,6 +233,25 @@ adotado: **849 nós / 784 AOT / 65 LLE**. A/B save9: **99,91% AOT**,
 off-rails; título idêntico ao `snesref` (6 bytes/SRAM/AE 2353/RMSE 30,29);
 zero stubs.
 
+### Destravamento 8: dispatch `$00:9B04`
+
+Um soak longo no título (frame 666.606) bateu em
+`dispatch_oob_$009B04[00FFFF]`, com stack top `bank_00_9A85_M1X1`; o
+fallback abandonou a execução e o processo abortou no frame 681.188. O site
+é um `JMP ($0000)` com tabela de **32 palavras** em `$9B08`, indexada por
+`($0875 & $1F) * 2`. O cfg agora autoriza a tabela:
+
+```text
+indirect_dispatch 9b04 32 ptrtail targets:9c59,9b97,...,9c59
+```
+
+O `dispatch_oob` nesse site desapareceu do C gerado. O grafo ficou **856
+nós / 771 AOT / 85 LLE**; o AOT caiu de 784 porque os 32 destinos incluem
+handlers LLE — a prioridade foi eliminar o trap, não inflar o número. O A/B
+save9 ficou em **99,91% AOT** e **1,03–1,09s**; boot/título/save4/save9
+passaram, zero stubs. O soak de 666k frames não foi repetido (leva horas); a
+autorização estática remove o trap e o interpretador executa o dispatch real.
+
 ## Correções no `tools/regen.sh`
 
 O ganho depende de o regen realmente semear os `func` dos cfgs:
@@ -274,8 +293,9 @@ marcadas com `force_lle 0086C0`/`force_lle 0088CE` em `recomp/bank00.cfg`.
 Agora o interpretador executa o `JMP ($0100)` com o ponteiro vivo,
 `unresolved_stub_get` retorna **zero** e a rota save4/save9 fica em
 **99,4–99,9% AOT / 0,1–0,6% interpretado**. O custo continua sendo duas
-funções em LLE; o resto do grafo cresceu para 784 variantes AOT com os
-contratos de saída, a fronteira de `$05:E5DB` e o frame wait AOT.
+funções em LLE; o resto do grafo cresceu para 771 variantes AOT com os
+contratos de saída, a fronteira de `$05:E5DB`, o frame wait AOT e o dispatch
+`$00:9B04`.
 
 O próximo passo de decompilação é **modelar esse dispatch vivo no emitter**
 (ou declarar `indirect_dispatch` de forma que o link-closure aceite os 8+4
@@ -284,27 +304,29 @@ funções. Uma tentativa inicial de `indirect_dispatch ... ptrtail targets:...`
 elevou a análise para 131 variantes, mas o link-closure rejeitou 28 variantes
 chamadas e não definidas; as diretivas foram revertidas.
 
-## Fronteira atual: 65 nós LLE-only
+## Fronteira atual: 85 nós LLE-only
 
-Os 65 nós LLE-only (52 bases) restantes se distribuem em poucos clusters.
-As razões ainda são 87 `unproven_call`, 62
-`truncated_call_continuation`, 54 `unproven_callee_exit`, três
+Os 85 nós LLE-only (70 bases) restantes se distribuem em poucos clusters.
+As razões ainda são 138 `unproven_call`, 82
+`truncated_call_continuation`, 74 `unproven_callee_exit`, três
 `brk_at_*`/`structural_poison` e uma aresta indireta:
 
 | Cluster | Bases/variantes | Bloqueio |
 |---|---|---|
 | Main loop | `$00:8014` | nunca retorna; chama `$05:8CB1`/`$00:94C3` sem saída provada |
+| Handlers do dispatch `$9B04` | `$00:9A85`, `$00:9B55`, `$00:9C1B`, `$00:9C3A`, `$00:9C59`, `$00:9D6E`, `$00:9DE9`, `$00:9EFB`, `$00:9F81`, `$00:A04A`, `$00:A051`, `$00:A1D8`, `$00:A4BA`, `$00:A507`, `$00:B241`, `$00:B534` | dispatch autorizado; handlers ainda têm callees não provados |
 | Lógica do banco `$02` | `$02:AFF9` (4), `$02:AFB6` | `$02:DC53`/`$01:91DA` ainda sem saída provada |
-| Texto/menus e continuação do banco `$03` | `$03:983C` (2), `$03:9C66`, `$03:A630` (2), `$03:8834`, `$03:9DBD`, `$03:AD87`, `$03:B3AB`, `$03:B43B` | `$03:983C` agora bloqueia só em `$03:A630`; `$03:A630` volta para `$00:9077`/`$30:D226` |
+| Texto/menus e continuação do banco `$03` | `$03:983C` (2), `$03:9C66`, `$03:A630` (2), `$03:8834`, `$03:9DBD`, `$03:AD87`, `$03:B3AB`, `$03:B43B` | `$03:983C` bloqueia só em `$03:A630`; `$03:A630` volta para `$00:9077`/`$30:D226` |
 | Helpers `$00`/`$01` | `$00:9077`, `$00:90EB`, `$00:9188`, `$00:947D`, `$00:94C3`, `$00:BF53`, `$00:F160`; `$01:91DA`, `$01:D672`–`$01:D9A2`, `$01:979C`–`$01:99B8`, `$01:AA30`, `$01:AE08`, `$01:EE96` | cluster de texto/input; maioria `unproven_call` |
 | Banco `$05` | `$05:8CB1`, `$05:931F`, `$05:962D`, `$05:96A0` | chamadas não provadas |
 | Bloco `$30` | 16 bases (`$30:8416`…`$30:F424`) | provável motor de som/gráficos; dispatcher `$0080AE` |
 | `$04:BE39` | 1 | `brk_at_04BEC6`/`structural_poison`; separar código/dados |
 
 O main loop `$00:8014` continua LLE (nunca retorna). O frame wait `$00:9397`
-(quatro variantes), `$01:8EAB` e `$02:DBB7` agora são AOT. O `$03:983C`
-continua LLE porque chama `$03:A630`; esse é o próximo contrato de maior
-alavancagem.
+(quatro variantes), `$01:8EAB` e `$02:DBB7` agora são AOT. O dispatch
+`$00:9B04` está autorizado; os handlers novos ainda são LLE porque chamam
+funções sem saída provada. O `$03:983C` continua LLE porque chama
+`$03:A630`; esse é o próximo contrato de maior alavancagem.
 
 ### Histórico: o gargalo do `$03:983C`
 
@@ -377,7 +399,7 @@ não a promoção AOT.
 2. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter, reativar
    `indirect_dispatch` com link-closure limpo e re-promover
    `$00:86C0`/`$00:88CE`.
-3. Declarar as tabelas dos sites `$00:9B04`, `$01:C72B`/`CD9C`/`EF15`,
+3. Declarar as tabelas dos sites restantes `$01:C72B`/`CD9C`/`EF15`,
    `$02:DC74` e `$30:*` (ponteiro `$0080AE`); separar o caminho
    `brk_at_04BEC6` (`$04:BE39`) como código/dados.
 4. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),

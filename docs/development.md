@@ -24,7 +24,7 @@ Atualizado em 2026-11-18.
 | Auto-mapping | OK — mapa da dungeon pelo menu COMP |
 | Primeira batalha | OK — Heket, Mad Slug, Basim fixo, negociação, game over, vitória/EXP/level-up |
 | Save/load via SRAM do jogo | OK — gravação, flush, boot e reload |
-| Cobertura estática | 784 variantes AOT, 12 bancos; 99,4–99,9% AOT no save4/save9 |
+| Cobertura estática | 771 variantes AOT, 12 bancos; 99,4–99,9% AOT no save4/save9 |
 | Comparação de referência | OK no título via snesref; MesenCE pendente |
 
 Marcos de frame observados com `--framedump`:
@@ -219,8 +219,8 @@ retorno à dungeon (HP 26/26 e 27/27), sem crash. O estado resultante está no
 A captura tier-2 do boot/título e dos save states de 8F/7F/batalha/level-up
 foi ingerida com `tier2_ingest.py`; os PCs quentes foram promovidos a roots
 permanentes. Com `tools/regen.sh` usando `--cfg-roots` por padrão, o grafo
-passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 784
-variantes AOT / 12 bancos** (849 variantes exatas, 65 LLE-only). Na rota
+passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 771
+variantes AOT / 12 bancos** (856 variantes exatas, 85 LLE-only). Na rota
 longa, o build ficou em **~94,7% AOT / 5,3% interpretado**, com zero dispatch
 misses; nos testes frescos, **save4 99,80% AOT** e **save9 99,91% AOT**, com
 zero stubs. O relatório completo, comandos e a lista de roots está em
@@ -279,6 +279,14 @@ Com `$9397` AOT, o `$03:983C` deixou de ser lento e foi adotado: **849 nós /
 784 AOT / 65 LLE**, save9 99,91%, save4 99,80%, boot/título/save4/save9
 validados, zero stubs.
 
+O oitavo lote corrigiu um crash de soak longo: no frame 666.606 o título
+entrou no dispatch `$00:9B04` (`JMP ($0000)` com tabela de 32 palavras em
+`$9B08`), o `dispatch_oob` disparou e o processo abortou. O cfg agora declara
+`indirect_dispatch 9b04 32 ptrtail targets:...`; o trap sumiu do C gerado. O
+grafo ficou **856 nós / 771 AOT / 85 LLE** (o AOT caiu porque os handlers
+novos incluem LLE), A/B 99,91% e 1,03–1,09s, boot/título/save4/save9 válidos,
+zero stubs.
+
 O regen também recebeu `--profile-manifest`, `--no-host-root-scan` e um
 `funcs.h` temporário fora da raiz do projeto; sem isso o scanner readicionava
 declarações antigas e o link-closure falhava com 28 variantes pendentes.
@@ -306,8 +314,8 @@ limpo e re-promover as duas funções.
    uma fronteira `data_region` como `$05:E5DB`.
 2. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter e re-promover
    `$00:86C0`/`$00:88CE`; detalhes em `docs/coverage.md`.
-3. Declarar as tabelas indiretas restantes (`$00:9B04`, `$01:C72B`/`CD9C`/
-   `EF15`, `$02:DC74`, `$30:*`) e separar `$04:BE39` (`brk_at_04BEC6`) como
+3. Declarar as tabelas indiretas restantes (`$01:C72B`/`CD9C`/`EF15`,
+   `$02:DC74`, `$30:*`) e separar `$04:BE39` (`brk_at_04BEC6`) como
    código/dados.
 4. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
    ingerir com `tier2_ingest.py` e adicionar os novos roots.

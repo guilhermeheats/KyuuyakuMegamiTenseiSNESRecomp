@@ -77,11 +77,12 @@ c.query("step 30")
 
 A comparação foi repetida depois da varredura de cobertura/AOT (105 variantes
 em 10 bancos), de novo depois dos contratos de saída e da fronteira
-`$05:E5DB` (511 variantes AOT) e de novo depois do contrato `$01:8613`
-(**529 variantes AOT** em 12 bancos, com `$00:86C0`/`$00:88CE` em LLE): os
+`$05:E5DB` (511 variantes AOT), de novo depois do contrato `$01:8613`
+(529 variantes AOT) e de novo depois do cluster `$03:E91A`/`$03:E9B1`
+(**532 variantes AOT** em 12 bancos, com `$00:86C0`/`$00:88CE` em LLE): os
 mesmos **6 bytes** de WRAM, a mesma SRAM e o mesmo framebuffer (AE 2353 /
 RMSE 30,29). O `unresolved_stub_get` ficou **zero** no título. A promoção de
-105 para 529 variantes AOT não alterou o estado de referência.
+105 para 532 variantes AOT não alterou o estado de referência.
 
 ## Limitações e próximo passo
 

@@ -74,13 +74,13 @@ Com `tools/regen.sh` (agora com `--cfg-roots` por padrão):
 | Métrica | Linha de base | Depois dos contratos |
 |---|---:|---:|
 | Roots | 11 | 72 |
-| Variantes exatas | 60 | 614 |
-| Variantes AOT-eligible | 54 | 529 |
-| Variantes LLE-only | 6 | 85 |
+| Variantes exatas | 60 | 615 |
+| Variantes AOT-eligible | 54 | 532 |
+| Variantes LLE-only | 6 | 83 |
 | Bancos emitidos | 8 | 12 |
-| Entradas de dispatch | 51 | 473 |
-| Entradas com AOT | 46 | 403 |
-| Variantes AOT no dispatch | 54 | 529 |
+| Entradas de dispatch | 51 | 474 |
+| Entradas com AOT | 46 | 406 |
+| Variantes AOT no dispatch | 54 | 532 |
 
 No mesmo build, após carregar os save states de 8F/7F/batalha/level-up, o
 `interp_stats` acumulado mostrou **~94,7% AOT / ~5,3% interpretado** (o boot
@@ -176,6 +176,16 @@ nós / 85 LLE**, AOT **99,89%** e `step 60` em **1,03–1,04s** — o mesmo temp
 do baseline 511. Zero stubs; `save4` em 99,80% AOT e título com os mesmos
 6 bytes/SRAM/AE 2353/RMSE 30,29.
 
+### Destravamento 4: cluster `$03:E91A`/`$03:E9B1`
+
+Contratos de saída para `$03:E91A` (M1X0), `$03:E9B1` (M1X1) e para os
+callees de folha `$03:EAEE`/`$03:EAFA`/`$03:F415` (M0X0). O cluster promoveu
+`$03:E91A` e `$03:E9B1`; `$03:EAEE`/`$03:EAFA`/`$03:F415` continuam LLE
+porque ainda chamam `$03:EB06`/`$03:80CA`, mas as larguras de retorno estão
+documentadas. O grafo ficou em **615 nós / 532 AOT / 83 LLE**. O A/B de
+`step 60` no save9 ficou em **1,03–1,04s**, 99,89% AOT, zero stubs; `save4`
+em 99,79% e título com os mesmos 6 bytes/SRAM/AE 2353/RMSE 30,29.
+
 ## Correções no `tools/regen.sh`
 
 O ganho depende de o regen realmente semear os `func` dos cfgs:
@@ -217,7 +227,7 @@ marcadas com `force_lle 0086C0`/`force_lle 0088CE` em `recomp/bank00.cfg`.
 Agora o interpretador executa o `JMP ($0100)` com o ponteiro vivo,
 `unresolved_stub_get` retorna **zero** e a rota save4/save9 fica em
 **99,4–99,9% AOT / 0,1–0,6% interpretado**. O custo continua sendo duas
-funções em LLE; o resto do grafo cresceu para 529 variantes AOT com os
+funções em LLE; o resto do grafo cresceu para 532 variantes AOT com os
 contratos de saída e a fronteira de `$05:E5DB`.
 
 O próximo passo de decompilação é **modelar esse dispatch vivo no emitter**
@@ -227,18 +237,18 @@ funções. Uma tentativa inicial de `indirect_dispatch ... ptrtail targets:...`
 elevou a análise para 131 variantes, mas o link-closure rejeitou 28 variantes
 chamadas e não definidas; as diretivas foram revertidas.
 
-## Fronteira atual: 85 nós LLE-only
+## Fronteira atual: 83 nós LLE-only
 
-Os 85 nós LLE-only (70 bases) restantes se distribuem em poucos clusters.
-As razões ainda são 179 `unproven_call`, 83
-`truncated_call_continuation`, 78 `unproven_callee_exit` e dois
+Os 83 nós LLE-only (68 bases) restantes se distribuem em poucos clusters.
+As razões ainda são 170 `unproven_call`, 81
+`truncated_call_continuation`, 76 `unproven_callee_exit` e dois
 `brk_at_*`/`structural_poison`:
 
 | Cluster | Bases/variantes | Bloqueio |
 |---|---|---|
 | Ciclo de boot/frame wait | `$00:8014`, `$00:9397` (4), `$01:8EAB` | caminho terminal; não há retorno a provar |
 | Lógica do banco `$02` | `$02:AFF9` (4), `$02:DBB7`, `$02:AFB6`, `$02:8183` | chamadas para `$03:E91A`/`$03:E9B1` ainda sem contrato |
-| Texto/menus e continuação do banco `$03` | ~23 bases, incluindo `$03:983C` (2), `$03:9C66`, `$03:A630` (2), `$03:E91A`, `$03:E9B1`, `$03:EAEE`–`$03:EB06` | maior bloco; maioria `unproven_call` |
+| Texto/menus e continuação do banco `$03` | ~21 bases, incluindo `$03:983C` (2), `$03:9C66`, `$03:A630` (2), `$03:EAEE`/`$03:EAFA`/`$03:F415`, `$03:EB06`, `$03:EEE4` | maior bloco; maioria `unproven_call` |
 | Helpers `$00`/`$01` | `$00:9077`, `$00:90EB`, `$00:947D`, `$00:9188`, `$00:9A85`, `$00:C0FE`, `$00:BA04`, `$00:BA6B`; `$018613` (3), `$01:D672`–`$01:D9A2` | inclui o cluster de texto `$01:D6xx` |
 | Banco `$05` | `$05:8CB1`, `$05:931F`, `$05:9421`, `$05:962D`, `$05:96A0` | chamadas não provadas |
 | Bloco `$30` | 16 bases (`$30:8416`…`$30:F424`) | provável motor de som/gráficos; dispatcher `$0080AE` |
@@ -330,12 +340,13 @@ não a promoção AOT.
 
 ## Próximos passos
 
-1. Declarar contratos de saída para `$03:E91A`/`$03:E9B1`, `$02:AFB6`/
-   `$02:DBB7`, `$00:947D`/`$00:90EB` e o bloco `$30`, um de cada vez,
-   validando `save4`/`save9`, o `snesref` e o **tempo de parede** depois de
-   cada contrato. `$03:983C` fica rejeitado até o frame wait ser promovido
-   ou contido. Se a análise expuser outro `BRK` de caminho de erro, adicionar
-   uma fronteira `data_region` como a de `$05:E5DB`.
+1. Continuar os contratos pelo cluster `$03:EB06`/`$03:EEE4`/`$03:80CA`,
+   depois `$02:AFB6`/`$02:DBB7`, `$00:947D`/`$00:90EB` e o bloco `$30`, um
+   de cada vez, validando `save4`/`save9`, o `snesref` e o **tempo de
+   parede** depois de cada contrato. `$03:983C` fica rejeitado até o frame
+   wait ser promovido ou contido. Se a análise expuser outro `BRK` de
+   caminho de erro, adicionar uma fronteira `data_region` como a de
+   `$05:E5DB`.
 2. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter, reativar
    `indirect_dispatch` com link-closure limpo e re-promover
    `$00:86C0`/`$00:88CE`.

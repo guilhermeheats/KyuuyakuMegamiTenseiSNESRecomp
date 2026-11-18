@@ -24,7 +24,7 @@ Atualizado em 2026-11-18.
 | Auto-mapping | OK — mapa da dungeon pelo menu COMP |
 | Primeira batalha | OK — Heket, Mad Slug, Basim fixo, negociação, game over, vitória/EXP/level-up |
 | Save/load via SRAM do jogo | OK — gravação, flush, boot e reload |
-| Cobertura estática | 529 variantes AOT, 12 bancos; 99,4–99,9% AOT no save4/save9 |
+| Cobertura estática | 532 variantes AOT, 12 bancos; 99,4–99,9% AOT no save4/save9 |
 | Comparação de referência | OK no título via snesref; MesenCE pendente |
 
 Marcos de frame observados com `--framedump`:
@@ -219,10 +219,10 @@ retorno à dungeon (HP 26/26 e 27/27), sem crash. O estado resultante está no
 A captura tier-2 do boot/título e dos save states de 8F/7F/batalha/level-up
 foi ingerida com `tier2_ingest.py`; os PCs quentes foram promovidos a roots
 permanentes. Com `tools/regen.sh` usando `--cfg-roots` por padrão, o grafo
-passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 529
-variantes AOT / 12 bancos** (614 variantes exatas, 85 LLE-only). Na rota
+passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 532
+variantes AOT / 12 bancos** (615 variantes exatas, 83 LLE-only). Na rota
 longa, o build ficou em **~94,7% AOT / 5,3% interpretado**, com zero dispatch
-misses; nos testes frescos, **save4 99,80% AOT** e **save9 99,89% AOT**, com
+misses; nos testes frescos, **save4 99,79% AOT** e **save9 99,89% AOT**, com
 zero stubs. O relatório completo, comandos e a lista de roots está em
 `docs/coverage.md`.
 
@@ -254,6 +254,10 @@ LLE**. O contrato de `$03:983C` foi testado e **rejeitado**: sobe para 596
 AOT, mas o `step 60` passa de 1,03s para 12,79s porque o frame wait
 `$00:9300` vira o gargalo interpretado (detalhes em `docs/coverage.md`).
 
+O quarto lote foi o cluster `$03:E91A`/`$03:E9B1`: contratos para E91A (M1X0),
+E9B1 (M1X1) e as folhas EAEE/EAFA/F415 (M0X0). O grafo ficou em **615 nós /
+532 AOT / 83 LLE**; o `step 60` continuou em 1,03–1,04s, com zero stubs.
+
 O regen também recebeu `--profile-manifest`, `--no-host-root-scan` e um
 `funcs.h` temporário fora da raiz do projeto; sem isso o scanner readicionava
 declarações antigas e o link-closure falhava com 28 variantes pendentes.
@@ -267,13 +271,13 @@ limpo e re-promover as duas funções.
 
 ## Próximos passos
 
-1. Declarar contratos de saída para `$03:E91A`/`$03:E9B1`, `$02:AFB6`/
-   `$02:DBB7`, `$00:947D`/`$00:90EB` e o bloco `$30`, um de cada vez,
-   validando `save4`/`save9`, o `snesref` e o **tempo de parede** após cada
-   contrato. O `$018613` foi adotado (529 AOT/614 nós, `step 60` inalterado);
-   o `$03:983C` foi rejeitado (596 AOT, mas `step 60` 12,79s vs 1,03s). Se um
-   contrato expuser outro BRK de caminho de erro, adicionar uma fronteira
-   `data_region` como `$05:E5DB`.
+1. Continuar os contratos pelo cluster `$03:EB06`/`$03:EEE4`/`$03:80CA`,
+   depois `$02:AFB6`/`$02:DBB7`, `$00:947D`/`$00:90EB` e o bloco `$30`, um
+   de cada vez, validando `save4`/`save9`, o `snesref` e o **tempo de
+   parede** após cada contrato. O `$018613` foi adotado (529 AOT/614 nós,
+   `step 60` inalterado); o `$03:983C` foi rejeitado (596 AOT, mas `step 60`
+   12,79s vs 1,03s). Se um contrato expuser outro BRK de caminho de erro,
+   adicionar uma fronteira `data_region` como `$05:E5DB`.
 2. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter e re-promover
    `$00:86C0`/`$00:88CE`; detalhes em `docs/coverage.md`.
 3. Declarar as tabelas indiretas restantes (`$00:9B04`, `$01:C72B`/`CD9C`/

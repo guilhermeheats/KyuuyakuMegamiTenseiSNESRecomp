@@ -1,5 +1,5 @@
 diff --git a/recompiler-rs/src/bin/analyze.rs b/recompiler-rs/src/bin/analyze.rs
-index d7836a06..384fa991 100644
+index d7836a06..2795409c 100644
 --- a/recompiler-rs/src/bin/analyze.rs
 +++ b/recompiler-rs/src/bin/analyze.rs
 @@ -386,6 +386,23 @@ fn load_inputs(cfg_dir: &Path, rom: &mut Vec<u8>, all_cfg_roots: bool) -> Result
@@ -26,6 +26,47 @@ index d7836a06..384fa991 100644
          for &site_pc16 in &cfg.live_operand {
              let site = (bank << 16) | (site_pc16 & 0xFFFF);
              live_operand_sites.insert(site);
+@@ -596,6 +613,28 @@ fn has_truncated_call_continuation(graph: &FunctionDecodeGraph) -> bool {
+     })
+ }
+ 
++fn truncated_call_sites(graph: &FunctionDecodeGraph) -> Vec<(u32, u32)> {
++    graph
++        .insns()
++        .iter()
++        .filter_map(|decoded| {
++            let ins = &decoded.insn;
++            if !matches!(ins.mnem, "JSR" | "JSL")
++                || ins.terminal_jsr
++                || !decoded.successors.is_empty()
++            {
++                return None;
++            }
++            let target = if ins.mnem == "JSR" {
++                (ins.addr & 0xFF0000) | (ins.operand & 0xFFFF)
++            } else {
++                ins.operand & 0xFFFFFF
++            };
++            Some((ins.addr & 0xFFFFFF, target & 0xFFFFFF))
++        })
++        .collect()
++}
++
+ fn summarize(
+     key: VariantKey,
+     graph: &FunctionDecodeGraph,
+@@ -814,6 +853,11 @@ fn summarize(
+     }
+     if has_truncated_call_continuation(graph) {
+         reasons.insert("truncated_call_continuation".to_string());
++        for (site, target) in truncated_call_sites(graph) {
++            reasons.insert(format!(
++                "truncated_call_at_{site:06X}_to_{target:06X}"
++            ));
++        }
+     }
+ 
+     let disposition = if reasons.contains("structural_poison")
 diff --git a/recompiler-rs/src/cfg.rs b/recompiler-rs/src/cfg.rs
 index d678c6ac..57b211bb 100644
 --- a/recompiler-rs/src/cfg.rs

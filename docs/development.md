@@ -11,7 +11,7 @@ Atualizado em 2026-11-18.
 |---|---|
 | ROM japonesa limpa verificada | OK — CRC32 `c8d286c9` |
 | Scaffold do snesrecomp | OK — 4 roots iniciais |
-| Cobertura estática atual | OK — 72 roots, 10 bancos |
+| Cobertura estática atual | OK — 72 roots, 12 bancos |
 | Build nativo | OK — build-debug e release |
 | Boot / tela de título | OK |
 | Introdução do MT1 | OK |
@@ -24,7 +24,7 @@ Atualizado em 2026-11-18.
 | Auto-mapping | OK — mapa da dungeon pelo menu COMP |
 | Primeira batalha | OK — Heket, Mad Slug, Basim fixo, negociação, game over, vitória/EXP/level-up |
 | Save/load via SRAM do jogo | OK — gravação, flush, boot e reload |
-| Cobertura estática | 292 variantes AOT, 10 bancos; até 99,4% AOT no save4/save9 |
+| Cobertura estática | 511 variantes AOT, 12 bancos; 99,40–99,75% AOT no save4/save9 |
 | Comparação de referência | OK no título via snesref; MesenCE pendente |
 
 Marcos de frame observados com `--framedump`:
@@ -219,20 +219,32 @@ retorno à dungeon (HP 26/26 e 27/27), sem crash. O estado resultante está no
 A captura tier-2 do boot/título e dos save states de 8F/7F/batalha/level-up
 foi ingerida com `tier2_ingest.py`; os PCs quentes foram promovidos a roots
 permanentes. Com `tools/regen.sh` usando `--cfg-roots` por padrão, o grafo
-passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 292
-variantes AOT / 10 bancos** (339 variantes exatas, 47 LLE-only). Na rota
+passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 511
+variantes AOT / 12 bancos** (590 variantes exatas, 79 LLE-only). Na rota
 longa, o build ficou em **~94,7% AOT / 5,3% interpretado**, com zero dispatch
-misses; no teste save4/save9, **99,4% AOT / 0,6% interpretado**. O relatório
-completo, comandos e a lista de roots está em `docs/coverage.md`.
+misses; nos testes frescos, **save4 99,40% AOT** e **save9 99,75% AOT**, com
+zero stubs. O relatório completo, comandos e a lista de roots está em
+`docs/coverage.md`.
 
-O salto veio do contrato de saída de `$00:9397`: a rotina empilha `PHP` e
-restaura com `PLP`/`PLX`, então a largura de saída espelha a de entrada. As
-três diretivas `exit_mx_variant 009397 ...` provaram o retorno para todos os
-chamadores e destravaram a análise pós-chamada que antes parava em
-`unproven_callee_exit`. O `$02:B0B6` também foi corrigido com uma fronteira
-explícita (`func Clamp_024E_TierWait b0b6 end:b0fa entry_mx:1,1`) e
-`force_variant_at` nos dois call sites; o overrun do `v2_regen` era uma
-variante fantasma M0X1, não dados lidos como código.
+O primeiro salto veio do contrato de saída de `$00:9397`: a rotina empilha
+`PHP` e restaura com `PLP`/`PLX`, então a largura de saída espelha a de
+entrada. As quatro diretivas `exit_mx_variant 009397 ...` provaram o retorno
+para todos os chamadores e destravaram a análise pós-chamada que antes parava
+em `unproven_callee_exit`; isso promoveu `$02:B0B6` e `LevelUp_Apply`. O
+`$02:B0B6` também ganhou uma fronteira explícita
+(`func Clamp_024E_TierWait b0b6 end:b0fa entry_mx:1,1`) e `force_variant_at`
+nos dois call sites; o overrun do `v2_regen` era uma variante fantasma M0X1,
+não dados lidos como código.
+
+O segundo salto veio do contrato de `$02:AFF9`, que também preserva M/X. Ao
+continuar a análise depois do `JSL $02AFF9` em `$05:D731`, o decoder chegou
+ao caminho M=1 de erro em `$05:E556 JMP $E5D9` e leu o terceiro byte do
+imediato `LDA #$0001` como `BRK` em `$05:E5DB`. Como o analyzer trata
+qualquer BRK como `structural_poison` e descarta todas as demandas do nó, o
+SCC inteiro caía de 590 para 153 nós. A fronteira
+`data_region 05 e5db e5dc` em `recomp/bank05.cfg` marca só esse byte como
+não-código e preserva o caminho M=0 válido em `$E5DC`. O resultado é o grafo
+atual de 511 variantes AOT.
 
 O regen também recebeu `--profile-manifest`, `--no-host-root-scan` e um
 `funcs.h` temporário fora da raiz do projeto; sem isso o scanner readicionava
@@ -247,13 +259,17 @@ limpo e re-promover as duas funções.
 
 ## Próximos passos
 
-1. Declarar contratos de saída para os gargalos repetidos `$03:983C` e
-   `$02:AFF9`, um de cada vez, validando `save4`/`save9` e o `snesref` após
-   cada contrato.
+1. Declarar contratos de saída para `$03:983C`, `$03:E91A`/`$03:E9B1`,
+   `$02:D13B` e o bloco `$30`, um de cada vez, validando `save4`/`save9` e o
+   `snesref` após cada contrato. Se um contrato expuser outro BRK de caminho
+   de erro, adicionar uma fronteira `data_region` como `$05:E5DB`.
 2. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter e re-promover
    `$00:86C0`/`$00:88CE`; detalhes em `docs/coverage.md`.
-3. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
+3. Declarar as tabelas indiretas restantes (`$00:9B04`, `$01:C72B`/`CD9C`/
+   `EF15`, `$02:DC74`, `$30:*`) e separar `$04:BE39` (`brk_at_04BEC6`) como
+   código/dados.
+4. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
    ingerir com `tier2_ingest.py` e adicionar os novos roots.
-4. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
+5. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
    `$38` e `$3F`, e continuar a separação código/dados.
-5. Manter gameplay, save states e comparação com emulador como regressão.
+6. Manter gameplay, save states e comparação com emulador como regressão.

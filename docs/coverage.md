@@ -74,13 +74,13 @@ Com `tools/regen.sh` (agora com `--cfg-roots` por padrão):
 | Métrica | Linha de base | Depois dos contratos |
 |---|---:|---:|
 | Roots | 11 | 72 |
-| Variantes exatas | 60 | 1020 |
-| Variantes AOT-eligible | 54 | 954 |
-| Variantes LLE-only | 6 | 66 |
+| Variantes exatas | 60 | 1081 |
+| Variantes AOT-eligible | 54 | 1029 |
+| Variantes LLE-only | 6 | 52 |
 | Bancos emitidos | 8 | 12 |
-| Entradas de dispatch | 51 | 779 |
-| Entradas com AOT | 46 | 717 |
-| Variantes AOT no dispatch | 54 | 954 |
+| Entradas de dispatch | 51 | 816 |
+| Entradas com AOT | 46 | 767 |
+| Variantes AOT no dispatch | 54 | 1029 |
 
 No mesmo build, após carregar os save states de 8F/7F/batalha/level-up, o
 `interp_stats` acumulado mostrou **~94,7% AOT / ~5,3% interpretado** (o boot
@@ -301,6 +301,19 @@ Resultado: `$03:A630`, `$02:AFF9`, `$02:AFB6` e `$04:BE39` viraram AOT. O
 grafo foi para **1020 nós / 954 AOT / 66 LLE**. A/B save9 em **99,92% AOT** e
 **1,05–1,11s** (trial 1 1,64s), zero stubs; boot/título/save4/save9 válidos.
 
+### Destravamento 12: hub `$9A85` e `$94C3`
+
+O `$00:9A85` é o hub de dispatch chamado por `$00:94C3` em três sites M1X1.
+O contrato `exit_mx_variant 009A85 1 1 1 1` destravou os chamadores e elevou
+o grafo para **1081 nós / 1019 AOT / 62 LLE**. Depois, o `$00:BF53`
+(`exit_mx_set 00BF53 M0X0 M0X0,M1X1`) e o `noreturn_jsl 98b5` (`$00:80FB`
+entra no main loop e não tem saída local) promoveram o `$00:94C3`, a função
+de 616 instruções que o main loop chama.
+
+Resultado final: **1081 nós / 1029 AOT / 52 LLE**. A/B save9 em **99,91%
+AOT** e **1,03–1,12s**, zero stubs; boot/título/save4/save9 válidos; título
+com os mesmos 6 bytes/SRAM/AE 2353/RMSE 30,29.
+
 ## Correções no `tools/regen.sh`
 
 O ganho depende de o regen realmente semear os `func` dos cfgs:
@@ -342,9 +355,10 @@ marcadas com `force_lle 0086C0`/`force_lle 0088CE` em `recomp/bank00.cfg`.
 Agora o interpretador executa o `JMP ($0100)` com o ponteiro vivo,
 `unresolved_stub_get` retorna **zero** e a rota save4/save9 fica em
 **99,4–99,9% AOT / 0,1–0,6% interpretado**. O custo continua sendo duas
-funções em LLE; o resto do grafo cresceu para 954 variantes AOT com os
+funções em LLE; o resto do grafo cresceu para 1029 variantes AOT com os
 contratos de saída, as fronteiras `$04:BEC6`/`$05:E5DB`, o frame wait AOT,
-o dispatch `$00:9B04` e o lote do bloco `$30`/`$00:9077`.
+o dispatch `$00:9B04` e os lotes do bloco `$30`/`$00:9077` e do hub
+`$9A85`/`$94C3`.
 
 O próximo passo de decompilação é **modelar esse dispatch vivo no emitter**
 (ou declarar `indirect_dispatch` de forma que o link-closure aceite os 8+4
@@ -353,27 +367,27 @@ funções. Uma tentativa inicial de `indirect_dispatch ... ptrtail targets:...`
 elevou a análise para 131 variantes, mas o link-closure rejeitou 28 variantes
 chamadas e não definidas; as diretivas foram revertidas.
 
-## Fronteira atual: 66 nós LLE-only
+## Fronteira atual: 52 nós LLE-only
 
-Os 66 nós LLE-only (62 bases) restantes se distribuem em poucos clusters.
-As razões são 104 `unproven_call`, 66 `truncated_call_continuation`, 66
-`unproven_callee_exit` (mais as razões detalhadas `truncated_call_at_*`) e uma
+Os 52 nós LLE-only (49 bases) restantes se distribuem em poucos clusters.
+As razões são 58 `unproven_call`, 52 `truncated_call_continuation`, 50
+`unproven_callee_exit` (mais 63 razões detalhadas `truncated_call_at_*`) e uma
 aresta indireta:
 
 | Cluster | Bases/variantes | Bloqueio |
 |---|---|---|
-| Main loop | `$00:8014`, `$00:80FF` | nunca retornam; chamam `$05:8CB1`/`$00:94C3` |
-| Handlers do dispatch `$9B04` | `$00:9A85`, `$00:9C1B`, `$00:9C3A`, `$00:9D6E`, `$00:9EFB`, `$00:9F81`, `$00:A04A`, `$00:A051`, `$00:A1D8`, `$00:A4BA`, `$00:A507`, `$00:B241` | dispatch autorizado; callees ainda não provados |
-| Texto/menus e continuação do banco `$03` | `$03:9DBD`, `$03:AD87`, `$03:AEF7`, `$03:B2F6`, `$03:B3AB`, `$03:B43B`, `$03:BA49`, `$03:C24C` | `$03:A630`/`$03:983C` já são AOT |
-| Helpers `$00`/`$01` | `$00:90EB`, `$00:94C3`, `$00:F160`; `$01:91DA`, `$01:979C`–`$01:99B8`, `$01:AE08`, `$01:EE96` | texto/input; maioria `unproven_call` |
+| Main loop | `$00:8014`, `$00:80FB`, `$00:80FF` | nunca retornam; chamam `$05:8CB1`/`$00:94C3` |
+| Handlers do dispatch `$9B04` | `$00:9A85`, `$00:A1D8` | truncados em `$00:A29D` → `$05:A718` |
+| Texto/menus banco `$03` | `$03:9DBD`, `$03:AD87`, `$03:B3AB`, `$03:B43B` | chamadas não provadas |
+| Helpers `$00`/`$01` | `$00:BF53`; `$01:91DA`, `$01:979C`, `$01:97C6`, `$01:986D`, `$01:99B8`, `$01:AE08`, `$01:EE96` | texto/input; maioria `unproven_call` |
 | Banco `$05` | `$05:8CB1`, `$05:931F`, `$05:962D` | chamadas não provadas |
-| Bloco `$30` | ~30 bases, incl. `$30:8BF0`, `$30:95CA`, `$30:A20D`, `$30:DD34`, `$30:ECF4`, `$30:D4BF`, `$30:D809`, `$30:BA74`–`$30:C15A` | som/gráficos; dispatcher `$0080AE` |
+| Bloco `$30` | ~25 bases, incl. `$30:8BF0`, `$30:95CA`, `$30:A20D`, `$30:DD34`, `$30:ECF4`, `$30:D4BF`, `$30:D809`, `$30:BA74`–`$30:C15A` | som/gráficos; dispatcher `$0080AE` |
 
-O main loop `$00:8014`/`$00:80FF` continua LLE (nunca retorna). O frame wait
-`$00:9397`, `$01:8EAB`, `$02:DBB7`, `$03:983C`, `$00:9077`, `$00:9188`,
-`$00:947D`, `$03:A630`, `$02:AFF9`, `$02:AFB6` e `$04:BE39` agora são AOT.
-O próximo bloco é o banco `$30` (som/gráficos) e os handlers do dispatch
-`$9B04`; depois os sites indiretos restantes e a rota até o 6F.
+O main loop `$00:8014`/`$00:80FB`/`$00:80FF` continua LLE (nunca retorna). O
+frame wait `$00:9397`, `$01:8EAB`, `$02:DBB7`, `$03:983C`, `$00:9077`,
+`$00:9188`, `$00:947D`, `$03:A630`, `$02:AFF9`, `$02:AFB6`, `$04:BE39` e o
+`$00:94C3` agora são AOT. O próximo foco é o par `$9A85`/`$A1D8` (bloqueado
+por `$05:A718`) e o bloco `$30`; depois os sites indiretos e a rota até o 6F.
 
 ### Histórico: o gargalo do `$03:983C`
 
@@ -437,11 +451,11 @@ não a promoção AOT.
 
 ## Próximos passos
 
-1. Atacar os handlers do dispatch `$9B04`, o bloco `$30` e o cluster
-   `$01:979C`–`$01:99B8`. Cada mudança precisa de `save4`/`save9`,
-   `snesref` e **tempo de parede**. Se a análise expuser outro `BRK` de
-   caminho de erro, usar uma fronteira `data_region` como `$04:BEC6` ou
-   `$05:E5DB`.
+1. Resolver o bloqueio `$05:A718` para promover `$9A85`/`$A1D8`, depois o
+   bloco `$30` e o cluster `$01:97C6`/`$01:986D`. Cada mudança precisa de
+   `save4`/`save9`, `snesref` e **tempo de parede**. Se a análise expuser
+   outro `BRK` de caminho de erro, usar uma fronteira `data_region` como
+   `$04:BEC6` ou `$05:E5DB`.
 2. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter, reativar
    `indirect_dispatch` com link-closure limpo e re-promover
    `$00:86C0`/`$00:88CE`.

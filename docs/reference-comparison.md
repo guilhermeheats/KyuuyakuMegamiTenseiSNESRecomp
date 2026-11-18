@@ -75,6 +75,12 @@ c.query("step 30")
   (0,046%). A diferença visual está concentrada na animação do logo e no
   círculo do cursor I/II; o layout, as fontes e as cores estáticas batem.
 
+A comparação foi repetida depois da varredura de cobertura/AOT (105 variantes
+em 10 bancos, com `$00:86C0`/`$00:88CE` em LLE): os mesmos **6 bytes** de
+WRAM, a mesma SRAM e o mesmo framebuffer (AE 2353 / RMSE 30,29). O
+`unresolved_stub_get` ficou **zero** no título. A promoção AOT não alterou o
+estado de referência.
+
 ## Limitações e próximo passo
 
 - A tela de título, tanto no recomp quanto no snesref, mostra apenas a

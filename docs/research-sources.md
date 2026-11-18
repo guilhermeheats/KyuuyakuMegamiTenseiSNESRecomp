@@ -17,10 +17,12 @@ mapa, imagem, ROM ou save de terceiros é versionado no repositório.
   - estoque e preços da loja do 8F;
   - baú do 8F: 500 Macca + 宝玉.
 - Ressalva: a tabela não lista batalhas fixas no 7F. O detonado e o mapa da
-  Sion listam Basim e Gnome como encontros não aleatórios no 7F; os tiles
-  exatos ainda não foram confirmados. No jogo, o primeiro encontro observado
-  no 7F foi **aleatório**, com **Heket** em `(8,2)` (WRAM); uma besta verde
-  (provável Basim) também apareceu aleatoriamente no mesmo trecho.
+  Sion listam Basim e Gnome como encontros não aleatórios no 7F. O **Basim
+  fixo foi confirmado** em 2026-11-18 a partir de WRAM `(9,3)` (andar para
+  leste): `何かが潜んでいた！` → `怪獣バシムが現れた！`. Os gatilhos de
+  Gnome e Dryad ainda não foram confirmados. No jogo, o primeiro encontro
+  observado no 7F foi **aleatório**, com **Heket** em `(8,2)` (WRAM); uma
+  besta verde (provável Basim) também apareceu aleatoriamente no mesmo trecho.
 
 ### 2. Sion’s Runs — rota de speedrun (SNES)
 
@@ -133,11 +135,14 @@ mapa, imagem, ROM ou save de terceiros é versionado no repositório.
   (animação/stack) e a SRAM é idêntica; framebuffer com RMSE 0,046%. O
   MesenCE 2.2.1 Linux não reconheceu `--testRunner`; ver
   `docs/reference-comparison.md`.
+- O **Basim fixo** do 7F foi confirmado em `(9,3)` → leste, com stats de
+  debug no build AOT: `怪獣バシムを倒した！`, 30 EXP, 18 Macca, 6 MAG,
+  1 `宝玉`; Nakajima e Yumiko LV3. O tile não dá loot extra.
 
 ## Próximos passos de pesquisa
 
-1. Confirmar as coordenadas/gatilhos de Basim, Gnome e Dryad no 7F e descer ao
-   6F.
+1. Confirmar os gatilhos de **Gnome** e **Dryad** no 7F e mapear a rota ao 6F
+   (o Basim fixo já está confirmado).
 2. Mapear o 7F com o auto-map `Fixed` e `0x877`/`0x878`/`0x865`.
 3. Validar o início do Megami Tensei II (CP-014) e continuar a cobertura de
    batalha/AOT no MT1.

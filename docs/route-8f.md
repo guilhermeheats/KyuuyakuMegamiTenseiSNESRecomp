@@ -168,12 +168,21 @@ A tabela do ROM lista 7 eventos no 7F, em duas componentes:
 
 A escada do 8F cai na componente #1. O elevador do 7F **não para** (flag 0).
 O detonado e o mapa da Sion listam **batalhas não aleatórias contra Basim e
-Gnome** no 7F; a tabela do ROM não as lista como eventos fixos. O primeiro
-encontro observado foi **aleatório**, com **Heket** em `(8,2)` (WRAM), não um
-evento fixo. Um segundo encontro aleatório trouxe uma **besta verde
+Gnome** no 7F. O primeiro encontro observado foi **aleatório**, com **Heket**
+em `(8,2)` (WRAM). Um segundo encontro aleatório trouxe uma **besta verde
 (provável Basim)** no mesmo trecho: `TALK` respondeu `グルルルルル...` e
-`ESCAPE` falhou duas vezes, com 3 de dano em Nakajima. Os gatilhos fixos de
-Basim/Gnome continuam não confirmados.
+`ESCAPE` falhou duas vezes, com 3 de dano em Nakajima.
+
+**Basim fixo confirmado (2026-11-18):** a partir de WRAM `(9,3)`, tentar
+andar para leste dispara `何かが潜んでいた！` →
+`怪獣バシムが現れた！`, seguido de `怪獣バシムを倒した！`. A batalha foi
+vencida com os stats de debug (99) no build AOT, não em dificuldade normal:
+**30 EXP**, **18 Macca** (88→106), **6 MAG**, **1 `宝玉`**; Nakajima e
+Yumiko chegaram a **LV3** (37/37 e 39/39) e receberam `BONUS 1`. Depois da
+vitória, a mensagem `辺りを調べてみた・・・・ / が、何もなかった` confirma
+que o tile não dá loot extra. Uma segunda tentativa de andar para leste foi
+bloqueada sem mensagem; o gatilho do Gnome e a rota para a escada do 6F a
+partir desse lado continuam pendentes.
 
 Para repetir a validação, os save states locais são:
 
@@ -185,10 +194,11 @@ Para repetir a validação, os save states locais são:
 | `save0` | 7F, `(8,2)`, início da batalha contra Heket (LV1) |
 | `save3` | pós-vitória normal contra Heket, Nakajima LV3, Yumiko `DEAD` |
 | `save7` | pós-vitória normal contra Heket (cópia de segurança) |
-| `save4` | 7F, `(8,1)`, pós-vitória contra 2 Mad Slugs, ainda com boost |
 | `save11` | tela `レベルアップ：ユミコ`, antes da alocação |
-| `save2` | pós-level-up no build AOT, 7F, HP 26/26 e 27/27, Yumiko `POISON` |
-| `save9` | pós-level-up (boost), dungeon 7F, HP 30/30 e 27/27, Yumiko `POISON` |
+| `save2` | pré-Basim no build AOT, 7F, HP 26/26 e 27/27, Yumiko `POISON` |
+| `save5` | início da batalha fixa contra `怪獣バシム` em `(9,3)` |
+| `save4` | tela `レベルアップ：ナカジマあああ` após Basim, `BONUS 1` |
+| `save9` | pós-Basim, 7F, Nakajima 37/37 e Yumiko 39/39, LV3, Yumiko `POISON` |
 
 Esses saves são artefatos locais de `build-debug/saves/` e **não** são
 versionados.
@@ -201,9 +211,9 @@ versionados.
   encerrada por `ESCAPE` antes da vitória.
 - Testar a sala `Kaifuku`/revival do 8F se houver caminho de volta, ou seguir
   para o 6F e procurar um ponto de cura/revival.
-- Confirmar as coordenadas e os gatilhos exatos de Basim, Gnome e Dryad no 7F
-  (o encontro aleatório de Heket em `(8,2)` já foi confirmado; a besta verde
-  provável Basim também apareceu aleatoriamente).
+- Confirmar os gatilhos exatos de **Gnome** e **Dryad** no 7F; o **Basim
+  fixo** foi confirmado em `(9,3)` (ver acima). A rota para a escada do 6F a
+  partir desse lado ainda não está mapeada.
 - Descer do 7F para o 6F e validar a continuação da torre.
 - CP-013 concluído: gravação/flush e load pelo título validados. O antigo
   `save1` restaurava SRAM zerada e foi regenerado com a SRAM válida.

@@ -14,7 +14,7 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
 | CP-007 | Primeira dungeon | confirmar os status (~frame 14861) | OK — corredor inicial |
 | CP-008 | Movimento | setas na dungeon | OK — câmera muda de célula |
 | CP-009 | Interação com baú | andar até o baú (~frame 15100) | OK — diálogo YES/NO; loot `500` + `宝玉` |
-| CP-010 | Primeira batalha | rota confirmada em `docs/route-8f.md`: Gate Keeper `(2,2)`, escada `(2,3)`, 7F `(10,2)`, batalha em `(8,2)` | **OK** — encontros de Heket, Mad Slug e besta verde (provável Basim), negociação, game over, vitória em dificuldade normal contra Heket (64 EXP, 20 Macca, 1 `宝玉`, Nakajima LV3) e level-up/alocação de `BONUS` validados |
+| CP-010 | Primeira batalha | rota confirmada em `docs/route-8f.md`: Gate Keeper `(2,2)`, escada `(2,3)`, 7F `(10,2)`, batalha em `(8,2)` | **OK** — encontros de Heket, Mad Slug e besta verde, negociação, game over, vitória normal contra Heket (64 EXP, 20 Macca, 1 `宝玉`, Nakajima LV3), **Basim fixo em `(9,3)`** (30 EXP, 18 Macca, 6 MAG) e level-up/alocação de `BONUS` validados |
 | CP-011 | Menu de status | apertar A na passagem (~frame 16400) | OK — COMP/MAGIC/ITEM/STATUS; ficha em ~frame 16800 |
 | CP-012 | Auto-mapping | A → COMP → `オートマッピング` (5º item; down ×4); configurar `Fixed` | OK — minimapa local; modo Fixed norte-para-cima mostra posição/EV |
 | CP-013 | Salvar e carregar pelo jogo | salvar via SRAM, reiniciar, carregar | **OK** — gravação/flush e carregamento validados; o `CONTINUE` lista o arquivo e restaura o estado. O save state antigo `save1` restaurava SRAM zerada e foi regenerado. |
@@ -36,7 +36,15 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
 - **Segundo encontro (besta verde, provável Basim):** ao voltar para
   `(8,2)`, apareceu uma besta verde (provável Basim); `TALK` respondeu
   `グルルルルル...` e `ESCAPE` falhou duas vezes; o inimigo causou 3 de
-  dano em Nakajima. O gatilho fixo de Basim/Gnome continua não confirmado.
+  dano em Nakajima.
+- **Basim fixo (2026-11-18):** a partir de WRAM `(9,3)`, tentar andar para
+  leste dispara `何かが潜んでいた！` → `怪獣バシムが現れた！`. A batalha foi
+  vencida com os stats de debug (99) no build AOT: `怪獣バシムを倒した！`,
+  **30 EXP**, **18 Macca** (88→106), **6 MAG** e **1 `宝玉`**; Nakajima e
+  Yumiko chegaram a **LV3** (37/37 e 39/39) e receberam `BONUS 1`. O tile
+  depois mostra `辺りを調べてみた・・・・ / が、何もなかった`; a segunda
+  tentativa de andar para leste foi bloqueada. Gnome/Dryad e a rota do 6F
+  continuam pendentes.
 - **Vitória/level-up (com boost de debug):** contra 2 Mad Slugs no 7F, com
   HP/stats elevados via debug (999 HP, 99 stats). A batalha terminou com
   `外道マッドスラッグを倒した！`, **100 EXP**, **65 Macca** e **20 MAG**;

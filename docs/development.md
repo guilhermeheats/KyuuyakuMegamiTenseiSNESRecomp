@@ -172,6 +172,11 @@ runner funcional. Detalhes e comandos em `docs/reference-comparison.md`.
   para 0x20 para alocar. Yumiko morreu na luta normal (0/9, `DEAD`) e o
   `宝玉` não a revive. O HUD de batalha exibiu `997/997`/`999/999` sem
   correspondência na WRAM — candidato a bug de exibição.
+- O **Basim fixo** do 7F foi confirmado em `(9,3)` → leste: `何かが潜んで
+  いた！` → `怪獣バシムが現れた！`. A batalha foi vencida com stats de debug
+  no build AOT (30 EXP, 18 Macca, 6 MAG, 1 `宝玉`; Nakajima e Yumiko LV3).
+  O tile não dá loot extra (`が、何もなかった`) e a rota do 6F a partir
+  desse lado ainda não está mapeada. Gnome/Dryad continuam pendentes.
 - A rota do 8F está confirmada em `docs/route-8f.md`: Gate Keeper em `(2,2)`,
   escada em `(2,3)` e chegada ao 7F em `(10,2)`.
 - O servidor de debug funciona e `0x877`/`0x878`/`0x865` dão a posição; a

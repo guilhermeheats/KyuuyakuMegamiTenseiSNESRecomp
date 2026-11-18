@@ -79,7 +79,7 @@
       "Gnome"
     ],
     "source": "GameFAQs walkthrough 54063 (SNES) and Sion's 7F route map (★1/★2)",
-    "note": "The guide lists nonrandom battles against Basim and Gnome on 7F 1st section. The pareido event table does not list fixed battles on 7F, so the exact trigger tiles are still unconfirmed. In-game, the first battle was a random encounter with Heket at WRAM (8,2); a later random encounter with a green beast (likely Basim) also occurred. The fixed Basim/Gnome triggers remain unconfirmed."
+    "note": "The guide lists nonrandom battles against Basim and Gnome on 7F 1st section. In-game, the fixed Basim encounter was confirmed on 2026-11-18: from WRAM (9,3), attempting to move east triggered '何かが潜んでいた！' and '怪獣バシムが現れた！'. After victory the tile gave 'が、何もなかった'. The Gnome trigger and the route to the 6F down stairs from this side remain unconfirmed."
   },
   "observed": {
     "date": "2026-11-17",
@@ -116,6 +116,28 @@
       "talk": "グルルルルル...",
       "escape": "failed twice",
       "damage": "Nakajima took 3 damage"
+    },
+    "fixed_basim": {
+      "date": "2026-11-18",
+      "type": "fixed_encounter",
+      "trigger": "attempt to move east from WRAM (9,3) into the event tile at (10,3)",
+      "message": [
+        "何かが潜んでいた！",
+        "怪獣バシムが現れた！"
+      ],
+      "victory": "怪獣バシムを倒した！",
+      "rewards": {
+        "exp": 30,
+        "macca": 18,
+        "mag": 6,
+        "items": [
+          "宝玉"
+        ]
+      },
+      "after_victory": "辺りを調べてみた・・・・ / が、何もなかった",
+      "party_after": "Nakajima LV3 37/37; Yumiko LV3 39/39; both BONUS 1; Yumiko POISON",
+      "debug_note": "Fought with debug-boosted stats (99) on the AOT build; the fixed trigger and rewards are validated, not the normal-difficulty balance.",
+      "repeatability": "A second attempt to move east was blocked with no message; the down-stairs route from this side is still unmapped."
     },
     "victory": {
       "type": "random_encounter",

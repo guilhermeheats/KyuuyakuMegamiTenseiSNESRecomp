@@ -233,6 +233,19 @@ alocar o ponto. Não é bug do recomp.
   frames por passo fez Heket aparecer no 9º passo em `(8,2)`; esperas de 6,
   18 e 20 frames trouxeram Mad Slug, besta verde e outro demônio.
 
+### Basim fixo (2026-11-18)
+
+- Em WRAM `(9,3)`, tentar andar para **leste** dispara
+  `何かが潜んでいた！` → `怪獣バシムが現れた！`. É um encontro fixo, não
+  aleatório; o tile do evento fica em `(10,3)`.
+- A batalha foi vencida com os stats de debug (99) no build AOT:
+  `怪獣バシムを倒した！`, 30 EXP, 18 Macca, 6 MAG, 1 `宝玉`; Nakajima e
+  Yumiko chegaram a LV3 (37/37 e 39/39) e receberam `BONUS 1`.
+- Depois da vitória: `辺りを調べてみた・・・・ / が、何もなかった`.
+  A segunda tentativa de andar para leste foi bloqueada sem mensagem, então
+  o evento parece de uso único. A rota para a escada do 6F a partir desse
+  lado ainda não foi encontrada.
+
 > **Cuidado com `A`/`B`:** no dungeon, `A` abre a janela de comandos; `B`
 > volta do submenu para a lista de comandos e `B` de novo fecha. Para
 > equipar: `A` → `B` → `↓` até `ITEM` → `A` → `↓×3` até `そうび` → `A`.

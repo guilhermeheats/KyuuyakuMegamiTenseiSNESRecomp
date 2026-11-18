@@ -150,6 +150,38 @@
         "after": "HP normalized to 30/30 and 27/27; Yumiko is POISONed",
         "debug_note": "The 99-stat boost exceeded the screen's 0x23 (35) cap and matched the base value, blocking allocation until the selected stat was lowered to 0x20. The display clamps all stats to 35. This was a debug artifact, not a recomp hang."
       }
+    },
+    "normal_victory": {
+      "date": "2026-11-18",
+      "type": "random_encounter",
+      "wram": {
+        "x": 8,
+        "y": 2
+      },
+      "demon": "妖魔ヘケット (Heket)",
+      "debug_boost": null,
+      "party": "Nakajima LV1 with Jack Knife + Combat Suit; Yumiko LV1 with Combat Suit",
+      "message": "妖魔ヘケットを倒した！",
+      "rewards": {
+        "exp": 64,
+        "macca": 20,
+        "items": ["宝玉"]
+      },
+      "level_up": {
+        "nakajima": {
+          "level": 3,
+          "hp": "23/23",
+          "first_stat": "20 -> 22",
+          "bonus": 1,
+          "allocation": "default cursor (A) applied the bonus"
+        },
+        "yumiko": "died during the battle; remained LV1, HP 0/9, DEAD"
+      },
+      "notes": [
+        "The Jewel cannot revive a dead character: 宝玉の効果はありません.",
+        "In a later normal battle, the HUD showed 997/997 and 999/999 even though WRAM held 8/0 and 9/9; raw party data stayed correct. Candidate display bug.",
+        "With a 12-frame wait per step from save8, the ninth step at (8,2) produced Heket. Other waits produced Mad Slug (W=6), green beast (W=18), and another demon (W=20)."
+      ]
     }
   },
   "notes": [

@@ -161,11 +161,13 @@ independente é o próximo passo de validação.
 
 - O menu de status, o auto-mapping, os encontros de batalha, a negociação, o
   game over, a vitória/EXP/level-up e a alocação de `BONUS` já foram
-  validados. A vitória e o level-up foram obtidos com boost de debug
-  (999 HP/99 stats); a tela de bônus limita os atributos a 35 (0x23) e o boost
-  em 99 travava a alocação até o atributo ser reduzido para 0x20. Em
-  dificuldade normal, o grupo no nível 1 ainda não consegue ferir o Mad Slug.
-  Yumiko saiu da batalha com `POISON` e não há item de cura no inventário.
+  validados. A vitória/level-up foi obtida com boost de debug e também em
+  **dificuldade normal** contra `妖魔ヘケット` (64 EXP, 20 Macca, 1 `宝玉`,
+  Nakajima LV3), usando Jack Knife + Combat Suits. A tela de bônus limita os
+  atributos a 35 (0x23); com o boost em 99, era preciso reduzir o atributo
+  para 0x20 para alocar. Yumiko morreu na luta normal (0/9, `DEAD`) e o
+  `宝玉` não a revive. O HUD de batalha exibiu `997/997`/`999/999` sem
+  correspondência na WRAM — candidato a bug de exibição.
 - A rota do 8F está confirmada em `docs/route-8f.md`: Gate Keeper em `(2,2)`,
   escada em `(2,3)` e chegada ao 7F em `(10,2)`.
 - O servidor de debug funciona e `0x877`/`0x878`/`0x865` dão a posição; a
@@ -192,8 +194,9 @@ o load; ele foi regenerado com a SRAM válida.
 
 ## Próximos passos
 
-1. Curar o `POISON` da Yumiko e repetir a vitória em dificuldade normal; o
-   recrutamento segue pendente (o manual exige nível maior que o do demônio).
+1. Reviver a Yumiko (Kaifuku/8F ou magia/item) e repetir a batalha com ela
+   viva; o recrutamento segue pendente (o manual exige nível maior que o do
+   demônio).
 2. Comparar boot/dungeon/batalha com o MesenCE usando frames e WRAM.
 3. Nomear as rotinas descobertas em `recomp/symbols.toml` — começando pelo
    caminho da batalha e pela tela de level-up (`$01:B4F6`, `$01:B431`,

@@ -139,12 +139,24 @@ O 8F tem 64 células conectadas. A escada `(3,3)` leva ao 7F `(11,3)`.
   A tela os exibia limitados a 35 e `A`/`Direita` não somavam nada. Baixar o
   atributo selecionado para 0x20 destravou a alocação; o código da tela está
   em `$01:B4F6` (loop), `$01:B431` (desenho) e `$01:B5D5` (impressão/limite).
-  Em dificuldade normal, o grupo no nível 1 ainda não conseguiu ferir o Mad
-  Slug; o grinding/equipamento continua necessário.
+- **Vitória em dificuldade normal (2026-11-18):** sem boost de debug, contra
+  `妖魔ヘケット` no 7F. Nakajima com Jack Knife + Combat Suit e Yumiko com
+  Combat Suit; Nakajima causou 2–5 por golpe e Heket 1–3. Resultado:
+  `妖魔ヘケットを倒した！`, **64 EXP**, **20 Macca** e **1 `宝玉`**;
+  Nakajima foi de **LV1 para LV3** (HP 23/23, primeiro atributo 20→22) e
+  recebeu `BONUS 1`. Yumiko morreu (0/9, `DEAD`) e o `宝玉` não a revive.
+  O HUD de batalha mostrou `997/997` e `999/999` sem correspondência na
+  WRAM (8/0 e 9/9); é candidato a bug de exibição.
+- **Reprodução do encontro:** com `save8` e espera de 12 frames por passo,
+  o nono passo em `(8,2)` trouxe Heket. Outros tempos trouxeram Mad Slug
+  (W=6), besta verde (W=18) e outro demônio (W=20); o RNG de encontro
+  depende do tempo entre passos.
 - **Equipamento:** o caminho é `A` → `B` (duas vezes) → `ITEM` → `そうび`;
-  a tela `EQUIPMENTS` mostra Jack Knife, Nunchaku e Combat Suit. O manual
-  confirma que é preciso equipar explicitamente; a interação de slot ainda
-  não foi concluída.
+  a tela `EQUIPMENTS` mostra os slots HEAD/BODY/HAND/SWD/ARM e a lista de
+  itens. O cursor é o sublinhado branco na lista; `A` equipa o item no slot
+  compatível. O Jack Knife foi para SWD e os dois Combat Suits para BODY
+  (Nakajima e Yumiko). O Nunchaku não apareceu para Yumiko; ela usa a arma
+  padrão (HAND).
 
 ## 7F — primeira batalha
 
@@ -169,21 +181,25 @@ Para repetir a validação, os save states locais são:
 |---|---|
 | `save10` | 8F, `(1,4)`, equipado, 10 Macca |
 | `save6` | 7F, `(8,2)`, pós-batalha de Heket, dungeon |
+| `save8` | 7F, `(8,2)`, pré-batalha, full HP e equipado |
+| `save0` | 7F, `(8,2)`, início da batalha contra Heket (LV1) |
+| `save3` | pós-vitória normal contra Heket, Nakajima LV3, Yumiko `DEAD` |
+| `save7` | pós-vitória normal contra Heket (cópia de segurança) |
 | `save4` | 7F, `(8,1)`, pós-vitória contra 2 Mad Slugs, ainda com boost |
 | `save11` | tela `レベルアップ：ユミコ`, antes da alocação |
-| `save9` | pós-level-up, dungeon 7F, HP 30/30 e 27/27, Yumiko `POISON` |
-| `save3` | tela de level-up antiga com atributos 99 (artefato do boost) |
+| `save9` | pós-level-up (boost), dungeon 7F, HP 30/30 e 27/27, Yumiko `POISON` |
 
 Esses saves são artefatos locais de `build-debug/saves/` e **não** são
 versionados.
 
 ## O que ainda falta
 
-- Curar o `POISON` da Yumiko (não há item de cura no inventário; a opção
-  `MAGIC` fora de batalha responde `魔法を使える者がいません`) ou confirmar
-  que o veneno não drena HP fora de batalha.
-- Repetir a vitória sem boost de debug; o grinding/equipamento em dificuldade
-  normal ainda é necessário.
+- Reviver a Yumiko ou repetir a batalha com ela viva (o `宝玉` não revive;
+  a opção `MAGIC` fora de batalha responde `魔法を使える者がいません`).
+  O `DEFEND` de Yumiko evitou dano na rodada testada, mas a batalha foi
+  encerrada por `ESCAPE` antes da vitória.
+- Testar a sala `Kaifuku`/revival do 8F se houver caminho de volta, ou seguir
+  para o 6F e procurar um ponto de cura/revival.
 - Confirmar as coordenadas e os gatilhos exatos de Basim, Gnome e Dryad no 7F
   (o encontro aleatório de Heket em `(8,2)` já foi confirmado; a besta verde
   provável Basim também apareceu aleatoriamente).

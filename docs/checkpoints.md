@@ -14,7 +14,7 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
 | CP-007 | Primeira dungeon | confirmar os status (~frame 14861) | OK — corredor inicial |
 | CP-008 | Movimento | setas na dungeon | OK — câmera muda de célula |
 | CP-009 | Interação com baú | andar até o baú (~frame 15100) | OK — diálogo YES/NO; loot `500` + `宝玉` |
-| CP-010 | Primeira batalha | rota confirmada em `docs/route-8f.md`: Gate Keeper `(2,2)`, escada `(2,3)`, 7F `(10,2)`, batalha em `(8,2)` | **OK** — encontros aleatórios de Heket (negociação) e besta verde (provável Basim), derrota/game over e vitória contra 2 Mad Slugs com 100 EXP/65 Macca/20 MAG; level-up, alocação de `BONUS` e magia aprendida validados (com boost de debug) |
+| CP-010 | Primeira batalha | rota confirmada em `docs/route-8f.md`: Gate Keeper `(2,2)`, escada `(2,3)`, 7F `(10,2)`, batalha em `(8,2)` | **OK** — encontros de Heket, Mad Slug e besta verde (provável Basim), negociação, game over, vitória em dificuldade normal contra Heket (64 EXP, 20 Macca, 1 `宝玉`, Nakajima LV3) e level-up/alocação de `BONUS` validados |
 | CP-011 | Menu de status | apertar A na passagem (~frame 16400) | OK — COMP/MAGIC/ITEM/STATUS; ficha em ~frame 16800 |
 | CP-012 | Auto-mapping | A → COMP → `オートマッピング` (5º item; down ×4); configurar `Fixed` | OK — minimapa local; modo Fixed norte-para-cima mostra posição/EV |
 | CP-013 | Salvar e carregar pelo jogo | salvar via SRAM, reiniciar, carregar | **OK** — gravação/flush e carregamento validados; o `CONTINUE` lista o arquivo e restaura o estado. O save state antigo `save1` restaurava SRAM zerada e foi regenerado. |
@@ -55,8 +55,21 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
   `A`/`Direita` não conseguiam somar e `Esquerda` não conseguia reduzir. A
   tela exibia todos os atributos limitados a **35**. Reduzir o atributo
   selecionado para 0x20 destravou a alocação; não era bug do recomp.
-- A vitória em dificuldade normal ainda não foi obtida; o grupo no nível 1
-  não conseguiu ferir o Mad Slug.
+- **Vitória em dificuldade normal (2026-11-18):** sem boost de debug, contra
+  `妖魔ヘケット` no 7F. Nakajima estava com Jack Knife + Combat Suit e Yumiko
+  com Combat Suit. Nakajima causou 2–5 por golpe; Heket causou 1–3 e matou
+  Yumiko durante a luta. Resultado: `妖魔ヘケットを倒した！`, **64 EXP**,
+  **20 Macca** e **1 `宝玉`**; Nakajima subiu de **LV1 para LV3** (HP 23/23,
+  primeiro atributo 20→22) e recebeu `BONUS 1`. Yumiko ficou em LV1, 0/9,
+  `DEAD`; o `宝玉` não a revive (`宝玉の効果はありません`).
+- **Menu de batalha:** o cursor fica em `$028F` (0=FIGHT, 1=ESCAPE, 2=TALK,
+  3=AUTO). O menu de ação de Yumiko tem `MAGIC`, mas em LV1 responde
+  `使える魔法はありません`. Com `DEFEND`, Yumiko não sofreu dano na rodada
+  testada, mas a batalha foi encerrada por `ESCAPE` antes da vitória.
+- **HUD de batalha:** em uma batalha normal posterior, o painel mostrou
+  `997/997` e `999/999` mesmo com a WRAM em 8/0 e 9/9; os valores brutos
+  estavam certos. É um candidato a bug de exibição do recomp, não do estado
+  do jogo.
 - **Combate:** ataques físicos causaram 0–1 de dano; o inimigo revidou com
   2–3 de dano. A negociação `TALK` → `わたしと対等に話すつもりか？` → `NO`
   → `はははっ、よく分かっているようだな` →

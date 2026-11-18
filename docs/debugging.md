@@ -212,6 +212,23 @@ teto. Além disso, o valor base também era 99, então `Esquerda` não reduzia.
 Baixar o atributo selecionado (e o base correspondente) para 0x20 permitiu
 alocar o ponto. Não é bug do recomp.
 
+### Menu de batalha e vitória normal (2026-11-18)
+
+- O cursor do menu `FIGHT`/`ESCAPE`/`TALK`/`AUTO` fica em `$028F`:
+  `0=FIGHT`, `1=ESCAPE`, `2=TALK`, `3=AUTO`. Ele pode lembrar a última opção;
+  por isso um `A` logo após uma mensagem pode repetir `ESCAPE`. Dá para
+  escrever `$028F` e confirmar com `A` para escolher a opção exata.
+- A batalha normal contra `妖魔ヘケット` foi vencida sem boost com Jack Knife
+  + Combat Suit. Nakajima causou 2–5 por golpe, Heket 1–3. Recompensas:
+  `妖魔ヘケットを倒した！`, 64 EXP, 20 Macca, 1 `宝玉`; Nakajima chegou a
+  LV3 (23/23 HP, primeiro atributo 22). Yumiko morreu e o `宝玉` não revive.
+- Em uma batalha normal posterior, o HUD mostrou `997/997` e `999/999`
+  enquanto a WRAM tinha 8/0 e 9/9. É um forte candidato a bug de exibição do
+  recomp; os valores brutos e a lógica da batalha continuaram corretos.
+- O encontro é sensível ao tempo entre passos. Com `save8`, esperar 12
+  frames por passo fez Heket aparecer no 9º passo em `(8,2)`; esperas de 6,
+  18 e 20 frames trouxeram Mad Slug, besta verde e outro demônio.
+
 > **Cuidado com `A`/`B`:** no dungeon, `A` abre a janela de comandos; `B`
 > volta do submenu para a lista de comandos e `B` de novo fecha. Para
 > equipar: `A` → `B` → `↓` até `ITEM` → `A` → `↓×3` até `そうび` → `A`.

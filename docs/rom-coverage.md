@@ -1,4 +1,4 @@
-# Cobertura de bytes do ROM — 2026-11-18
+# Cobertura de bytes do ROM — 2026-11-19
 
 Este relatório mede **bytes de instrução descobertos** no ROM original, não
 uma porcentagem subjetiva de “decompilação”. Todos os números são contagens
@@ -9,7 +9,7 @@ do ROM japonês limpo:
 
 ## Método
 
-1. O manifesto final tem **1417 nós / 1417 AOT / 0 LLE-only**.
+1. O manifesto final tem **1421 nós / 1421 AOT / 0 LLE-only**.
 2. Cada nó foi decodificado com o decoder v2; os bytes de cada instrução
    foram mapeados para o offset LoROM e deduplicados.
 3. `data_region` e `force_lle` foram lidos dos cfgs.
@@ -19,19 +19,19 @@ do ROM japonês limpo:
 
 | Métrica | Valor |
 |---|---:|
-| Roots | 80 |
-| Variantes descobertas | **1417** |
-| Variantes AOT-eligible | **1417** |
+| Roots | 84 |
+| Variantes descobertas | **1421** |
+| Variantes AOT-eligible | **1421** |
 | Variantes LLE-only | **0** |
 | Bancos com código | 12 |
-| Entradas de dispatch | 1103 |
-| Entradas com AOT | 1103 |
-| Variantes AOT no dispatch | 1417 |
-| Instruções físicas únicas | 56.280 |
+| Entradas de dispatch | 1106 |
+| Entradas com AOT | 1106 |
+| Variantes AOT no dispatch | 1421 |
+| Instruções físicas únicas | 56.356 |
 
 Além do grafo, existem **2 entradas `force_lle` intencionais**, fora do
 manifesto de nós: `$00:8000` (reset) e `$00:827A` (NMI). Contando-as como
-funções, a taxa efetiva é **1417 / 1419 = 99,8591% AOT** por contagem de
+funções, a taxa efetiva é **1421 / 1423 = 99,8595% AOT** por contagem de
 funções.
 
 Há também **8 nós AOT com borda interpretada** (`has_lle_indirect_edge`):
@@ -43,22 +43,27 @@ LLE-only; o `JMP ($80AE,X)` de 16 bits ainda não foi modelado no emitter.
 | Métrica | Bytes | % do ROM |
 |---|---:|---:|
 | ROM total | 2.097.152 | 100% |
-| Instruções únicas descobertas | **126.969** | **6,0544%** |
-| Instruções no grafo AOT | 126.969 | 100% do grafo |
+| Instruções únicas descobertas | **127.156** | **6,0633%** |
+| Instruções no grafo AOT | 127.156 | 100% do grafo |
 | `data_region` (fronteiras de BRK) | 4 | 0,0002% |
-| Desconhecido (dados/gráficos/som/código não achado) | 1.970.183 | 93,9456% |
+| Desconhecido (dados/gráficos/som/código não achado) | 1.969.996 | 93,9367% |
 
-O número de **6,0544%** é a fração do ROM ocupada por instruções já
+O número de **6,0633%** é a fração do ROM ocupada por instruções já
 decodificadas. Ele **não** significa “6% decompilado”: a maior parte do
 cartucho é dado, gráfico, som ou código ainda não alcançado.
+
+Os quatro roots do 6F adicionaram **187 bytes distintos**: `$00:8608`
+(55 bytes) e `$00:8993` (132 bytes). As variantes `$00:845B:M1X1` e
+`$00:86C0:M1X1` reutilizam bytes já cobertos pelas variantes M1X0 e pelos
+handlers de HDMA; por isso não entram duas vezes na contagem.
 
 ### Denominadores de código
 
 | Denominador | Capacidade | Instruções descobertas | Cobertura |
 |---|---:|---:|---:|
-| 12 bancos com código | 393.216 | 126.969 | **32,2899%** |
-| 6 bancos do núcleo (`$00`,`$01`,`$02`,`$03`,`$05`,`$30`) | 196.608 | 118.964 | **60,5082%** |
-| ROM total | 2.097.152 | 126.969 | **6,0544%** |
+| 12 bancos com código | 393.216 | 127.156 | **32,3374%** |
+| 6 bancos do núcleo (`$00`,`$01`,`$02`,`$03`,`$05`,`$30`) | 196.608 | 119.151 | **60,6033%** |
+| ROM total | 2.097.152 | 127.156 | **6,0633%** |
 
 Os bancos contêm dados além de código; por isso a cobertura dos 12 bancos é
 um **limite inferior** de código mapeado, não uma divisão exata
@@ -68,7 +73,7 @@ código/dados.
 
 | Banco | Bytes de instrução | % do banco (32 KB) | Papel aproximado |
 |---|---:|---:|---|
-| `$00` | 17.306 | 52,81% | núcleo / boot / main loop / HDMA |
+| `$00` | 17.493 | 53,38% | núcleo / boot / main loop / HDMA |
 | `$01` | 25.667 | 78,33% | núcleo / texto / input / tabelas |
 | `$02` | 18.250 | 55,69% | núcleo / batalha / menus |
 | `$03` | 22.949 | 70,03% | núcleo / save / texto |
@@ -95,8 +100,15 @@ dados, gráficos, som ou código de rotas ainda não capturadas.
 | `save4` / `save9` | party correta, 0 stubs |
 | Batalha/menus (`save0/5/7`) | 0 off-rails, 0 stubs |
 | Campo (`save2`, 2 mil frames) | 0 off-rails, 0 stubs, 99,7088% AOT |
-| Checkpoint 6F (slot 12, 780 frames) | 0 stubs, 0 off-rails, `step 60` 1,034–1,039s, AOT 98,25–98,59%, 0 roots novos |
+| Checkpoint 6F (slot 12, 780 frames) | 0 stubs, 0 off-rails, `step 60` 1,034–1,039s, AOT 98,25–98,59%, 0 roots no state parado |
+| Exploração 6F (2026-11-19) | **4 roots novos** em `$00`; capturas pós-promoção com `discoveries: []` |
+| 6F com grafo 1421 | **1421/1421 AOT**, 0 stubs/off-rails, `step 60` 1,036–1,042s, AOT 97,83–98,16% |
 | LLE quente no campo | `$00:9300`, 0,2741% dos ciclos |
+
+Os testes de boot/título/`save4`/`save9`/`snesref` são do lote de 1417; o
+lote de 1421 foi validado no 6F e pelas capturas tier-2 pós-promoção. O
+processo final roda destacado com `setsid nohup`; as quedas anteriores não
+deixaram core, stub ou off-rail.
 
 O LLE restante no campo está fora do grafo AOT (reset/NMI, bordas
 indiretas e o caminho `$00:9300`), não em nós LLE-only. Os HDMA já são AOT;
@@ -106,11 +118,11 @@ banco `$02` e continuar a rota a partir do checkpoint do 6F.
 ## Leitura honesta
 
 - **Grafo descoberto:** 100% AOT.
-- **Código já descoberto:** 126.969 bytes, 100% no grafo AOT.
-- **12 bancos de código:** 32,2899% dos bytes são instruções mapeadas; o
+- **Código já descoberto:** 127.156 bytes, 100% no grafo AOT.
+- **12 bancos de código:** 32,3374% dos bytes são instruções mapeadas; o
   resto é dado ou código não descoberto.
-- **6 bancos do núcleo:** 60,5082% dos bytes são instruções mapeadas.
-- **ROM física:** 6,0544% dos bytes são instruções; não é “% de decomp”.
+- **6 bancos do núcleo:** 60,6033% dos bytes são instruções mapeadas.
+- **ROM física:** 6,0633% dos bytes são instruções; não é “% de decomp”.
 - **Jogo:** boot/título/8F/7F/**6F**/save4/save9/batalha/level-up
   validados; o restante do 6F e o late game ainda não estão mapeados.
 

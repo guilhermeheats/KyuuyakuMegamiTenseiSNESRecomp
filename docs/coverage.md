@@ -431,15 +431,47 @@ foi carregado no build AOT e rodou **780 frames** (600 + 180) com **zero
 stubs** e **zero off-rails**. O `step 60` ficou em **1,034–1,039s** e o AOT
 acumulado em **98,25–98,59%**.
 
-A captura tier-2 do estado registrou **7.958.086 instruções** e
+A captura tier-2 do **estado parado** registrou **7.958.086 instruções** e
 **27.808.236 ciclos** interpretados, mas retornou **`discoveries: []`**: o
-6F já está coberto pelo grafo de **1417 variantes**. O perfil interpretado
-do processo é dominado por `$00:9300` (26,4M ciclos, 1,20% da CPU), seguido
-dos wrappers do main loop em `$3F:C4xx`; não há site novo de campo.
+state em si estava coberto pelo grafo então em **1417 variantes**. O perfil
+interpretado do processo é dominado por `$00:9300` (26,4M ciclos, 1,20% da
+CPU), seguido dos wrappers do main loop em `$3F:C4xx`; não há site novo de
+campo.
 
-Conclusão: o checkpoint é um ponto de partida de gameplay, não uma fonte de
-roots. O próximo ganho de cobertura está em **explorar a rota do 6F** e nos
-oito `JMP ($80AE,X)`/bancos `$02`.
+Conclusão: o checkpoint parado não é fonte de roots; a **exploração a
+partir dele** é (ver o destravamento abaixo). O próximo ganho de cobertura
+está na rota do 6F e nos oito `JMP ($80AE,X)`/bancos `$02`.
+
+### Destravamento 20: exploração do 6F (2026-11-19)
+
+A exploração a partir do checkpoint do 6F (slot 12/QUICK) e as batalhas
+aleatórias revelaram **quatro variantes ausentes** em `$00`:
+
+| Variante | Origem | Observação |
+|---|---|---|
+| `$00:8993:M1X0` | call gap em `$00:82DB` | rotina nova do caminho NMI/PPU |
+| `$00:86C0:M1X1` | call gap em `$00:82E5` | variante M1X1 do dispatcher HDMA |
+| `$00:845B:M1X1` | call gap em `$00:82E8` | variante M1X1 de `$845B` (já tinha M1X0) |
+| `$00:8608:M1X0` | call gap em `$00:82C4` | rotina nova de setup |
+
+As capturas foram feitas durante a exploração e as batalhas:
+
+- `/tmp/opencode/coverage-6f-explore/…`: 3 descobertas, 69.858.454
+  instruções interpretadas;
+- `/tmp/opencode/coverage-6f-roots/…`: 1 descoberta (`$8608`), 306.774.016
+  instruções, durante as batalhas longas;
+- `/tmp/opencode/coverage-6f-roots2/…` e `coverage-6f-final/…`:
+  **`discoveries: []`** depois da promoção.
+
+Resultado: **1421 nós / 1421 AOT / 0 LLE**, **84 roots** e **1106 entradas
+de dispatch**. O `step 60` no 6F ficou em **1,036–1,042s**, com AOT
+acumulado em **97,83–98,16%** e zero stubs/off-rails. O estado carrega com
+o analisador aberto; **B três vezes** volta ao campo.
+
+**Nota de estabilidade:** os primeiros processos de exploração morreram sem
+core, stub ou off-rail depois de batalhas longas. A hipótese atual é
+**SIGHUP do shell que os lançou**; a validação final usa `setsid nohup` e
+ficou estável.
 
 ## Correções no `tools/regen.sh`
 
@@ -498,7 +530,7 @@ chamadas e não definidas; as diretivas foram revertidas.
 
 ## Fronteira atual: 0 nós LLE-only
 
-O grafo descoberto está **100% AOT-eligible: 1417/1417**. Não há mais nó
+O grafo descoberto está **100% AOT-eligible: 1421/1421**. Não há mais nó
 LLE-only. O que resta são **2 entradas `force_lle` intencionais** (reset e
 NMI) e **8 nós AOT com borda interpretada** (`has_lle_indirect_edge`):
 `$02:DC53`, `$02:ED38` e os seis handlers de som `$30:*`, cujos
@@ -510,7 +542,8 @@ O perfil de campo (`save2`) mostrou **0,27% dos ciclos** em `$00:9300`, um
 caminho LLE fora do grafo AOT (provavelmente ligado ao NMI/PPU/APU); não há
 stubs nem off-rails. O próximo foco é modelar a tabela 16-bit de `$80AE` e
 os dois sites do banco `$02`; a rota até o 6F já foi alcançada e validada
-(2026-11-19), mas a exploração completa do andar continua pendente.
+(2026-11-19), e a exploração inicial do andar achou 4 variantes novas em
+`$00`, mas a rota completa continua pendente.
 
 ### Histórico: o gargalo do `$03:983C`
 
@@ -581,9 +614,9 @@ não a promoção AOT.
 3. Investigar o caminho LLE quente `$00:9300` no campo (0,27% dos ciclos) e
    ver se ele pode virar root/AOT; manter o NMI/reset como `force_lle` se
    necessário.
-4. Continuar a captura da rota **a partir do 6F** (o checkpoint de
-   2026-11-19 já foi ingerido sem roots novos), incluindo menus, batalhas e
-   level-up, e adicionar os roots que aparecerem.
+4. Continuar a captura da rota **a partir do 6F**: o state parado não
+   revelou roots, mas a exploração/batalhas já adicionaram 4 variantes em
+   `$00`; seguir para o 5F, menus e level-up e ingerir cada captura.
 5. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
    `$38` e `$3F`, e continuar a separação código/dados (`$04:BEC6`,
    `$05:DD6D`).

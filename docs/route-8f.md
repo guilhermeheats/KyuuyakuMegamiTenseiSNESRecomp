@@ -220,16 +220,27 @@ Nakajima e Yumiko. O estado foi gravado pelo menu **Select+R**
   600 + 180 frames rodaram com **zero stubs** e **zero off-rails**. O
   `step 60` ficou em **1,034–1,039s** e o AOT acumulado em
   **98,25–98,59%**.
-- **Cobertura:** a captura tier-2 do 6F registrou 7.958.086 instruções
-  interpretadas e **`discoveries: []`** — nenhum root novo. O estado já
-  está coberto pelo grafo de 1417 variantes.
-- **Rótulo do HUD:** a imagem do quick save ainda mostra `7F` no HUD. Como
-  o jogador confirma o 6F e o mapa está em `Fixed`, a rota adota a
-  designação do jogador; a divergência fica registrada para não confundir
-  o próximo checkpoint.
+- **Cobertura:** a captura tier-2 do estado parado registrou 7.958.086
+  instruções interpretadas e `discoveries: []`; o state em si já estava
+  coberto pelo grafo de 1417 variantes. A **exploração a partir dele**,
+  porém, revelou **4 variantes novas em `$00`** (`$8993:M1X0`,
+  `$86C0:M1X1`, `$845B:M1X1`, `$8608:M1X0`) e levou o grafo a **1421/1421
+  AOT**. Detalhes em `docs/coverage.md`.
+- **Exploração inicial:** o state carrega com o **analisador aberto**; `B`
+  três vezes volta ao campo. A partir de `(2,11)`, o ramo norte vai a
+  `(2,10)` (sala sem saída) e o leste a `(3,11)`; o caminho para o resto do
+  andar é `(2,10)` → leste `(3,10)` → norte `(3,9)` → leste `(4,9)` →
+  `(5,9)`, que é um **beco sem saída**. As batalhas aleatórias aparecem com
+  atraso; espere ~150–200 frames antes de concluir que o movimento falhou.
+- **Rótulo do HUD:** a imagem do quick save foi capturada antes de o HUD
+  atualizar e ainda mostra `7F`; o state carregado mostra **`6F`**. A rota
+  adota a designação do jogador.
 
 O 6F ainda não tem a rota completa mapeada; esse state é o ponto de partida
 para explorar o andar, procurar cura/revival e capturar os roots restantes.
+O processo de validação final roda destacado com `setsid nohup`; as quedas
+anteriores não deixaram core, stub ou off-rail e são atribuídas ao shell
+que lançava o jogo.
 
 ## O que ainda falta
 

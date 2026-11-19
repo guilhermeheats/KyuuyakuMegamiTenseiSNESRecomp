@@ -23,7 +23,7 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
 | CP-012 | Auto-mapping | A → COMP → `オートマッピング` (5º item; down ×4); configurar `Fixed` | OK — minimapa local; modo Fixed norte-para-cima mostra posição/EV |
 | CP-013 | Salvar e carregar pelo jogo | salvar via SRAM, reiniciar, carregar | **OK** — gravação/flush e carregamento validados; o `CONTINUE` lista o arquivo e restaura o estado. O save state antigo `save1` restaurava SRAM zerada e foi regenerado. |
 | CP-014 | Início do Megami Tensei II | completar o MT1 ou usar save de teste | pendente |
-| CP-015 | Checkpoint do 6F | carregar slot 12/QUICK criado após as batalhas do 7F | **OK** — mapa `Fixed`, equipamentos em Nakajima/Yumiko; 780 frames sem stub/off-rail, `step 60` 1,034–1,039s, captura tier-2 sem roots novos |
+| CP-015 | Checkpoint do 6F | carregar slot 12/QUICK criado após as batalhas do 7F | **OK** — mapa `Fixed`, equipamentos em Nakajima/Yumiko; 780 frames sem stub/off-rail, `step 60` 1,034–1,039s; exploração/batalhas revelaram 4 roots novos em `$00` |
 
 ## CP-010 — detalhes da primeira batalha
 
@@ -160,10 +160,16 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
   slot 12 do menu) restaurou o campo no frame 49358.
 - **Resultado:** 600 + 180 frames com **zero stubs** e **zero off-rails**;
   `step 60` em **1,034–1,039s**; AOT acumulado **98,25–98,59%**.
-- **Cobertura:** captura tier-2 com 7.958.086 instruções interpretadas e
-  `discoveries: []`; nenhum root novo. A captura está em
-  `/tmp/opencode/coverage-6f/` e o relatório em
-  `logs/kyuuyaku/2026-11-19-6f-ingest.json`.
+- **Cobertura:** o state parado registrou 7.958.086 instruções
+  interpretadas e `discoveries: []`; a **exploração/batalhas** a partir dele
+  revelou **4 variantes novas em `$00`** (`$8993:M1X0`, `$86C0:M1X1`,
+  `$845B:M1X1`, `$8608:M1X0`). O grafo foi para **1421/1421 AOT** e as
+  capturas pós-promoção voltaram com `discoveries: []`.
+- **Carregamento do state:** o state abre com o **analisador** na tela;
+  pressione **B três vezes** para voltar ao campo. Batalhas aleatórias
+  começam com atraso de ~150–200 frames.
+- **Estabilidade:** a validação final roda com `setsid nohup`; as quedas
+  anteriores não deixaram core, stub ou off-rail.
 - **Observação:** o HUD do quick save ainda mostra `7F`; a rota adota a
   designação do jogador (6F), com a divergência registrada em
   `docs/route-8f.md`.

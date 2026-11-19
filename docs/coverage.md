@@ -74,13 +74,13 @@ Com `tools/regen.sh` (agora com `--cfg-roots` por padrão):
 | Métrica | Linha de base | Depois dos contratos |
 |---|---:|---:|
 | Roots | 11 | 72 |
-| Variantes exatas | 60 | 1228 |
-| Variantes AOT-eligible | 54 | 1222 |
-| Variantes LLE-only | 6 | 6 |
+| Variantes exatas | 60 | 1229 |
+| Variantes AOT-eligible | 54 | 1229 |
+| Variantes LLE-only | 6 | 0 |
 | Bancos emitidos | 8 | 12 |
 | Entradas de dispatch | 51 | 951 |
-| Entradas com AOT | 46 | 945 |
-| Variantes AOT no dispatch | 54 | 1222 |
+| Entradas com AOT | 46 | 951 |
+| Variantes AOT no dispatch | 54 | 1229 |
 
 No mesmo build, após carregar os save states de 8F/7F/batalha/level-up, o
 `interp_stats` acumulado mostrou **~94,7% AOT / ~5,3% interpretado** (o boot
@@ -356,6 +356,23 @@ e o `$00:BF53`. O grafo cresceu para **1228 nós / 1222 AOT / 6
 LLE** (+24 AOT e +9 nós). A/B save9 em **99,90–99,91% AOT** e **1,03–1,04s**,
 zero stubs; boot/título/save4/save9 válidos.
 
+### Destravamento 16: main loop e fim da fase 1
+
+O `$01:91DA` M1X1 tem duas saídas reais: o RTL normal em `$01:9797` retorna
+**M1X1**, e o caminho de cauda em `$01:9582`/`$01:9677` salta para `$01:9798`
+em **M1X0** e retorna pelo RTS `$01:97C5`. O contrato
+`exit_mx_set 0191DA M1X1 M1X0,M1X1` liberou `$05:931F`, `$05:962D` e
+`$05:8CB1`. Depois, `exit_mx_variant 0094C3 1 0 1 1` fechou o `$00:94C3`
+M1X0 e o main loop.
+
+Resultado: **1229 nós / 1229 AOT / 0 LLE-only**. A/B save9 em **99,91%
+AOT** e **1,033–1,036s**, zero stubs/tier; boot 3728 sem off-rails, título
+com os mesmos 6 bytes/SRAM, save4/save9 corretos; campo (`save2`) com 12 mil
+frames e zero off-rails/stubs. Restam **4 entradas `force_lle` intencionais**
+(reset, NMI, dois HDMA); o LLE quente de campo está em `$00:9300` (0,41% dos
+ciclos), fora do grafo AOT. A captura dinâmica não alcançou o `$01:91DA` nos
+menus; o contrato veio das duas saídas estáticas e foi validado pelo campo.
+
 ## Correções no `tools/regen.sh`
 
 O ganho depende de o regen realmente semear os `func` dos cfgs:
@@ -397,11 +414,11 @@ marcadas com `force_lle 0086C0`/`force_lle 0088CE` em `recomp/bank00.cfg`.
 Agora o interpretador executa o `JMP ($0100)` com o ponteiro vivo,
 `unresolved_stub_get` retorna **zero** e a rota save4/save9 fica em
 **99,4–99,9% AOT / 0,1–0,6% interpretado**. O custo continua sendo duas
-funções em LLE; o resto do grafo cresceu para 1222 variantes AOT com os
+funções em LLE; o resto do grafo cresceu para 1229 variantes AOT com os
 contratos de saída, as fronteiras `$04:BEC6`/`$05:E5DB`, o frame wait AOT,
-o dispatch `$00:9B04` e os lotes do bloco `$30`/`$00:9077`, do hub
-`$9A85`/`$94C3`, dos handlers `$9A85`/`$A1D8`, do bloco `$30` e da cadeia
-do banco `$03`.
+o dispatch `$00:9B04`, os lotes do bloco `$30`/`$00:9077`, do hub
+`$9A85`/`$94C3`, dos handlers `$9A85`/`$A1D8`, do bloco `$30`, da cadeia
+do banco `$03` e do main loop.
 
 O próximo passo de decompilação é **modelar esse dispatch vivo no emitter**
 (ou declarar `indirect_dispatch` de forma que o link-closure aceite os 8+4
@@ -410,25 +427,25 @@ funções. Uma tentativa inicial de `indirect_dispatch ... ptrtail targets:...`
 elevou a análise para 131 variantes, mas o link-closure rejeitou 28 variantes
 chamadas e não definidas; as diretivas foram revertidas.
 
-## Fronteira atual: 6 nós LLE-only
+## Fronteira atual: 0 nós LLE-only
 
-Os 6 nós LLE-only (6 bases) restantes são apenas o banco `$05` e o main loop.
-As razões são 7 `unproven_call`, 10 `truncated_call_at_*`, 6
-`truncated_call_continuation` e 6 `unproven_callee_exit`; não há mais aresta
-indireta em nó LLE:
+O grafo descoberto está **100% AOT-eligible: 1229/1229**. Não há mais nó
+LLE-only. O que resta são **4 entradas `force_lle` intencionais**, fora do
+manifesto de nós:
 
-| Cluster | Bases/variantes | Bloqueio |
-|---|---|---|
-| Main loop | `$00:8014`, `$00:80FB`, `$00:80FF` | nunca retornam; chamam `$05:8CB1`/`$00:94C3` |
-| Banco `$05` | `$05:8CB1`, `$05:931F`, `$05:962D` | `$05:931F`/`$05:962D` chamam `$01:91DA` M1X1, cuja saída ainda não foi declarada |
+| Entrada | Motivo |
+|---|---|
+| `$00:8000` (reset) | ponto de entrada, roda uma vez |
+| `$00:827A` (NMI) | interrupção de hardware, roda a cada frame |
+| `$00:86C0`, `$00:88CE` (HDMA) | `JMP ($0100)` com ponteiro vivo |
 
-O bloco `$01`, o bloco `$03`, o `$00:BF53` e o bloco `$30` agora são AOT. O
-frame wait `$00:9397`, `$01:8EAB`, `$02:DBB7`, `$03:983C`, `$00:9077`,
-`$00:9188`, `$00:947D`, `$03:A630`, `$02:AFF9`, `$02:AFB6`, `$04:BE39`,
-`$00:94C3`, `$9A85`/`$A1D8` e o bloco `$30` também. O próximo passo é
-declarar a saída de `$01:91DA` M1X1 (com evidência de runtime), depois
-`$05:8CB1` e, por fim, o main loop; em seguida vêm as tabelas indiretas, os
-HDMA e a rota até o 6F.
+O perfil de campo (`save2`) mostrou **0,41% dos ciclos** em `$00:9300`, um
+caminho LLE fora do grafo AOT (provavelmente ligado ao NMI/PPU/APU); não há
+stubs nem off-rails. O próximo foco é a **fase 2**: declarar as quatro
+tabelas indiretas (`$01:C72B`→`$C74E`, `$01:CD9C`→`$CDB6`,
+`$01:EF15`→`$ED47`, `$02:DC74`→`$DC35`), resolver os HDMA com as tabelas
+`$86FE`/`$88EC`, confirmar o ponteiro `$0080AE` dos sites `$30:*` e, depois,
+a rota até o 6F.
 
 ### Histórico: o gargalo do `$03:983C`
 
@@ -492,20 +509,19 @@ não a promoção AOT.
 
 ## Próximos passos
 
-1. Declarar a saída M1X1 de `$01:91DA` com evidência de runtime (o local dá
-   `M1X0` ou `M1X1`), promover `$05:931F`/`$05:962D`, depois `$05:8CB1` e o
-   main loop. Cada mudança precisa de `save4`/`save9`, `snesref` e **tempo
-   de parede**.
-2. Declarar as quatro tabelas indiretas do banco `$01`/`$02`:
+1. Declarar as quatro tabelas indiretas do banco `$01`/`$02`:
    `$01:C72B`→`$C74E` (30 entradas), `$01:CD9C`→`$CDB6`,
    `$01:EF15`→`$ED47` e `$02:DC74`→`$DC35` (16 entradas). Validar o count e
    os alvos de cada tabela; isso remove a borda LLE do `$01:EE96` e os
    fallbacks dos despachantes.
-3. Resolver os HDMA `$00:86C0`/`$00:88CE` com as tabelas `$86FE` (8 alvos) e
+2. Resolver os HDMA `$00:86C0`/`$00:88CE` com as tabelas `$86FE` (8 alvos) e
    `$88EC` (4 alvos) via `ptrtail targets:`, remover `force_lle` e validar o
    título/framebuffer.
-4. Confirmar o ponteiro `$0080AE` dos 11 sites `$30:*`; se for o alvo único
+3. Confirmar o ponteiro `$0080AE` dos 11 sites `$30:*`; se for o alvo único
    `$00:A220`, declarar os 11 alvos e validar o som numa rota com batalha.
+4. Investigar o caminho LLE quente `$00:9300` no campo (0,41% dos ciclos) e
+   ver se ele pode virar root/AOT; manter o NMI/reset como `force_lle` se
+   necessário.
 5. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
    ingerir com `tier2_ingest.py` e adicionar os novos roots.
 6. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,

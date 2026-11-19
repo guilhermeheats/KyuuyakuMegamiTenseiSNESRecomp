@@ -24,7 +24,7 @@ Atualizado em 2026-11-18.
 | Auto-mapping | OK — mapa da dungeon pelo menu COMP |
 | Primeira batalha | OK — Heket, Mad Slug, Basim fixo, negociação, game over, vitória/EXP/level-up |
 | Save/load via SRAM do jogo | OK — gravação, flush, boot e reload |
-| Cobertura estática | 1222 variantes AOT, 12 bancos; 99,4–99,9% AOT no save4/save9 |
+| Cobertura estática | 1229 variantes AOT, 12 bancos; 99,4–99,9% AOT no save4/save9 |
 | Comparação de referência | OK no título via snesref; MesenCE pendente |
 
 Marcos de frame observados com `--framedump`:
@@ -219,8 +219,8 @@ retorno à dungeon (HP 26/26 e 27/27), sem crash. O estado resultante está no
 A captura tier-2 do boot/título e dos save states de 8F/7F/batalha/level-up
 foi ingerida com `tier2_ingest.py`; os PCs quentes foram promovidos a roots
 permanentes. Com `tools/regen.sh` usando `--cfg-roots` por padrão, o grafo
-passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 1222
-variantes AOT / 12 bancos** (1228 variantes exatas, 6 LLE-only). Na rota
+passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 1229
+variantes AOT / 12 bancos** (1229 variantes exatas, 0 LLE-only). Na rota
 longa, o build ficou em **~94,7% AOT / 5,3% interpretado**, com zero dispatch
 misses; nos testes frescos, **save4 99,80% AOT** e **save9 99,91% AOT**, com
 zero stubs. O relatório completo, comandos e a lista de roots está em
@@ -338,6 +338,16 @@ inteira foi promovida e destravou de cascata o cluster `$01` e o
 `$00:BF53`: **1228 nós / 1222 AOT / 6 LLE**, A/B 99,90–99,91% e
 1,03–1,04s, zero stubs.
 
+O décimo sexto lote fechou a fase 1. O `$01:91DA` M1X1 tem duas saídas
+reais: RTL `$01:9797` em M1X1 e o caminho de cauda `$01:9582`/`$01:9677`
+→ `$01:9798` → RTS `$01:97C5` em M1X0. O contrato
+`exit_mx_set 0191DA M1X1 M1X0,M1X1` promoveu `$05:931F`, `$05:962D` e
+`$05:8CB1`; depois, `exit_mx_variant 0094C3 1 0 1 1` fechou o `$00:94C3`
+M1X0 e o main loop. Resultado: **1229 nós / 1229 AOT / 0 LLE-only**, A/B
+99,91% e 1,033–1,036s, zero stubs; campo (`save2`) com 12 mil frames e zero
+off-rails/stubs. Restam 4 `force_lle` intencionais (reset, NMI e dois HDMA).
+O mapa de bytes do ROM está em `docs/rom-coverage.md`.
+
 O regen também recebeu `--profile-manifest`, `--no-host-root-scan` e um
 `funcs.h` temporário fora da raiz do projeto; sem isso o scanner readicionava
 declarações antigas e o link-closure falhava com 28 variantes pendentes.
@@ -357,16 +367,15 @@ limpo e re-promover as duas funções.
 
 ## Próximos passos
 
-1. Declarar a saída M1X1 de `$01:91DA` com evidência de runtime, depois
-   promover `$05:931F`/`$05:962D`, `$05:8CB1` e o main loop. Cada mudança
-   precisa de `save4`/`save9`, `snesref` e **tempo de parede**.
-2. Declarar as tabelas indiretas `$01:C72B`→`$C74E`,
+1. Declarar as tabelas indiretas `$01:C72B`→`$C74E`,
    `$01:CD9C`→`$CDB6`, `$01:EF15`→`$ED47` e `$02:DC74`→`$DC35`; validar
    counts/alvos e remover a borda LLE do `$01:EE96`.
-3. Resolver os HDMA `$00:86C0`/`$00:88CE` com as tabelas `$86FE`/`$88EC`
+2. Resolver os HDMA `$00:86C0`/`$00:88CE` com as tabelas `$86FE`/`$88EC`
    via `ptrtail targets:` e remover `force_lle`; validar título/framebuffer.
-4. Confirmar o ponteiro `$0080AE` dos sites `$30:*`; se for `$00:A220`,
+3. Confirmar o ponteiro `$0080AE` dos sites `$30:*`; se for `$00:A220`,
    declarar o alvo único e validar o som.
+4. Investigar o caminho LLE quente `$00:9300` no campo e reduzir o
+   `force_lle`/interpretação da NMI/PPU/APU.
 5. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
    ingerir com `tier2_ingest.py` e adicionar os novos roots.
 6. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,

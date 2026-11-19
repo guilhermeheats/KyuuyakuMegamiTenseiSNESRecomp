@@ -9,7 +9,7 @@ do ROM japonês limpo:
 
 ## Método
 
-1. O manifesto final tem **1397 nós / 1397 AOT / 0 LLE-only**.
+1. O manifesto final tem **1417 nós / 1417 AOT / 0 LLE-only**.
 2. Cada nó foi decodificado com o decoder v2; os bytes de cada instrução
    foram mapeados para o offset LoROM e deduplicados.
 3. `data_region` e `force_lle` foram lidos dos cfgs.
@@ -19,20 +19,24 @@ do ROM japonês limpo:
 
 | Métrica | Valor |
 |---|---:|
-| Roots | 74 |
-| Variantes descobertas | **1397** |
-| Variantes AOT-eligible | **1397** |
+| Roots | 80 |
+| Variantes descobertas | **1417** |
+| Variantes AOT-eligible | **1417** |
 | Variantes LLE-only | **0** |
 | Bancos com código | 12 |
 | Entradas de dispatch | 1103 |
 | Entradas com AOT | 1103 |
-| Variantes AOT no dispatch | 1397 |
-| Instruções físicas únicas | 56.246 |
+| Variantes AOT no dispatch | 1417 |
+| Instruções físicas únicas | 56.280 |
 
 Além do grafo, existem **2 entradas `force_lle` intencionais**, fora do
 manifesto de nós: `$00:8000` (reset) e `$00:827A` (NMI). Contando-as como
-funções, a taxa efetiva é **1397 / 1399 = 99,8570% AOT** por contagem de
+funções, a taxa efetiva é **1417 / 1419 = 99,8591% AOT** por contagem de
 funções.
+
+Há também **8 nós AOT com borda interpretada** (`has_lle_indirect_edge`):
+`$02:DC53`, `$02:ED38` e os seis handlers de som `$30:*`. Eles não são
+LLE-only; o `JMP ($80AE,X)` de 16 bits ainda não foi modelado no emitter.
 
 ## Bytes do ROM
 
@@ -84,19 +88,19 @@ dados, gráficos, som ou código de rotas ainda não capturadas.
 
 | Teste | Resultado |
 |---|---|
-| A/B `save9` | 99,9064–99,9079% AOT, `step 60` 1,026–1,036s |
+| A/B `save9` | 99,9094–99,9109% AOT, `step 60` 1,050–1,060s |
 | Stubs / tier hits | 0 / 0 |
-| Boot até título | frame 3727, 0 off-rails, 0 stubs |
+| Boot até título | frame 3722, 0 off-rails, 0 stubs |
 | Título vs `snesref` | 6 bytes de WRAM, SRAM idêntica, **2353 pixels diferentes (4,10%)** |
 | `save4` / `save9` | party correta, 0 stubs |
 | Batalha/menus (`save0/5/7`) | 0 off-rails, 0 stubs |
-| Campo (`save2`, 2 mil frames) | 0 off-rails, 0 stubs, 99,7082% AOT |
-| LLE quente no campo | `$00:9300`, 0,2742% dos ciclos |
+| Campo (`save2`, 2 mil frames) | 0 off-rails, 0 stubs, 99,7088% AOT |
+| LLE quente no campo | `$00:9300`, 0,2741% dos ciclos |
 
-O LLE restante no campo está fora do grafo AOT (reset/NMI e o caminho
-`$00:9300`), não em nós LLE-only. Os HDMA já são AOT; a próxima fronteira
-da fase 2 é o ponteiro `$0080AE` dos sites `$30:*` e, depois, a rota até o
-6F.
+O LLE restante no campo está fora do grafo AOT (reset/NMI, bordas
+indiretas e o caminho `$00:9300`), não em nós LLE-only. Os HDMA já são AOT;
+a próxima fronteira é modelar a tabela 16-bit `$80AE`, os dois sites do
+banco `$02` e, depois, a rota até o 6F.
 
 ## Leitura honesta
 
@@ -109,6 +113,6 @@ da fase 2 é o ponteiro `$0080AE` dos sites `$30:*` e, depois, a rota até o
 - **Jogo:** boot/título/8F/7F/save4/save9/batalha/level-up validados; **6F e
   late game ainda não mapeados**.
 
-O próximo passo para aumentar o denominador é resolver o `$30:$0080AE` e
-capturar a rota até o 6F. O mapa acima é a base exata para comparar os
-próximos lotes.
+O próximo passo para aumentar o denominador é modelar a tabela 16-bit de
+`$80AE`, resolver os dois sites do banco `$02` e capturar a rota até o 6F.
+O mapa acima é a base exata para comparar os próximos lotes.

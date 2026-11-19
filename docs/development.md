@@ -24,7 +24,7 @@ Atualizado em 2026-11-18.
 | Auto-mapping | OK — mapa da dungeon pelo menu COMP |
 | Primeira batalha | OK — Heket, Mad Slug, Basim fixo, negociação, game over, vitória/EXP/level-up |
 | Save/load via SRAM do jogo | OK — gravação, flush, boot e reload |
-| Cobertura estática | 1397 variantes AOT, 12 bancos; 99,4–99,9% AOT no save4/save9 |
+| Cobertura estática | 1417 variantes AOT, 12 bancos; 99,4–99,9% AOT no save4/save9 |
 | Comparação de referência | OK no título via snesref; MesenCE pendente |
 
 Marcos de frame observados com `--framedump`:
@@ -219,8 +219,8 @@ retorno à dungeon (HP 26/26 e 27/27), sem crash. O estado resultante está no
 A captura tier-2 do boot/título e dos save states de 8F/7F/batalha/level-up
 foi ingerida com `tier2_ingest.py`; os PCs quentes foram promovidos a roots
 permanentes. Com `tools/regen.sh` usando `--cfg-roots` por padrão, o grafo
-passou de **11 roots / 54 variantes AOT / 8 bancos** para **74 roots / 1397
-variantes AOT / 12 bancos** (1397 variantes exatas, 0 LLE-only). Na rota
+passou de **11 roots / 54 variantes AOT / 8 bancos** para **80 roots / 1417
+variantes AOT / 12 bancos** (1417 variantes exatas, 0 LLE-only). Na rota
 longa, o build ficou em **~94,7% AOT / 5,3% interpretado**, com zero dispatch
 misses; nos testes frescos, **save4 99,80% AOT** e **save9 99,91% AOT**, com
 zero stubs. O relatório completo, comandos e a lista de roots está em
@@ -365,6 +365,15 @@ Restam só 2 `force_lle` (reset/NMI). A/B 99,9064–99,9079% e 1,026–1,036s;
 o título ficou com 2353 pixels diferentes (4,10%), o mesmo framebuffer de
 referência.
 
+O décimo nono lote promoveu as variantes reais dos handlers de som
+(`$30:9686`, `$30:A326`, `$30:C03F`, `$30:C176`, `$30:D24D`, `$30:D67D`)
+como roots M0X1/M1X1. O grafo foi para **1417 nós / 1417 AOT / 0 LLE**.
+As seis instruções `JMP ($80AE,X)` continuam no interpretador porque a
+tabela é de ponteiros 16-bit e o emitter ainda a lê como descritor de
+24 bits; são 8 nós AOT com borda interpretada, não LLE-only. A/B
+99,9094–99,9109% e 1,050–1,060s; boot 3722, título com os mesmos 2353
+pixels/SRAM.
+
 O regen também recebeu `--profile-manifest`, `--no-host-root-scan` e um
 `funcs.h` temporário fora da raiz do projeto; sem isso o scanner readicionava
 declarações antigas e o link-closure falhava com 28 variantes pendentes.
@@ -384,12 +393,13 @@ limpo e re-promover as duas funções.
 
 ## Próximos passos
 
-1. Confirmar o ponteiro `$0080AE` dos sites `$30:*`; se for `$00:A220`,
-   declarar o alvo único e validar o som.
-2. Investigar o caminho LLE quente `$00:9300` no campo e reduzir o
+1. Modelar a tabela 16-bit em `$80AE` e resolver os seis `JMP ($80AE,X)`
+   dos handlers de som; validar áudio em batalha/menus.
+2. Resolver os dois sites restantes do banco `$02` (`$02:DC53`/`$02:ED38`).
+3. Investigar o caminho LLE quente `$00:9300` no campo e reduzir o
    `force_lle`/interpretação da NMI/PPU/APU.
-3. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
+4. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
    ingerir com `tier2_ingest.py` e adicionar os novos roots.
-4. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
+5. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
    `$38` e `$3F`, e continuar a separação código/dados.
-5. Manter gameplay, save states e comparação com emulador como regressão.
+6. Manter gameplay, save states e comparação com emulador como regressão.

@@ -88,13 +88,14 @@ depois do contrato de `$03:A630` (782 variantes AOT), do lote do bloco
 `$30`/`$00:9077` (876), do lote `$04:BEC6`/`$03:A6BE` (954), do hub
 `$9A85`/`$94C3` (1029), do fechamento dos handlers `$9A85`/`$A1D8` (1031), da
 cascata de hubs do bloco `$30` (1198), da cadeia do banco `$03` (1222), do
-main loop (1229), das quatro tabelas indiretas (1383) e dos HDMA (**1397
-variantes AOT** em 12 bancos, com 2 entradas `force_lle`: reset e NMI): os
-mesmos **6 bytes** de WRAM, a mesma SRAM e o mesmo framebuffer (2353 pixels
-diferentes, 4,10%). O `unresolved_stub_get` ficou **zero** no título. O boot
-completo até o título também passou sem off-rails; o campo (`save2`) rodou
-12 mil frames sem off-rails/stubs. A promoção de 105 para 1397 variantes
-AOT não alterou o estado de referência.
+main loop (1229), das quatro tabelas indiretas (1383), dos HDMA (1397) e
+das variantes reais dos handlers de som (**1417 variantes AOT** em 12
+bancos, com 2 entradas `force_lle`: reset e NMI): os mesmos **6 bytes** de
+WRAM, a mesma SRAM e o mesmo framebuffer (2353 pixels diferentes, 4,10%).
+O `unresolved_stub_get` ficou **zero** no título. O boot completo até o
+título também passou sem off-rails; o campo (`save2`) rodou 12 mil frames
+sem off-rails/stubs. A promoção de 105 para 1417 variantes AOT não alterou
+o estado de referência.
 
 ## Limitações e próximo passo
 

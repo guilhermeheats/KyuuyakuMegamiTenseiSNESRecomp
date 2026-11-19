@@ -93,22 +93,26 @@ dados, gráficos, som ou código de rotas ainda não capturadas.
 
 | Teste | Resultado |
 |---|---|
-| A/B `save9` | 99,9094–99,9109% AOT, `step 60` 1,050–1,060s |
-| Stubs / tier hits | 0 / 0 |
-| Boot até título | frame 3722, 0 off-rails, 0 stubs |
-| Título vs `snesref` | 6 bytes de WRAM, SRAM idêntica, **2353 pixels diferentes (4,10%)** |
-| `save4` / `save9` | party correta, 0 stubs |
-| Batalha/menus (`save0/5/7`) | 0 off-rails, 0 stubs |
-| Campo (`save2`, 2 mil frames) | 0 off-rails, 0 stubs, 99,7088% AOT |
+| A/B `save9` (1417) | 99,9094–99,9109% AOT, `step 60` 1,050–1,060s |
+| Stubs / tier hits (1421) | 0 / 0 |
+| Boot até título (1421) | frame 3725, 0 off-rails, 0 stubs |
+| Título vs `snesref` (1421) | 6 bytes de WRAM, SRAM idêntica, **2256 pixels diferentes (3,93%)**, RMSE 0,1145 |
+| `save4` / `save9` (1421) | party correta, 0 stubs, 0 off-rails |
+| Batalha/menus (`save0/5/7`, 1421) | 0 off-rails, 0 stubs |
+| Campo (`save2`, 2 mil frames, 1417) | 0 off-rails, 0 stubs, 99,7088% AOT |
 | Checkpoint 6F (slot 12, 780 frames) | 0 stubs, 0 off-rails, `step 60` 1,034–1,039s, AOT 98,25–98,59%, 0 roots no state parado |
 | Exploração 6F (2026-11-19) | **4 roots novos** em `$00`; capturas pós-promoção com `discoveries: []` |
-| 6F com grafo 1421 | **1421/1421 AOT**, 0 stubs/off-rails, `step 60` 1,036–1,042s, AOT 97,83–98,16% |
-| LLE quente no campo | `$00:9300`, 0,2741% dos ciclos |
+| 6F com grafo 1421 | **1421/1421 AOT**, 0 stubs/off-rails, `step 60` 1,036–1,039s |
+| 6F ocioso (processo longo) | `$00:9300` domina 88,9% dos ciclos acumulados; `step 60` ~1,04s, 0 stubs/off-rails |
+| LLE quente no campo (save2, 1417) | `$00:9300`, 0,2741% dos ciclos |
 
-Os testes de boot/título/`save4`/`save9`/`snesref` são do lote de 1417; o
-lote de 1421 foi validado no 6F e pelas capturas tier-2 pós-promoção. O
-processo final roda destacado com `setsid nohup`; as quedas anteriores não
-deixaram core, stub ou off-rail.
+As linhas marcadas **1417** são a referência do lote anterior. As demais
+foram repetidas no lote de **1421**: boot/título, `save4`/`save9`,
+batalha/menus, 6F e a comparação com `snesref`. O release também foi
+reconstruído e rodou 473 frames em 8s (60,07 fps) no teste manual headless.
+O processo longo no 6F mostra o loop de espera `$00:9300` dominando o
+acumulado ocioso; isso é o LLE quente já conhecido, não uma regressão
+funcional.
 
 O LLE restante no campo está fora do grafo AOT (reset/NMI, bordas
 indiretas e o caminho `$00:9300`), não em nós LLE-only. Os HDMA já são AOT;

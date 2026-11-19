@@ -97,6 +97,25 @@ título também passou sem off-rails; o campo (`save2`) rodou 12 mil frames
 sem off-rails/stubs. A promoção de 105 para 1417 variantes AOT não alterou
 o estado de referência.
 
+### Repetição no lote de 1421 (2026-11-19)
+
+Depois dos quatro roots do 6F, a comparação foi repetida com **1421
+variantes AOT** e o SRAM válido extraído do `save1` (SHA-256
+`a0ca482f…`). O título foi comparado no frame **3680** dos dois lados:
+
+- **WRAM:** **6 bytes** diferentes, nos mesmos endereços de animação/stack
+  (`$028D`, `$1BFE`, `$1FDE`, `$1FEC`, `$1FEE`, `$7C03`);
+- **SRAM:** idêntica, mesmo SHA-256 `a0ca482f…`;
+- **framebuffer:** **2256 pixels diferentes (3,93%)**, RMSE **0,1145**;
+- **stubs/off-rails:** **0 / 0**.
+
+As diferenças de framebuffer são de cor subpixel e se concentram no logo,
+no cursor I/II e nos caracteres animados; a imagem é visualmente idêntica.
+O valor antigo de 2353 pixels/RMSE 30,29 foi medido em outro frame e por
+outro método, então não é diretamente comparável. Boot, `save4`, `save9`,
+batalha/menus e 6F também foram repetidos no lote de 1421 com zero
+stubs/off-rails.
+
 ## Limitações e próximo passo
 
 - A tela de título, tanto no recomp quanto no snesref, mostra apenas a

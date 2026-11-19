@@ -175,6 +175,10 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
   `docs/route-8f.md`.
 - **Próximo uso:** carregar esse state para mapear o 6F, procurar
   cura/revival e capturar a continuação da rota.
+- **Regressão 1421 (2026-11-19):** boot/título, `save4`/`save9`,
+  batalha/menus e 6F repetidos com **zero stubs/off-rails**; título contra
+  o `snesref` com 6 bytes de WRAM, SRAM idêntica e 2256 pixels diferentes
+  (3,93%). O release foi reconstruído e rodou 60,07 fps no smoke test.
 
 ## Formato sugerido de registro
 

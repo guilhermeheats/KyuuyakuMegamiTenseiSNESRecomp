@@ -473,6 +473,30 @@ core, stub ou off-rail depois de batalhas longas. A hipótese atual é
 **SIGHUP do shell que os lançou**; a validação final usa `setsid nohup` e
 ficou estável.
 
+### Destravamento 21: tabela 16-bit `$02:ED4F`
+
+O site `$02:ED4C` é um `JMP ($0000)` depois de montar o ponteiro em DP a
+partir de duas leituras `LDA $ED4F,X` / `LDA $ED50,X`, com
+`X = (cmd & $1F) * 2`. A tabela é de palavras de 16 bits em `$02:ED4F`,
+com **17 entradas válidas** (`$ED71`…`$EDE1`). A diretiva é:
+
+```text
+indirect_dispatch 2ed4c 17 idx:X tables:ed4f
+```
+
+O emitter divide X por 2 (`entry_size=2`) e emite o switch de 17 casos;
+cada stub M0X0 chama `$05:D2CF` e cai no tail comum `$02:EBB9`. Resultado:
+os nós `$02:DC53` e `$02:ED38` deixaram de ter `has_lle_indirect_edge`; o
+grafo foi para **1460/1460 AOT**, 84 roots e **1142 entradas de dispatch**.
+
+Os seis `$30:*` continuam com `JMP ($80AE,X)`. A investigação mostrou que
+`$80AE` **não é uma tabela estática**: no ROM `$30:80AE` o decoder lê
+código (`60 00 85 A2…`), a cópia em `$7E:80AE` está zerada nos estados
+testados e os valores de X dos seis sites não formam um conjunto
+consistente de ponteiros. Não forcei uma lista de 24 bits; eles ficam como
+bordas runtime documentadas até existir um dispatch de ponteiro em tempo
+de execução.
+
 ## Correções no `tools/regen.sh`
 
 O ganho depende de o regen realmente semear os `func` dos cfgs:
@@ -530,20 +554,22 @@ chamadas e não definidas; as diretivas foram revertidas.
 
 ## Fronteira atual: 0 nós LLE-only
 
-O grafo descoberto está **100% AOT-eligible: 1421/1421**. Não há mais nó
+O grafo descoberto está **100% AOT-eligible: 1460/1460**. Não há mais nó
 LLE-only. O que resta são **2 entradas `force_lle` intencionais** (reset e
-NMI) e **8 nós AOT com borda interpretada** (`has_lle_indirect_edge`):
-`$02:DC53`, `$02:ED38` e os seis handlers de som `$30:*`, cujos
-`JMP ($80AE,X)` usam uma tabela de ponteiros 16-bit ainda não modelada.
+NMI) e **6 nós AOT com borda interpretada** (`has_lle_indirect_edge`): os
+seis handlers de som `$30:*`, cujos `JMP ($80AE,X)` usam um ponteiro
+runtime/WRAM que não forma uma tabela estática no ROM. Os sites
+`$02:DC53`/`$02:ED38` foram resolvidos pela tabela `$02:ED4F`.
 
 Os HDMA `$00:86C0`/`$00:88CE` são AOT com `ptrtail targets:`; o framebuffer
-do título ficou idêntico ao de referência (2353 pixels diferentes, 4,10%).
+do título ficou visualmente idêntico ao de referência (2256 pixels
+diferentes, 3,93% no lote de 1421).
 O perfil de campo (`save2`) mostrou **0,27% dos ciclos** em `$00:9300`, um
 caminho LLE fora do grafo AOT (provavelmente ligado ao NMI/PPU/APU); não há
-stubs nem off-rails. O próximo foco é modelar a tabela 16-bit de `$80AE` e
-os dois sites do banco `$02`; a rota até o 6F já foi alcançada e validada
-(2026-11-19), e a exploração inicial do andar achou 4 variantes novas em
-`$00`, mas a rota completa continua pendente.
+stubs nem off-rails. A tabela `$02:ED4F` foi resolvida; o próximo foco é o
+dispatch runtime de `$80AE` nos seis `$30:*`. A rota até o 6F já foi
+alcançada e validada (2026-11-19), e a exploração inicial do andar achou 4
+variantes novas em `$00`, mas a rota completa continua pendente.
 
 ### Histórico: o gargalo do `$03:983C`
 
@@ -607,13 +633,14 @@ não a promoção AOT.
 
 ## Próximos passos
 
-1. Modelar a tabela de ponteiros **16-bit** em `$80AE` e resolver os seis
-   `JMP ($80AE,X)` dos handlers de som; validar o áudio numa rota com
-   batalha e menus.
-2. Resolver os dois sites restantes do banco `$02` (`$02:DC53`/`$02:ED38`).
-3. Investigar o caminho LLE quente `$00:9300` no campo (0,27% dos ciclos) e
-   ver se ele pode virar root/AOT; manter o NMI/reset como `force_lle` se
-   necessário.
+1. Investigar o dispatch **runtime** de `$80AE` ou documentá-lo como borda
+   runtime: a tabela não é estática no ROM e a cópia em WRAM está zerada
+   nos estados testados. Validar o áudio numa rota com batalha e menus.
+2. Validar a tabela `$02:ED4F` numa rota que use comandos de som e, se
+   necessário, promover os 17 handlers M0X0 que hoje já têm AOT.
+3. Investigar o caminho LLE quente `$00:9300` no campo e no idle (o
+   processo longo mostrou 88,9% dos ciclos acumulados) e ver se ele pode
+   virar root/AOT; manter o NMI/reset como `force_lle` se necessário.
 4. Continuar a captura da rota **a partir do 6F**: o state parado não
    revelou roots, mas a exploração/batalhas já adicionaram 4 variantes em
    `$00`; seguir para o 5F, menus e level-up e ingerir cada captura.

@@ -163,8 +163,10 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
 - **Cobertura:** o state parado registrou 7.958.086 instruções
   interpretadas e `discoveries: []`; a **exploração/batalhas** a partir dele
   revelou **4 variantes novas em `$00`** (`$8993:M1X0`, `$86C0:M1X1`,
-  `$845B:M1X1`, `$8608:M1X0`). O grafo foi para **1421/1421 AOT** e as
-  capturas pós-promoção voltaram com `discoveries: []`.
+  `$845B:M1X1`, `$8608:M1X0`). O grafo foi para **1421/1421 AOT**; a
+  tabela `$02:ED4F` foi resolvida no lote seguinte e levou o grafo a
+  **1460/1460 AOT**. As capturas pós-promoção voltaram com
+  `discoveries: []`.
 - **Carregamento do state:** o state abre com o **analisador** na tela;
   pressione **B três vezes** para voltar ao campo. Batalhas aleatórias
   começam com atraso de ~150–200 frames.

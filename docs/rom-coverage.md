@@ -9,7 +9,7 @@ do ROM japonês limpo:
 
 ## Método
 
-1. O manifesto final tem **1421 nós / 1421 AOT / 0 LLE-only**.
+1. O manifesto final tem **1460 nós / 1460 AOT / 0 LLE-only**.
 2. Cada nó foi decodificado com o decoder v2; os bytes de cada instrução
    foram mapeados para o offset LoROM e deduplicados.
 3. `data_region` e `force_lle` foram lidos dos cfgs.
@@ -20,40 +20,42 @@ do ROM japonês limpo:
 | Métrica | Valor |
 |---|---:|
 | Roots | 84 |
-| Variantes descobertas | **1421** |
-| Variantes AOT-eligible | **1421** |
+| Variantes descobertas | **1460** |
+| Variantes AOT-eligible | **1460** |
 | Variantes LLE-only | **0** |
 | Bancos com código | 12 |
-| Entradas de dispatch | 1106 |
-| Entradas com AOT | 1106 |
-| Variantes AOT no dispatch | 1421 |
-| Instruções físicas únicas | 56.356 |
+| Entradas de dispatch | 1142 |
+| Entradas com AOT | 1142 |
+| Variantes AOT no dispatch | 1460 |
+| Instruções físicas únicas | 56.390 |
 
 Além do grafo, existem **2 entradas `force_lle` intencionais**, fora do
 manifesto de nós: `$00:8000` (reset) e `$00:827A` (NMI). Contando-as como
-funções, a taxa efetiva é **1421 / 1423 = 99,8595% AOT** por contagem de
+funções, a taxa efetiva é **1460 / 1462 = 99,8632% AOT** por contagem de
 funções.
 
-Há também **8 nós AOT com borda interpretada** (`has_lle_indirect_edge`):
-`$02:DC53`, `$02:ED38` e os seis handlers de som `$30:*`. Eles não são
-LLE-only; o `JMP ($80AE,X)` de 16 bits ainda não foi modelado no emitter.
+Há também **6 nós AOT com borda interpretada** (`has_lle_indirect_edge`):
+os seis handlers de som `$30:*`. Eles não são LLE-only; o `JMP ($80AE,X)`
+usa um ponteiro runtime/WRAM que não forma uma tabela estática no ROM. Os
+sites `$02:DC53`/`$02:ED38` foram resolvidos pela tabela `$02:ED4F`.
 
 ## Bytes do ROM
 
 | Métrica | Bytes | % do ROM |
 |---|---:|---:|
 | ROM total | 2.097.152 | 100% |
-| Instruções únicas descobertas | **127.156** | **6,0633%** |
-| Instruções no grafo AOT | 127.156 | 100% do grafo |
+| Instruções únicas descobertas | **127.275** | **6,0689%** |
+| Instruções no grafo AOT | 127.275 | 100% do grafo |
 | `data_region` (fronteiras de BRK) | 4 | 0,0002% |
-| Desconhecido (dados/gráficos/som/código não achado) | 1.969.996 | 93,9367% |
+| Desconhecido (dados/gráficos/som/código não achado) | 1.969.877 | 93,9311% |
 
-O número de **6,0633%** é a fração do ROM ocupada por instruções já
+O número de **6,0689%** é a fração do ROM ocupada por instruções já
 decodificadas. Ele **não** significa “6% decompilado”: a maior parte do
 cartucho é dado, gráfico, som ou código ainda não alcançado.
 
 Os quatro roots do 6F adicionaram **187 bytes distintos**: `$00:8608`
-(55 bytes) e `$00:8993` (132 bytes). As variantes `$00:845B:M1X1` e
+(55 bytes) e `$00:8993` (132 bytes). A tabela `$02:ED4F` adicionou
+**119 bytes** (17 stubs de 7 bytes). As variantes `$00:845B:M1X1` e
 `$00:86C0:M1X1` reutilizam bytes já cobertos pelas variantes M1X0 e pelos
 handlers de HDMA; por isso não entram duas vezes na contagem.
 
@@ -61,9 +63,9 @@ handlers de HDMA; por isso não entram duas vezes na contagem.
 
 | Denominador | Capacidade | Instruções descobertas | Cobertura |
 |---|---:|---:|---:|
-| 12 bancos com código | 393.216 | 127.156 | **32,3374%** |
-| 6 bancos do núcleo (`$00`,`$01`,`$02`,`$03`,`$05`,`$30`) | 196.608 | 119.151 | **60,6033%** |
-| ROM total | 2.097.152 | 127.156 | **6,0633%** |
+| 12 bancos com código | 393.216 | 127.275 | **32,3677%** |
+| 6 bancos do núcleo (`$00`,`$01`,`$02`,`$03`,`$05`,`$30`) | 196.608 | 119.270 | **60,6639%** |
+| ROM total | 2.097.152 | 127.275 | **6,0689%** |
 
 Os bancos contêm dados além de código; por isso a cobertura dos 12 bancos é
 um **limite inferior** de código mapeado, não uma divisão exata
@@ -75,7 +77,7 @@ código/dados.
 |---|---:|---:|---|
 | `$00` | 17.493 | 53,38% | núcleo / boot / main loop / HDMA |
 | `$01` | 25.667 | 78,33% | núcleo / texto / input / tabelas |
-| `$02` | 18.250 | 55,69% | núcleo / batalha / menus |
+| `$02` | 18.369 | 56,06% | núcleo / batalha / menus |
 | `$03` | 22.949 | 70,03% | núcleo / save / texto |
 | `$04` | 1.437 | 4,39% | periférico |
 | `$05` | 14.734 | 44,96% | núcleo / campo / texto |
@@ -103,34 +105,38 @@ dados, gráficos, som ou código de rotas ainda não capturadas.
 | Checkpoint 6F (slot 12, 780 frames) | 0 stubs, 0 off-rails, `step 60` 1,034–1,039s, AOT 98,25–98,59%, 0 roots no state parado |
 | Exploração 6F (2026-11-19) | **4 roots novos** em `$00`; capturas pós-promoção com `discoveries: []` |
 | 6F com grafo 1421 | **1421/1421 AOT**, 0 stubs/off-rails, `step 60` 1,036–1,039s |
+| Tabela `$02:ED4F` (1460) | 17 entradas; `$02:DC53`/`$02:ED38` sem borda interpretada; 39 variantes novas |
+| 6F com grafo 1460 | 600 frames, 0 stubs/off-rails, AOT 98,20%; `step 60` 1,033–1,038s, AOT 98,98–99,20% |
 | 6F ocioso (processo longo) | `$00:9300` domina 88,9% dos ciclos acumulados; `step 60` ~1,04s, 0 stubs/off-rails |
 | LLE quente no campo (save2, 1417) | `$00:9300`, 0,2741% dos ciclos |
 
 As linhas marcadas **1417** são a referência do lote anterior. As demais
 foram repetidas no lote de **1421**: boot/título, `save4`/`save9`,
-batalha/menus, 6F e a comparação com `snesref`. O release também foi
-reconstruído e rodou 473 frames em 8s (60,07 fps) no teste manual headless.
-O processo longo no 6F mostra o loop de espera `$00:9300` dominando o
-acumulado ocioso; isso é o LLE quente já conhecido, não uma regressão
-funcional.
+batalha/menus, 6F e a comparação com `snesref`. O lote de **1460** resolveu
+a tabela `$02:ED4F`; o 6F foi revalidado em 600 frames com AOT 98,20% e
+zero stubs/off-rails. O release também foi reconstruído e rodou 473 frames
+em 8s (60,07 fps) no teste manual headless. O processo longo no 6F mostra o
+loop de espera `$00:9300` dominando o acumulado ocioso; isso é o LLE quente
+já conhecido, não uma regressão funcional.
 
 O LLE restante no campo está fora do grafo AOT (reset/NMI, bordas
 indiretas e o caminho `$00:9300`), não em nós LLE-only. Os HDMA já são AOT;
-a próxima fronteira é modelar a tabela 16-bit `$80AE`, os dois sites do
-banco `$02` e continuar a rota a partir do checkpoint do 6F.
+a tabela `$02:ED4F` foi resolvida, e a próxima fronteira é o dispatch
+runtime de `$80AE` nos seis `$30:*` e a rota a partir do checkpoint do 6F.
 
 ## Leitura honesta
 
 - **Grafo descoberto:** 100% AOT.
-- **Código já descoberto:** 127.156 bytes, 100% no grafo AOT.
-- **12 bancos de código:** 32,3374% dos bytes são instruções mapeadas; o
+- **Código já descoberto:** 127.275 bytes, 100% no grafo AOT.
+- **12 bancos de código:** 32,3677% dos bytes são instruções mapeadas; o
   resto é dado ou código não descoberto.
-- **6 bancos do núcleo:** 60,6033% dos bytes são instruções mapeadas.
-- **ROM física:** 6,0633% dos bytes são instruções; não é “% de decomp”.
+- **6 bancos do núcleo:** 60,6639% dos bytes são instruções mapeadas.
+- **ROM física:** 6,0689% dos bytes são instruções; não é “% de decomp”.
 - **Jogo:** boot/título/8F/7F/**6F**/save4/save9/batalha/level-up
   validados; o restante do 6F e o late game ainda não estão mapeados.
 
-O próximo passo para aumentar o denominador é modelar a tabela 16-bit de
-`$80AE`, resolver os dois sites do banco `$02` e continuar a rota a partir
-do checkpoint do 6F.
+O próximo passo para aumentar o denominador é investigar o dispatch
+runtime de `$80AE` (os seis `$30:*`), continuar a rota a partir do
+checkpoint do 6F e, se necessário, promover os handlers da tabela
+`$02:ED4F` numa rota de áudio.
 O mapa acima é a base exata para comparar os próximos lotes.

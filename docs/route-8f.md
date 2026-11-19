@@ -225,7 +225,8 @@ Nakajima e Yumiko. O estado foi gravado pelo menu **Select+R**
   coberto pelo grafo de 1417 variantes. A **exploração a partir dele**,
   porém, revelou **4 variantes novas em `$00`** (`$8993:M1X0`,
   `$86C0:M1X1`, `$845B:M1X1`, `$8608:M1X0`) e levou o grafo a **1421/1421
-  AOT**. Detalhes em `docs/coverage.md`.
+  AOT**; a tabela `$02:ED4F` depois o levou a **1460/1460 AOT**. Detalhes
+  em `docs/coverage.md`.
 - **Exploração inicial:** o state carrega com o **analisador aberto**; `B`
   três vezes volta ao campo. A partir de `(2,11)`, o ramo norte vai a
   `(2,10)` (sala sem saída) e o leste a `(3,11)`; o caminho para o resto do

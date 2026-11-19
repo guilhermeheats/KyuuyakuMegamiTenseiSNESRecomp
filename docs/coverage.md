@@ -534,9 +534,13 @@ O helper novo `cpu_dispatch_tail_pc` (em `runner/src/cpu_state.c`):
 Resultado: **0 nós com `has_lle_indirect_edge`**; o grafo continua
 **1460/1460 AOT**, 84 roots e 1142 entradas de dispatch. O teste de emissão
 `tests/v2/test_balanced_interp_dispatch.py` cobre o marcador e o código
-gerado. O site runtime ainda não foi atingido na rota de 6F/batalha (o
-perfil não mostra páginas `$30:96xx`), então a validação de execução fica
-pendente de uma rota que use os handlers de som.
+gerado. O site runtime não foi atingido nas rotas testadas: boot/título, 6F,
+menu/status, batalha e texto do 8F. O `func_snap` mostrou que o tick do
+motor de som (`$30:95CA`/`$30:95E4`) e os seis handlers nunca são chamados
+nessas rotas; o `dispatch_log` também não registra os seis sites. A
+implementação foi validada no nível do helper (teste C AOT+LLE) e do
+emissor; a execução em jogo fica pendente de uma rota/comando de som que
+realmente alcance esse caminho.
 
 ## Correções no `tools/regen.sh`
 

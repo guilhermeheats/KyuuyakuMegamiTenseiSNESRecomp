@@ -504,6 +504,81 @@ index 66a16c5a..69088dc8 100644
  /* Runtime-pointer JSR (abs,X) call: paired host-call dispatch of a WRAM
   * handler pointer the static pass cannot enumerate (SM enemy/PLM/eproj AI
   * instruction-list interpreters). Pushes the 2-byte JSR return frame,
+diff --git a/tests/runtime_dispatch/known_lle_entry_test.c b/tests/runtime_dispatch/known_lle_entry_test.c
+index c511f8bf..22bb1334 100644
+--- a/tests/runtime_dispatch/known_lle_entry_test.c
++++ b/tests/runtime_dispatch/known_lle_entry_test.c
+@@ -116,6 +116,34 @@ RecompReturn interp_tier_run_call(CpuState *cpu, uint32 target_pc24,
+     (void)cpu; (void)target_pc24; (void)source_pc24;
+     return RECOMP_RETURN_NORMAL;
+ }
++
++static int g_tail_ctx_calls;
++static uint16 g_tail_entry_s;
++static uint8 g_tail_hrv;
++void cpu_tailcall_inherit_return_context(uint16_t entry_s, uint8_t hrv) {
++    g_tail_ctx_calls++;
++    g_tail_entry_s = entry_s;
++    g_tail_hrv = hrv;
++}
++
++static int g_tail_lle_calls;
++static uint32 g_tail_lle_target;
++static uint32 g_tail_lle_site;
++static uint16 g_tail_lle_entry_s;
++static uint8 g_tail_lle_hrv;
++static int g_tail_lle_from_indirect;
++RecompReturn interp_tier_dispatch_tail_ex(CpuState *cpu, uint32 target_pc24,
++                                          uint32 site_pc24, uint16 entry_s,
++                                          uint8 hrv, bool from_indirect) {
++    (void)cpu;
++    g_tail_lle_calls++;
++    g_tail_lle_target = target_pc24;
++    g_tail_lle_site = site_pc24;
++    g_tail_lle_entry_s = entry_s;
++    g_tail_lle_hrv = hrv;
++    g_tail_lle_from_indirect = from_indirect ? 1 : 0;
++    return RECOMP_RETURN_NORMAL;
++}
+ RecompReturn interp_tier_run_call_frame(CpuState *cpu, uint32 target_pc24,
+                                         uint32 source_pc24, uint8 frame_size,
+                                         uint32 *return_pc24) {
+@@ -360,6 +388,35 @@ int main(void) {
+     cart.type = previous_cart_type;
+     cpu_select_program(NULL, 0, NULL, 0);
+ 
++    /* Runtime-pointer tail dispatch: AOT body inherits the enclosing return
++     * context; a known row without a body falls to the interpreter tier with
++     * the same context and the indirect-goto capture kind. */
++    memset(&cpu, 0, sizeof cpu);
++    cpu.S = 0x1F0;
++    cpu.PB = 0x00;
++    g_tail_ctx_calls = 0;
++    int aot_before = g_aot_calls;
++    fails += check(cpu_dispatch_tail_pc(&cpu, 0x008100u, 0x008000u,
++                                        0x1F0, 2) == RECOMP_RETURN_NORMAL,
++                   "runtime tail dispatch AOT return");
++    fails += check(g_aot_calls == aot_before + 1 && g_tail_ctx_calls == 1 &&
++                       g_tail_entry_s == 0x1F0 && g_tail_hrv == 2,
++                   "runtime tail dispatch inherits entry_s/hrv");
++    fails += check(g_aot_pb == 0x00, "runtime tail dispatch PB");
++
++    memset(&cpu, 0, sizeof cpu);
++    cpu.S = 0x1E0;
++    cpu.PB = 0x00;
++    g_tail_lle_calls = 0;
++    fails += check(cpu_dispatch_tail_pc(&cpu, 0x008200u, 0x008010u,
++                                        0x1E0, 3) == RECOMP_RETURN_NORMAL,
++                   "runtime tail dispatch LLE return");
++    fails += check(g_tail_lle_calls == 1 && g_tail_lle_target == 0x008200u &&
++                       g_tail_lle_site == 0x008010u &&
++                       g_tail_lle_entry_s == 0x1E0 && g_tail_lle_hrv == 3 &&
++                       g_tail_lle_from_indirect == 1,
++                   "runtime tail dispatch LLE context");
++
+     const DispatchEntry alternate[] = {{0x008300u, {NULL, NULL, NULL, NULL}, 3}};
+     cpu_select_program(alternate, 1, NULL, 0);
+     fails += check(!cpu_dispatch_has_entry(&cpu, 0x008100u),
 diff --git a/tests/v2/test_balanced_interp_dispatch.py b/tests/v2/test_balanced_interp_dispatch.py
 index 3231b191..dd2756fb 100644
 --- a/tests/v2/test_balanced_interp_dispatch.py

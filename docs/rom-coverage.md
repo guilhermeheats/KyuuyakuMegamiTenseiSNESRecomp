@@ -107,7 +107,7 @@ dados, gráficos, som ou código de rotas ainda não capturadas.
 | Exploração 6F (2026-11-19) | **4 roots novos** em `$00`; capturas pós-promoção com `discoveries: []` |
 | 6F com grafo 1421 | **1421/1421 AOT**, 0 stubs/off-rails, `step 60` 1,036–1,039s |
 | Tabela `$02:ED4F` (1460) | 17 entradas; `$02:DC53`/`$02:ED38` sem borda interpretada; 39 variantes novas |
-| Runtime `$80AE` (1460) | 6 sites, **0 `has_lle_indirect_edge`**; teste de emissão OK; site não atingido na rota 6F/batalha |
+| Runtime `$80AE` (1460) | 6 sites, **0 `has_lle_indirect_edge`**; testes de emissão e C (AOT+LLE) OK; não atingido em boot/título/6F/menu/batalha/8F |
 | 6F com grafo 1460 | 600 frames, 0 stubs/off-rails, AOT 98,20%; `step 60` 1,042s |
 | 6F ocioso (processo longo) | `$00:9300` domina 88,9% dos ciclos acumulados; `step 60` ~1,04s, 0 stubs/off-rails |
 | LLE quente no campo (save2, 1417) | `$00:9300`, 0,2741% dos ciclos |
@@ -118,8 +118,8 @@ batalha/menus, 6F e a comparação com `snesref`. O lote de **1460** resolveu
 a tabela `$02:ED4F` e emitiu o dispatch runtime `$80AE`; o 6F foi revalidado
 em 600 frames com AOT 98,20% e zero stubs/off-rails. O release também foi
 reconstruído e rodou 473 frames em 8s (60,07 fps) no teste manual headless.
-A execução do dispatch `$80AE` no jogo ainda depende de uma rota que atinja
-os handlers de som. O processo longo no 6F mostra o loop de espera
+A execução do dispatch `$80AE` em jogo ainda depende de uma rota/comando
+que atinja os handlers de som; boot/título/6F/menu/batalha/8F não os chamam. O processo longo no 6F mostra o loop de espera
 `$00:9300` dominando o acumulado ocioso; isso é o LLE quente já conhecido,
 não uma regressão funcional.
 

@@ -194,7 +194,7 @@ Para repetir a validação, os save states locais são:
 | `save0` | 7F, `(8,2)`, início da batalha contra Heket (LV1) |
 | `save3` | pós-vitória normal contra Heket, Nakajima LV3, Yumiko `DEAD` |
 | `save7` | pós-vitória normal contra Heket (cópia de segurança) |
-| `save11` | tela `レベルアップ：ユミコ`, antes da alocação |
+| `save11` | **6F (2026-11-19)** — slot 12, mapa `Fixed`, pós-batalhas, equipado (substituiu o save da tela de level-up) |
 | `save2` | pré-Basim no build AOT, 7F, HP 26/26 e 27/27, Yumiko `POISON` |
 | `save5` | início da batalha fixa contra `怪獣バシム` em `(9,3)` |
 | `save4` | tela `レベルアップ：ナカジマあああ` após Basim, `BONUS 1` |
@@ -203,24 +203,52 @@ Para repetir a validação, os save states locais são:
 Esses saves são artefatos locais de `build-debug/saves/` e **não** são
 versionados.
 
+## 6F — checkpoint pós-batalhas (2026-11-19)
+
+O jogador chegou ao 6F com o auto-map em **Fixed**, as duas batalhas
+scriptadas do 7F concluídas (Basim incluído) e os equipamentos equipados em
+Nakajima e Yumiko. O estado foi gravado pelo menu **Select+R**
+(`Right Shift+V`) em **slot 12** (`save11.sav`) e no **QUICK**
+(`savequick.sav`); os dois arquivos são idênticos.
+
+- **SHA-256 do state:**
+  `5e44d02fb4e3d60e7bbc62c461293fe24fca015102d6ccf7faa4f439ac913958`.
+- **Cópia segura:** `logs/kyuuyaku/2026-11-19-6f-slot12.sav` (+ `.thumb`).
+- **Como carregar:** Select+R → **Q** (QUICK) ou slot **12** → **X**
+  (`LOAD` no teclado; no gamepad, `A`).
+- **Validação:** o `loadstate 11` restaurou o campo sem stub/off-rail;
+  600 + 180 frames rodaram com **zero stubs** e **zero off-rails**. O
+  `step 60` ficou em **1,034–1,039s** e o AOT acumulado em
+  **98,25–98,59%**.
+- **Cobertura:** a captura tier-2 do 6F registrou 7.958.086 instruções
+  interpretadas e **`discoveries: []`** — nenhum root novo. O estado já
+  está coberto pelo grafo de 1417 variantes.
+- **Rótulo do HUD:** a imagem do quick save ainda mostra `7F` no HUD. Como
+  o jogador confirma o 6F e o mapa está em `Fixed`, a rota adota a
+  designação do jogador; a divergência fica registrada para não confundir
+  o próximo checkpoint.
+
+O 6F ainda não tem a rota completa mapeada; esse state é o ponto de partida
+para explorar o andar, procurar cura/revival e capturar os roots restantes.
+
 ## O que ainda falta
 
 - Reviver a Yumiko ou repetir a batalha com ela viva (o `宝玉` não revive;
   a opção `MAGIC` fora de batalha responde `魔法を使える者がいません`).
   O `DEFEND` de Yumiko evitou dano na rodada testada, mas a batalha foi
   encerrada por `ESCAPE` antes da vitória.
-- Testar a sala `Kaifuku`/revival do 8F se houver caminho de volta, ou seguir
-  para o 6F e procurar um ponto de cura/revival.
+- Testar a sala `Kaifuku`/revival do 8F se houver caminho de volta, ou
+  procurar um ponto de cura/revival a partir do checkpoint do 6F.
 - Confirmar os gatilhos exatos de **Gnome** e **Dryad** no 7F; o **Basim
   fixo** foi confirmado em `(9,3)` (ver acima). A rota para a escada do 6F a
-  partir desse lado ainda não está mapeada.
-- Descer do 7F para o 6F e validar a continuação da torre. As tentativas a
-  partir de `(8,2)`/`(9,1)` mudaram a área para `0x0002`/`0x0003` e foram
-  bloqueadas, sugerindo portas de mão única; mapear com o auto-map antes de
-  repetir.
+  partir desse lado continua não mapeada, mas o 6F já foi alcançado e salvo.
+- **6F alcançado e validado (2026-11-19):** state no slot 12/QUICK, mapa
+  `Fixed`, duas batalhas do 7F concluídas e equipamentos ativos. O próximo
+  passo é mapear a rota do 6F e capturar os roots que ela revelar.
 - CP-013 concluído: gravação/flush e load pelo título validados. O antigo
   `save1` restaurava SRAM zerada e foi regenerado com a SRAM válida.
-- Mapear o 7F e o 6F com o auto-map `Fixed` para as próximas batalhas.
+- Mapear o 6F com o auto-map `Fixed` e continuar a rota; o 7F já está
+  mapeado até Basim.
 
 ## Modelo de movimento (corrigido)
 

@@ -23,6 +23,7 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
 | CP-012 | Auto-mapping | A → COMP → `オートマッピング` (5º item; down ×4); configurar `Fixed` | OK — minimapa local; modo Fixed norte-para-cima mostra posição/EV |
 | CP-013 | Salvar e carregar pelo jogo | salvar via SRAM, reiniciar, carregar | **OK** — gravação/flush e carregamento validados; o `CONTINUE` lista o arquivo e restaura o estado. O save state antigo `save1` restaurava SRAM zerada e foi regenerado. |
 | CP-014 | Início do Megami Tensei II | completar o MT1 ou usar save de teste | pendente |
+| CP-015 | Checkpoint do 6F | carregar slot 12/QUICK criado após as batalhas do 7F | **OK** — mapa `Fixed`, equipamentos em Nakajima/Yumiko; 780 frames sem stub/off-rail, `step 60` 1,034–1,039s, captura tier-2 sem roots novos |
 
 ## CP-010 — detalhes da primeira batalha
 
@@ -146,6 +147,28 @@ Use estes checkpoints para comparar o recomp com o emulador. Para cada um, guard
 - **Nota de teste:** não use um save state capturado antes do save para
   validar o load; ele pode restaurar a SRAM zerada. Faça boot natural com o
   `save.srm` ou regenere o save state depois do save.
+
+## CP-015 — checkpoint do 6F (2026-11-19)
+
+- **Estado:** 6F, auto-map `Fixed`, duas batalhas scriptadas do 7F
+  concluídas (Basim incluído), equipamentos equipados em Nakajima e Yumiko.
+- **Save:** menu **Select+R** → slot **12** (`save11.sav`) e **QUICK**
+  (`savequick.sav`); os dois arquivos têm o mesmo SHA-256
+  `5e44d02fb4e3d60e7bbc62c461293fe24fca015102d6ccf7faa4f439ac913958`.
+- **Cópia segura:** `logs/kyuuyaku/2026-11-19-6f-slot12.sav` (+ `.thumb`).
+- **Carregamento:** `loadstate 11` no processo de validação (equivalente ao
+  slot 12 do menu) restaurou o campo no frame 49358.
+- **Resultado:** 600 + 180 frames com **zero stubs** e **zero off-rails**;
+  `step 60` em **1,034–1,039s**; AOT acumulado **98,25–98,59%**.
+- **Cobertura:** captura tier-2 com 7.958.086 instruções interpretadas e
+  `discoveries: []`; nenhum root novo. A captura está em
+  `/tmp/opencode/coverage-6f/` e o relatório em
+  `logs/kyuuyaku/2026-11-19-6f-ingest.json`.
+- **Observação:** o HUD do quick save ainda mostra `7F`; a rota adota a
+  designação do jogador (6F), com a divergência registrada em
+  `docs/route-8f.md`.
+- **Próximo uso:** carregar esse state para mapear o 6F, procurar
+  cura/revival e capturar a continuação da rota.
 
 ## Formato sugerido de registro
 

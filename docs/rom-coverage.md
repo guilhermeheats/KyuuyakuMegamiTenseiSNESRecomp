@@ -95,12 +95,13 @@ dados, gráficos, som ou código de rotas ainda não capturadas.
 | `save4` / `save9` | party correta, 0 stubs |
 | Batalha/menus (`save0/5/7`) | 0 off-rails, 0 stubs |
 | Campo (`save2`, 2 mil frames) | 0 off-rails, 0 stubs, 99,7088% AOT |
+| Checkpoint 6F (slot 12, 780 frames) | 0 stubs, 0 off-rails, `step 60` 1,034–1,039s, AOT 98,25–98,59%, 0 roots novos |
 | LLE quente no campo | `$00:9300`, 0,2741% dos ciclos |
 
 O LLE restante no campo está fora do grafo AOT (reset/NMI, bordas
 indiretas e o caminho `$00:9300`), não em nós LLE-only. Os HDMA já são AOT;
 a próxima fronteira é modelar a tabela 16-bit `$80AE`, os dois sites do
-banco `$02` e, depois, a rota até o 6F.
+banco `$02` e continuar a rota a partir do checkpoint do 6F.
 
 ## Leitura honesta
 
@@ -110,9 +111,10 @@ banco `$02` e, depois, a rota até o 6F.
   resto é dado ou código não descoberto.
 - **6 bancos do núcleo:** 60,5082% dos bytes são instruções mapeadas.
 - **ROM física:** 6,0544% dos bytes são instruções; não é “% de decomp”.
-- **Jogo:** boot/título/8F/7F/save4/save9/batalha/level-up validados; **6F e
-  late game ainda não mapeados**.
+- **Jogo:** boot/título/8F/7F/**6F**/save4/save9/batalha/level-up
+  validados; o restante do 6F e o late game ainda não estão mapeados.
 
 O próximo passo para aumentar o denominador é modelar a tabela 16-bit de
-`$80AE`, resolver os dois sites do banco `$02` e capturar a rota até o 6F.
+`$80AE`, resolver os dois sites do banco `$02` e continuar a rota a partir
+do checkpoint do 6F.
 O mapa acima é a base exata para comparar os próximos lotes.

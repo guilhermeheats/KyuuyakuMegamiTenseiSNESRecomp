@@ -423,6 +423,24 @@ interpretador, sem stub. O mesmo vale para `$02:DC53`/`$02:ED38`. São
 **99,9094–99,9109% AOT** e **1,050–1,060s**, zero stubs/tier; boot 3722,
 título com os mesmos 2353 pixels/SRAM, save4/save9/batalha/menus válidos.
 
+### Validação de rota: 6F (2026-11-19)
+
+O checkpoint do 6F (slot 12/QUICK, SHA-256
+`5e44d02fb4e3d60e7bbc62c461293fe24fca015102d6ccf7faa4f439ac913958`)
+foi carregado no build AOT e rodou **780 frames** (600 + 180) com **zero
+stubs** e **zero off-rails**. O `step 60` ficou em **1,034–1,039s** e o AOT
+acumulado em **98,25–98,59%**.
+
+A captura tier-2 do estado registrou **7.958.086 instruções** e
+**27.808.236 ciclos** interpretados, mas retornou **`discoveries: []`**: o
+6F já está coberto pelo grafo de **1417 variantes**. O perfil interpretado
+do processo é dominado por `$00:9300` (26,4M ciclos, 1,20% da CPU), seguido
+dos wrappers do main loop em `$3F:C4xx`; não há site novo de campo.
+
+Conclusão: o checkpoint é um ponto de partida de gameplay, não uma fonte de
+roots. O próximo ganho de cobertura está em **explorar a rota do 6F** e nos
+oito `JMP ($80AE,X)`/bancos `$02`.
+
 ## Correções no `tools/regen.sh`
 
 O ganho depende de o regen realmente semear os `func` dos cfgs:
@@ -491,7 +509,8 @@ do título ficou idêntico ao de referência (2353 pixels diferentes, 4,10%).
 O perfil de campo (`save2`) mostrou **0,27% dos ciclos** em `$00:9300`, um
 caminho LLE fora do grafo AOT (provavelmente ligado ao NMI/PPU/APU); não há
 stubs nem off-rails. O próximo foco é modelar a tabela 16-bit de `$80AE` e
-os dois sites do banco `$02`; depois, a rota até o 6F.
+os dois sites do banco `$02`; a rota até o 6F já foi alcançada e validada
+(2026-11-19), mas a exploração completa do andar continua pendente.
 
 ### Histórico: o gargalo do `$03:983C`
 
@@ -562,8 +581,9 @@ não a promoção AOT.
 3. Investigar o caminho LLE quente `$00:9300` no campo (0,27% dos ciclos) e
    ver se ele pode virar root/AOT; manter o NMI/reset como `force_lle` se
    necessário.
-4. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
-   ingerir com `tier2_ingest.py` e adicionar os novos roots.
+4. Continuar a captura da rota **a partir do 6F** (o checkpoint de
+   2026-11-19 já foi ingerido sem roots novos), incluindo menus, batalhas e
+   level-up, e adicionar os roots que aparecerem.
 5. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
    `$38` e `$3F`, e continuar a separação código/dados (`$04:BEC6`,
    `$05:DD6D`).

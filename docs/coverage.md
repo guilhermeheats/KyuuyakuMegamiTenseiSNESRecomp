@@ -74,13 +74,13 @@ Com `tools/regen.sh` (agora com `--cfg-roots` por padrão):
 | Métrica | Linha de base | Depois dos contratos |
 |---|---:|---:|
 | Roots | 11 | 72 |
-| Variantes exatas | 60 | 1229 |
-| Variantes AOT-eligible | 54 | 1229 |
+| Variantes exatas | 60 | 1383 |
+| Variantes AOT-eligible | 54 | 1383 |
 | Variantes LLE-only | 6 | 0 |
 | Bancos emitidos | 8 | 12 |
-| Entradas de dispatch | 51 | 951 |
-| Entradas com AOT | 46 | 951 |
-| Variantes AOT no dispatch | 54 | 1229 |
+| Entradas de dispatch | 51 | 1089 |
+| Entradas com AOT | 46 | 1089 |
+| Variantes AOT no dispatch | 54 | 1383 |
 
 No mesmo build, após carregar os save states de 8F/7F/batalha/level-up, o
 `interp_stats` acumulado mostrou **~94,7% AOT / ~5,3% interpretado** (o boot
@@ -373,6 +373,26 @@ frames e zero off-rails/stubs. Restam **4 entradas `force_lle` intencionais**
 ciclos), fora do grafo AOT. A captura dinâmica não alcançou o `$01:91DA` nos
 menus; o contrato veio das duas saídas estáticas e foi validado pelo campo.
 
+### Destravamento 17: as quatro tabelas indiretas
+
+| Site | Tabela | Count | Forma |
+|---|---|---:|---|
+| `$02:DC74` | `$DC35` | 15 | `idx:X`; a 16ª entrada (`$8B08`) é padding/BRK |
+| `$01:C72B` | `$C74E` | 30 | `ptrtail`; o ponteiro é carregado antes do JSR `$C78E` |
+| `$01:CD9C` | `$CDB6` | 127 | `idx:X`; a entrada 127 (`$3828`) é inválida |
+| `$01:EF15` | `$ED47` | 129 | `idx:X`; as entradas 129/130 (`$8B08`/`$AB4B`) são meio de função/dados |
+
+O `$01:EE49` é o wrapper comum de mensagem e também usa a tabela `$ED47`
+em `$01:EE93`; ele é terminal (tail dispatch). Os 12 wrappers do `$C74E`
+fazem `JSL $01:EE49` e depois `JMP $C740`; como o `JSL` nunca retorna,
+cada site recebeu `noreturn_jsl` (`c81f`…`c98a`). Com os counts corretos,
+o veneno dos BRKs `$018B99`/`$018BC5`/`$01ABA1` desapareceu.
+
+Resultado: **+154 nós, todos AOT**. O grafo foi para **1383 nós / 1383 AOT
+/ 0 LLE**, com 1089 entradas de dispatch (todas com AOT). A/B save9 em
+**99,90–99,91% AOT** e **1,032–1,038s**, zero stubs/tier; boot/título/
+save4/save9/batalha/menus válidos.
+
 ## Correções no `tools/regen.sh`
 
 O ganho depende de o regen realmente semear os `func` dos cfgs:
@@ -414,11 +434,11 @@ marcadas com `force_lle 0086C0`/`force_lle 0088CE` em `recomp/bank00.cfg`.
 Agora o interpretador executa o `JMP ($0100)` com o ponteiro vivo,
 `unresolved_stub_get` retorna **zero** e a rota save4/save9 fica em
 **99,4–99,9% AOT / 0,1–0,6% interpretado**. O custo continua sendo duas
-funções em LLE; o resto do grafo cresceu para 1229 variantes AOT com os
+funções em LLE; o resto do grafo cresceu para 1383 variantes AOT com os
 contratos de saída, as fronteiras `$04:BEC6`/`$05:E5DB`, o frame wait AOT,
 o dispatch `$00:9B04`, os lotes do bloco `$30`/`$00:9077`, do hub
 `$9A85`/`$94C3`, dos handlers `$9A85`/`$A1D8`, do bloco `$30`, da cadeia
-do banco `$03` e do main loop.
+do banco `$03`, do main loop e das quatro tabelas indiretas.
 
 O próximo passo de decompilação é **modelar esse dispatch vivo no emitter**
 (ou declarar `indirect_dispatch` de forma que o link-closure aceite os 8+4
@@ -429,7 +449,7 @@ chamadas e não definidas; as diretivas foram revertidas.
 
 ## Fronteira atual: 0 nós LLE-only
 
-O grafo descoberto está **100% AOT-eligible: 1229/1229**. Não há mais nó
+O grafo descoberto está **100% AOT-eligible: 1383/1383**. Não há mais nó
 LLE-only. O que resta são **4 entradas `force_lle` intencionais**, fora do
 manifesto de nós:
 
@@ -441,11 +461,9 @@ manifesto de nós:
 
 O perfil de campo (`save2`) mostrou **0,41% dos ciclos** em `$00:9300`, um
 caminho LLE fora do grafo AOT (provavelmente ligado ao NMI/PPU/APU); não há
-stubs nem off-rails. O próximo foco é a **fase 2**: declarar as quatro
-tabelas indiretas (`$01:C72B`→`$C74E`, `$01:CD9C`→`$CDB6`,
-`$01:EF15`→`$ED47`, `$02:DC74`→`$DC35`), resolver os HDMA com as tabelas
-`$86FE`/`$88EC`, confirmar o ponteiro `$0080AE` dos sites `$30:*` e, depois,
-a rota até o 6F.
+stubs nem off-rails. As quatro tabelas indiretas já foram declaradas; o
+próximo foco da fase 2 é resolver os HDMA com as tabelas `$86FE`/`$88EC`,
+confirmar o ponteiro `$0080AE` dos sites `$30:*` e, depois, a rota até o 6F.
 
 ### Histórico: o gargalo do `$03:983C`
 
@@ -509,22 +527,17 @@ não a promoção AOT.
 
 ## Próximos passos
 
-1. Declarar as quatro tabelas indiretas do banco `$01`/`$02`:
-   `$01:C72B`→`$C74E` (30 entradas), `$01:CD9C`→`$CDB6`,
-   `$01:EF15`→`$ED47` e `$02:DC74`→`$DC35` (16 entradas). Validar o count e
-   os alvos de cada tabela; isso remove a borda LLE do `$01:EE96` e os
-   fallbacks dos despachantes.
-2. Resolver os HDMA `$00:86C0`/`$00:88CE` com as tabelas `$86FE` (8 alvos) e
+1. Resolver os HDMA `$00:86C0`/`$00:88CE` com as tabelas `$86FE` (8 alvos) e
    `$88EC` (4 alvos) via `ptrtail targets:`, remover `force_lle` e validar o
    título/framebuffer.
-3. Confirmar o ponteiro `$0080AE` dos 11 sites `$30:*`; se for o alvo único
+2. Confirmar o ponteiro `$0080AE` dos 11 sites `$30:*`; se for o alvo único
    `$00:A220`, declarar os 11 alvos e validar o som numa rota com batalha.
-4. Investigar o caminho LLE quente `$00:9300` no campo (0,41% dos ciclos) e
+3. Investigar o caminho LLE quente `$00:9300` no campo (0,41% dos ciclos) e
    ver se ele pode virar root/AOT; manter o NMI/reset como `force_lle` se
    necessário.
-5. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
+4. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
    ingerir com `tier2_ingest.py` e adicionar os novos roots.
-6. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
+5. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
    `$38` e `$3F`, e continuar a separação código/dados (`$04:BEC6`,
    `$05:DD6D`).
-7. Manter gameplay, save states e comparação com emulador como regressão.
+6. Manter gameplay, save states e comparação com emulador como regressão.

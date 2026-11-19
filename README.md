@@ -20,8 +20,8 @@ the opening story, accepts the two character names, allocates stats, enters
 the first dungeon and the 7F floor**, and validates movement, chest looting,
 the status menu, auto-mapping, random and fixed battles, negotiation, game
 over, victory/EXP/level-up, equipment and in-game SRAM save/load. The current
-focus is **decompilation coverage**: the static graph now emits 1229 AOT
-variants across 12 banks (from 54 across 8), with 1229 exact variants and 0
+focus is **decompilation coverage**: the static graph now emits 1383 AOT
+variants across 12 banks (from 54 across 8), with 1383 exact variants and 0
 LLE-only, and reaches **99.4–99.9% AOT** on the save4/save9 route. Four
 entry points remain intentionally `force_lle` (reset, NMI, and the two HDMA
 live-pointer dispatchers `$00:86C0`/`$00:88CE`); the HDMA pair is next. See `docs/coverage.md` and

@@ -230,6 +230,44 @@ index a8c01f5f..01861dfd 100644
              # live_operand <site_pc16> — read this site's immediate from ROM
              # at run time. The emitter validates the opcode against its
              # supported set (data operands only: never REP/SEP/MVN/MVP).
+diff --git a/recompiler/v2/codegen.py b/recompiler/v2/codegen.py
+index 72ddd6a4..50348328 100644
+--- a/recompiler/v2/codegen.py
++++ b/recompiler/v2/codegen.py
+@@ -2055,6 +2055,33 @@ def _emit_runtime_dispatch(insn) -> List[str]:
+     ]
+ 
+ 
++def _emit_runtime_tail_dispatch(insn) -> List[str]:
++    """Emit a runtime-pointer tail dispatch for a `JMP/JML (abs,X)` whose
++    pointer table is not statically enumerable (e.g. a WRAM jump table).
++
++    Reads the 16-bit pointer from PB:(base + idx) at run time and hands
++    (PB<<16 | ptr) to cpu_dispatch_tail_pc, which tail-calls the live
++    (m,x) AOT body or runs the target on the interpreter tier. The target
++    inherits the enclosing function's _entry_s/_hrv, so its RTS/RTL
++    returns through the original caller's frame.
++    """
++    site_pc24 = insn.addr & 0xFFFFFF
++    base = insn.operand & 0xFFFF
++    idx_reg = getattr(insn, 'dispatch_idx_reg', 'X')
++    idx_field = 'Y' if idx_reg == 'Y' else 'X'
++    return [
++        "{ /* runtime indirect tail dispatch: live 16-bit pointer table */",
++        f"  uint16 _disp_ptr = cpu_read16(cpu, cpu->PB, "
++        f"(uint16)(0x{base:04x}u + (uint16)(cpu->{idx_field} & 0xFFFFu)));",
++        f"  uint32 _disp_target = ((uint32)cpu->PB << 16) | (uint32)_disp_ptr;",
++        f"  RecompReturn _r = cpu_dispatch_tail_pc(cpu, _disp_target, "
++        f"0x{site_pc24:06x}u, _entry_s, _hrv);",
++        "  RecompStackPop();",
++        "  return _r;",
++        "}",
++    ]
++
++
+ def _emit_dispatch(insn) -> List[str]:
+     """Emit a return-address jump-table dispatch as a static function-pointer
+     array indexed by A. The 65816 dispatcher pops its return PC,
 diff --git a/recompiler/v2/decoder.py b/recompiler/v2/decoder.py
 index 0308e7b6..9ab6d503 100644
 --- a/recompiler/v2/decoder.py
@@ -331,7 +369,7 @@ index f94ddc43..86c436ff 100644
              entry_hooks=entry_hooks,
              brk_rti_sites=brk_rti_sites,
 diff --git a/recompiler/v2/emit_function.py b/recompiler/v2/emit_function.py
-index 82598b41..a959185c 100644
+index 82598b41..e4929822 100644
 --- a/recompiler/v2/emit_function.py
 +++ b/recompiler/v2/emit_function.py
 @@ -533,6 +533,8 @@ def emit_function(rom: bytes, bank: int, start: int,
@@ -352,6 +390,19 @@ index 82598b41..a959185c 100644
                              brk_rti_sites=brk_rti_sites,
                              hle_entry_pcs=(set(hle_func or ()) |
                                             set(hle_spc_upload or ())),
+@@ -1840,7 +1844,11 @@ def emit_function(rom: bytes, bank: int, start: int,
+                         site_pc16 = site_pc24 & 0xFFFF
+                         if hle_dispatch and site_pc16 in hle_dispatch:
+                             c_helper = hle_dispatch[site_pc16]
+-                            if c_helper == '__balanced_interp__':
++                            if c_helper == '__runtime_indirect__':
++                                from v2.codegen import _emit_runtime_tail_dispatch
++                                for ln in _emit_runtime_tail_dispatch(insn):
++                                    lines.append(ln)
++                            elif c_helper == '__balanced_interp__':
+                                 if getattr(insn, 'dispatch_pushed_call', False):
+                                     ptr = insn.operand & 0xFFFF
+                                     ret_pc = insn.dispatch_return_pc & 0xFFFF
 diff --git a/recompiler/v2/program_emit.py b/recompiler/v2/program_emit.py
 index 6a750a02..ba30b603 100644
 --- a/recompiler/v2/program_emit.py
@@ -384,6 +435,107 @@ index 6a750a02..ba30b603 100644
                  live_operand_sites=live_operand_sites,
                  entry_hooks=entry_hooks,
                  brk_rti_sites=brk_rti_sites,
+diff --git a/runner/src/cpu_state.c b/runner/src/cpu_state.c
+index 72515994..b9542769 100644
+--- a/runner/src/cpu_state.c
++++ b/runner/src/cpu_state.c
+@@ -30,6 +30,7 @@
+ #include "cpu_state.h"
+ #include "cpu_plain_rom_read.h"
+ #include "common_rtl.h"
++#include "common_cpu_infra.h"
+ #include "cpu_trace.h"
+ #include "snes/snes.h"
+ #include "snes/cart.h"
+@@ -1257,6 +1258,35 @@ RecompReturn cpu_dispatch_pc(CpuState *cpu, uint32 pc24,
+     return cpu_dispatch_pc_from(cpu, pc24, entry_s_for_miss_restore, 0xFFFFFFu);
+ }
+ 
++RecompReturn cpu_dispatch_tail_pc(CpuState *cpu, uint32 pc24,
++                                  uint32 source_pc24, uint16 entry_s,
++                                  uint8 hrv) {
++    pc24 &= 0xFFFFFFu;
++    source_pc24 &= 0xFFFFFFu;
++    unsigned mx_idx = (unsigned)(((cpu->m_flag & 1) << 1) | (cpu->x_flag & 1));
++    int via_mirror = 0;
++    RecompReturn (*fp)(CpuState *) = _cpu_dispatch_lookup(cpu, pc24);
++    if (fp == NULL) {
++        if (dispatch_has_rom_mirror(pc24)) {
++            fp = _cpu_dispatch_lookup(cpu, pc24 ^ 0x800000u);
++            if (fp != NULL) via_mirror = 1;
++        }
++    }
++    _dispatch_log_record(pc24, source_pc24, mx_idx, fp != NULL, via_mirror);
++    if (fp != NULL) {
++        /* Tail entry: the target's prologue adopts the enclosing host
++         * return context (entry S + hrv) instead of pushing a new frame. */
++        cpu_tailcall_inherit_return_context(entry_s, hrv);
++        cpu->PB = (uint8)(pc24 >> 16);
++        return fp(cpu);
++    }
++    /* No AOT body for the live (m,x): run the real bytes with the same
++     * tail context. This is the same fallback as the unresolved indirect
++     * path, but reached through the live pointer dispatch. */
++    return interp_tier_dispatch_tail_ex(cpu, pc24, source_pc24, entry_s, hrv,
++                                        true);
++}
++
+ /* Runtime-pointer JSR (abs,X) call (cfg-free; emitted by codegen
+  * _emit_runtime_dispatch for a reachable WRAM-pointer dispatch — SM
+  * enemy/PLM/eproj AI interpreters). The 16-bit pointer was already read
+diff --git a/runner/src/cpu_state.h b/runner/src/cpu_state.h
+index 66a16c5a..69088dc8 100644
+--- a/runner/src/cpu_state.h
++++ b/runner/src/cpu_state.h
+@@ -629,6 +629,16 @@ RecompReturn cpu_dispatch_pc_from(CpuState *cpu, uint32 pc24,
+                                   uint16 entry_s_for_miss_restore,
+                                   uint32 source_pc24);
+ 
++/* Runtime-pointer tail transfer for an indirect JMP/JML whose 16-bit
++ * pointer cannot be enumerated from the ROM table (e.g. a WRAM jump
++ * table). The caller reads the live pointer and passes PB:pointer.
++ * AOT body present: inherit the enclosing _entry_s/_hrv tail context and
++ * tail-call the body. No AOT body: run the target on the interpreter tier
++ * with the same tail context. Always stack-balanced for the caller. */
++RecompReturn cpu_dispatch_tail_pc(CpuState *cpu, uint32 pc24,
++                                  uint32 source_pc24, uint16 entry_s,
++                                  uint8 hrv);
++
+ /* Runtime-pointer JSR (abs,X) call: paired host-call dispatch of a WRAM
+  * handler pointer the static pass cannot enumerate (SM enemy/PLM/eproj AI
+  * instruction-list interpreters). Pushes the 2-byte JSR return frame,
+diff --git a/tests/v2/test_balanced_interp_dispatch.py b/tests/v2/test_balanced_interp_dispatch.py
+index 3231b191..dd2756fb 100644
+--- a/tests/v2/test_balanced_interp_dispatch.py
++++ b/tests/v2/test_balanced_interp_dispatch.py
+@@ -24,6 +24,27 @@ def test_reserved_hle_dispatch_uses_balanced_interpreter_tier():
+     assert '_entry_s, _hrv, true)' in src
+ 
+ 
++def test_reserved_hle_dispatch_uses_runtime_tail_dispatch():
++    rom = make_lorom_bank0({
++        0x8000: bytes([0x7C, 0xAE, 0x80]),  # JMP ($80AE,X)
++        0x80AE: bytes([0x00, 0x00]),        # invalid table -> auto-recovery declines
++    })
++
++    src = emit_function(
++        rom,
++        bank=0,
++        start=0x8000,
++        entry_m=1,
++        entry_x=1,
++        hle_dispatch={0x8000: '__runtime_indirect__'},
++    )
++
++    assert 'cpu_read16(cpu, cpu->PB, (uint16)(0x80aeu + (uint16)(cpu->X & 0xFFFFu)))' in src
++    assert 'cpu_dispatch_tail_pc(cpu, _disp_target, 0x008000u, _entry_s, _hrv)' in src
++    assert 'RecompStackPop();' in src
++    assert 'extern RecompReturn __runtime_indirect__' not in src
++
++
+ def test_unresolved_jump_and_truncated_continuation_have_explicit_capture_kind():
+     rom = make_lorom_bank0({0x8000: bytes([0xDC, 0x00, 0x10]),
+                             0x8100: bytes([0x20, 0x00, 0x90, 0x60])})
 diff --git a/tests/v2/test_cfg_loader.py b/tests/v2/test_cfg_loader.py
 index 9ea74010..805a6a6d 100644
 --- a/tests/v2/test_cfg_loader.py

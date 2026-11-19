@@ -34,10 +34,11 @@ manifesto de nós: `$00:8000` (reset) e `$00:827A` (NMI). Contando-as como
 funções, a taxa efetiva é **1460 / 1462 = 99,8632% AOT** por contagem de
 funções.
 
-Há também **6 nós AOT com borda interpretada** (`has_lle_indirect_edge`):
-os seis handlers de som `$30:*`. Eles não são LLE-only; o `JMP ($80AE,X)`
-usa um ponteiro runtime/WRAM que não forma uma tabela estática no ROM. Os
-sites `$02:DC53`/`$02:ED38` foram resolvidos pela tabela `$02:ED4F`.
+Há também **0 nós AOT com borda interpretada** (`has_lle_indirect_edge`).
+Os seis handlers de som `$30:*` usam um **dispatch runtime** via
+`PB:80AE+X` e `cpu_dispatch_tail_pc` (AOT quando existe, interpretador
+quando não). Os sites `$02:DC53`/`$02:ED38` foram resolvidos pela tabela
+`$02:ED4F`.
 
 ## Bytes do ROM
 
@@ -106,23 +107,27 @@ dados, gráficos, som ou código de rotas ainda não capturadas.
 | Exploração 6F (2026-11-19) | **4 roots novos** em `$00`; capturas pós-promoção com `discoveries: []` |
 | 6F com grafo 1421 | **1421/1421 AOT**, 0 stubs/off-rails, `step 60` 1,036–1,039s |
 | Tabela `$02:ED4F` (1460) | 17 entradas; `$02:DC53`/`$02:ED38` sem borda interpretada; 39 variantes novas |
-| 6F com grafo 1460 | 600 frames, 0 stubs/off-rails, AOT 98,20%; `step 60` 1,033–1,038s, AOT 98,98–99,20% |
+| Runtime `$80AE` (1460) | 6 sites, **0 `has_lle_indirect_edge`**; teste de emissão OK; site não atingido na rota 6F/batalha |
+| 6F com grafo 1460 | 600 frames, 0 stubs/off-rails, AOT 98,20%; `step 60` 1,042s |
 | 6F ocioso (processo longo) | `$00:9300` domina 88,9% dos ciclos acumulados; `step 60` ~1,04s, 0 stubs/off-rails |
 | LLE quente no campo (save2, 1417) | `$00:9300`, 0,2741% dos ciclos |
 
 As linhas marcadas **1417** são a referência do lote anterior. As demais
 foram repetidas no lote de **1421**: boot/título, `save4`/`save9`,
 batalha/menus, 6F e a comparação com `snesref`. O lote de **1460** resolveu
-a tabela `$02:ED4F`; o 6F foi revalidado em 600 frames com AOT 98,20% e
-zero stubs/off-rails. O release também foi reconstruído e rodou 473 frames
-em 8s (60,07 fps) no teste manual headless. O processo longo no 6F mostra o
-loop de espera `$00:9300` dominando o acumulado ocioso; isso é o LLE quente
-já conhecido, não uma regressão funcional.
+a tabela `$02:ED4F` e emitiu o dispatch runtime `$80AE`; o 6F foi revalidado
+em 600 frames com AOT 98,20% e zero stubs/off-rails. O release também foi
+reconstruído e rodou 473 frames em 8s (60,07 fps) no teste manual headless.
+A execução do dispatch `$80AE` no jogo ainda depende de uma rota que atinja
+os handlers de som. O processo longo no 6F mostra o loop de espera
+`$00:9300` dominando o acumulado ocioso; isso é o LLE quente já conhecido,
+não uma regressão funcional.
 
 O LLE restante no campo está fora do grafo AOT (reset/NMI, bordas
 indiretas e o caminho `$00:9300`), não em nós LLE-only. Os HDMA já são AOT;
-a tabela `$02:ED4F` foi resolvida, e a próxima fronteira é o dispatch
-runtime de `$80AE` nos seis `$30:*` e a rota a partir do checkpoint do 6F.
+a tabela `$02:ED4F` foi resolvida e o dispatch runtime `$80AE` foi emitido.
+A próxima fronteira é validar esse runtime numa rota que atinja os handlers
+de som e continuar a rota a partir do checkpoint do 6F.
 
 ## Leitura honesta
 
@@ -135,8 +140,8 @@ runtime de `$80AE` nos seis `$30:*` e a rota a partir do checkpoint do 6F.
 - **Jogo:** boot/título/8F/7F/**6F**/save4/save9/batalha/level-up
   validados; o restante do 6F e o late game ainda não estão mapeados.
 
-O próximo passo para aumentar o denominador é investigar o dispatch
-runtime de `$80AE` (os seis `$30:*`), continuar a rota a partir do
-checkpoint do 6F e, se necessário, promover os handlers da tabela
+O próximo passo para aumentar o denominador é validar o dispatch runtime
+de `$80AE` numa rota que atinja os handlers de som, continuar a rota a
+partir do checkpoint do 6F e, se necessário, promover os handlers da tabela
 `$02:ED4F` numa rota de áudio.
 O mapa acima é a base exata para comparar os próximos lotes.

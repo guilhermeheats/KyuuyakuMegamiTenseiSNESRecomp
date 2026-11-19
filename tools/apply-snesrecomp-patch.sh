@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Apply the project's portable snesrecomp patch (currently: noreturn_jsl /
-# terminal_jsl support). The submodule stays pinned at its public upstream
-# commit; this script records the framework delta in the parent repository.
+# terminal_jsl support and runtime indirect tail dispatch). The submodule stays
+# pinned at its public upstream commit; this script records the framework delta
+# in the parent repository.
 set -euo pipefail
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 SUB="$ROOT/snesrecomp"

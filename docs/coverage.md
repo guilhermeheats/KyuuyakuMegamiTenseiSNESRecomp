@@ -493,9 +493,50 @@ Os seis `$30:*` continuam com `JMP ($80AE,X)`. A investigação mostrou que
 `$80AE` **não é uma tabela estática**: no ROM `$30:80AE` o decoder lê
 código (`60 00 85 A2…`), a cópia em `$7E:80AE` está zerada nos estados
 testados e os valores de X dos seis sites não formam um conjunto
-consistente de ponteiros. Não forcei uma lista de 24 bits; eles ficam como
-bordas runtime documentadas até existir um dispatch de ponteiro em tempo
-de execução.
+consistente de ponteiros. O dispatch runtime foi implementado no
+destravamento 22.
+
+### Destravamento 22: dispatch runtime `$80AE`
+
+Os seis sites foram marcados em `recomp/bank30.cfg` com o helper reservado
+`__runtime_indirect__`:
+
+```text
+hle_dispatch 969c __runtime_indirect__
+hle_dispatch a33c __runtime_indirect__
+hle_dispatch c078 __runtime_indirect__
+hle_dispatch c19b __runtime_indirect__
+hle_dispatch d266 __runtime_indirect__
+hle_dispatch d6db __runtime_indirect__
+```
+
+O emitter reconhece o marcador e emite, em vez do fallback para o
+interpretador:
+
+```c
+uint16 _disp_ptr = cpu_read16(cpu, cpu->PB,
+    (uint16)(0x80AEu + (uint16)(cpu->X & 0xFFFFu)));
+uint32 _disp_target = ((uint32)cpu->PB << 16) | _disp_ptr;
+RecompReturn _r = cpu_dispatch_tail_pc(cpu, _disp_target,
+    0x30xxxxu, _entry_s, _hrv);
+RecompStackPop();
+return _r;
+```
+
+O helper novo `cpu_dispatch_tail_pc` (em `runner/src/cpu_state.c`):
+
+- se existe corpo AOT para o alvo vivo, herda `_entry_s`/`_hrv` via
+  `cpu_tailcall_inherit_return_context` e faz tail-call do corpo;
+- se não existe, executa o alvo real com
+  `interp_tier_dispatch_tail_ex`, mantendo o mesmo contexto de retorno;
+- registra o dispatch no `g_dispatch_log`.
+
+Resultado: **0 nós com `has_lle_indirect_edge`**; o grafo continua
+**1460/1460 AOT**, 84 roots e 1142 entradas de dispatch. O teste de emissão
+`tests/v2/test_balanced_interp_dispatch.py` cobre o marcador e o código
+gerado. O site runtime ainda não foi atingido na rota de 6F/batalha (o
+perfil não mostra páginas `$30:96xx`), então a validação de execução fica
+pendente de uma rota que use os handlers de som.
 
 ## Correções no `tools/regen.sh`
 
@@ -555,21 +596,23 @@ chamadas e não definidas; as diretivas foram revertidas.
 ## Fronteira atual: 0 nós LLE-only
 
 O grafo descoberto está **100% AOT-eligible: 1460/1460**. Não há mais nó
-LLE-only. O que resta são **2 entradas `force_lle` intencionais** (reset e
-NMI) e **6 nós AOT com borda interpretada** (`has_lle_indirect_edge`): os
-seis handlers de som `$30:*`, cujos `JMP ($80AE,X)` usam um ponteiro
-runtime/WRAM que não forma uma tabela estática no ROM. Os sites
-`$02:DC53`/`$02:ED38` foram resolvidos pela tabela `$02:ED4F`.
+LLE-only e **nenhum nó com `has_lle_indirect_edge`**. O que resta são
+**2 entradas `force_lle` intencionais** (reset e NMI). Os seis handlers de
+som `$30:*` usam um **dispatch runtime** documentado: leem `PB:80AE+X` e
+chamam `cpu_dispatch_tail_pc` (corpo AOT quando existe, interpretador
+quando não). Os sites `$02:DC53`/`$02:ED38` foram resolvidos pela tabela
+`$02:ED4F`.
 
 Os HDMA `$00:86C0`/`$00:88CE` são AOT com `ptrtail targets:`; o framebuffer
 do título ficou visualmente idêntico ao de referência (2256 pixels
 diferentes, 3,93% no lote de 1421).
 O perfil de campo (`save2`) mostrou **0,27% dos ciclos** em `$00:9300`, um
 caminho LLE fora do grafo AOT (provavelmente ligado ao NMI/PPU/APU); não há
-stubs nem off-rails. A tabela `$02:ED4F` foi resolvida; o próximo foco é o
-dispatch runtime de `$80AE` nos seis `$30:*`. A rota até o 6F já foi
-alcançada e validada (2026-11-19), e a exploração inicial do andar achou 4
-variantes novas em `$00`, mas a rota completa continua pendente.
+stubs nem off-rails. A tabela `$02:ED4F` foi resolvida e o dispatch runtime
+de `$80AE` nos seis `$30:*` foi implementado; falta validá-lo numa rota que
+atinja os handlers de som. A rota até o 6F já foi alcançada e validada
+(2026-11-19), e a exploração inicial do andar achou 4 variantes novas em
+`$00`, mas a rota completa continua pendente.
 
 ### Histórico: o gargalo do `$03:983C`
 
@@ -633,9 +676,9 @@ não a promoção AOT.
 
 ## Próximos passos
 
-1. Investigar o dispatch **runtime** de `$80AE` ou documentá-lo como borda
-   runtime: a tabela não é estática no ROM e a cópia em WRAM está zerada
-   nos estados testados. Validar o áudio numa rota com batalha e menus.
+1. Validar o dispatch runtime `$80AE` numa rota que use os handlers de som
+   (`$30:96xx`); o código já está emitido e compila, mas o site não foi
+   atingido na rota de 6F/batalha.
 2. Validar a tabela `$02:ED4F` numa rota que use comandos de som e, se
    necessário, promover os 17 handlers M0X0 que hoje já têm AOT.
 3. Investigar o caminho LLE quente `$00:9300` no campo e no idle (o

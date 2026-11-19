@@ -24,7 +24,7 @@ Atualizado em 2026-11-18.
 | Auto-mapping | OK — mapa da dungeon pelo menu COMP |
 | Primeira batalha | OK — Heket, Mad Slug, Basim fixo, negociação, game over, vitória/EXP/level-up |
 | Save/load via SRAM do jogo | OK — gravação, flush, boot e reload |
-| Cobertura estática | 1198 variantes AOT, 12 bancos; 99,4–99,9% AOT no save4/save9 |
+| Cobertura estática | 1222 variantes AOT, 12 bancos; 99,4–99,9% AOT no save4/save9 |
 | Comparação de referência | OK no título via snesref; MesenCE pendente |
 
 Marcos de frame observados com `--framedump`:
@@ -219,8 +219,8 @@ retorno à dungeon (HP 26/26 e 27/27), sem crash. O estado resultante está no
 A captura tier-2 do boot/título e dos save states de 8F/7F/batalha/level-up
 foi ingerida com `tier2_ingest.py`; os PCs quentes foram promovidos a roots
 permanentes. Com `tools/regen.sh` usando `--cfg-roots` por padrão, o grafo
-passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 1198
-variantes AOT / 12 bancos** (1219 variantes exatas, 21 LLE-only). Na rota
+passou de **11 roots / 54 variantes AOT / 8 bancos** para **72 roots / 1222
+variantes AOT / 12 bancos** (1228 variantes exatas, 6 LLE-only). Na rota
 longa, o build ficou em **~94,7% AOT / 5,3% interpretado**, com zero dispatch
 misses; nos testes frescos, **save4 99,80% AOT** e **save9 99,91% AOT**, com
 zero stubs. O relatório completo, comandos e a lista de roots está em
@@ -330,6 +330,14 @@ A/B 99,91% e 1,03s. Depois, `exit_mx_variant 30877B 1 0 1 0` fechou o
 `$30:8770` e o bloco `$30` ficou 100% AOT: **1219 nós / 1198 AOT / 21 LLE**,
 A/B 99,90–99,91% e 1,03–1,06s, zero stubs.
 
+O décimo quinto lote fechou a cadeia do banco `$03`. O detalhe que faltava
+era a entrada **M0X1** do frame wait `$03:983C`, usada por `$03:B43B` e
+`$01:AE08`: `exit_mx_variant 03983C 0 1 0 1`. Com os contratos de
+`$03:9DBD` (M0X0/M1X0), `$03:AD87`, `$03:B3AB` e `$03:B43B`, a cadeia
+inteira foi promovida e destravou de cascata o cluster `$01` e o
+`$00:BF53`: **1228 nós / 1222 AOT / 6 LLE**, A/B 99,90–99,91% e
+1,03–1,04s, zero stubs.
+
 O regen também recebeu `--profile-manifest`, `--no-host-root-scan` e um
 `funcs.h` temporário fora da raiz do projeto; sem isso o scanner readicionava
 declarações antigas e o link-closure falhava com 28 variantes pendentes.
@@ -349,17 +357,18 @@ limpo e re-promover as duas funções.
 
 ## Próximos passos
 
-1. Atacar o cluster `$01:97C6`/`$01:986D`, o restante do banco `$03` e o
-   banco `$05`. Cada mudança precisa de `save4`/`save9`, `snesref` e
-   **tempo de parede**. Se a análise expuser outro BRK de caminho de erro,
-   usar uma fronteira `data_region` como `$04:BEC6` ou `$05:E5DB`.
-2. Modelar o `JMP ($0100)` dos dispatchers de HDMA no emitter e re-promover
-   `$00:86C0`/`$00:88CE`; detalhes em `docs/coverage.md`.
-3. Declarar as tabelas indiretas restantes (`$01:C72B`/`CD9C`/`EF15`,
-   `$02:DC74`, `$30:*`) e separar `$04:BE39` (`brk_at_04BEC6`) como
-   código/dados.
-4. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
+1. Declarar a saída M1X1 de `$01:91DA` com evidência de runtime, depois
+   promover `$05:931F`/`$05:962D`, `$05:8CB1` e o main loop. Cada mudança
+   precisa de `save4`/`save9`, `snesref` e **tempo de parede**.
+2. Declarar as tabelas indiretas `$01:C72B`→`$C74E`,
+   `$01:CD9C`→`$CDB6`, `$01:EF15`→`$ED47` e `$02:DC74`→`$DC35`; validar
+   counts/alvos e remover a borda LLE do `$01:EE96`.
+3. Resolver os HDMA `$00:86C0`/`$00:88CE` com as tabelas `$86FE`/`$88EC`
+   via `ptrtail targets:` e remover `force_lle`; validar título/framebuffer.
+4. Confirmar o ponteiro `$0080AE` dos sites `$30:*`; se for `$00:A220`,
+   declarar o alvo único e validar o som.
+5. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
    ingerir com `tier2_ingest.py` e adicionar os novos roots.
-5. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
+6. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
    `$38` e `$3F`, e continuar a separação código/dados.
-6. Manter gameplay, save states e comparação com emulador como regressão.
+7. Manter gameplay, save states e comparação com emulador como regressão.

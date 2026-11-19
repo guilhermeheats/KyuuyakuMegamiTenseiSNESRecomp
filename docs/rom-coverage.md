@@ -9,7 +9,7 @@ do ROM japonês limpo:
 
 ## Método
 
-1. O manifesto final tem **1383 nós / 1383 AOT / 0 LLE-only**.
+1. O manifesto final tem **1397 nós / 1397 AOT / 0 LLE-only**.
 2. Cada nó foi decodificado com o decoder v2; os bytes de cada instrução
    foram mapeados para o offset LoROM e deduplicados.
 3. `data_region` e `force_lle` foram lidos dos cfgs.
@@ -19,32 +19,32 @@ do ROM japonês limpo:
 
 | Métrica | Valor |
 |---|---:|
-| Roots | 72 |
-| Variantes descobertas | **1383** |
-| Variantes AOT-eligible | **1383** |
+| Roots | 74 |
+| Variantes descobertas | **1397** |
+| Variantes AOT-eligible | **1397** |
 | Variantes LLE-only | **0** |
 | Bancos com código | 12 |
-| Entradas de dispatch | 1089 |
-| Entradas com AOT | 1089 |
-| Variantes AOT no dispatch | 1383 |
-| Instruções físicas únicas | 56.026 |
+| Entradas de dispatch | 1103 |
+| Entradas com AOT | 1103 |
+| Variantes AOT no dispatch | 1397 |
+| Instruções físicas únicas | 56.246 |
 
-Além do grafo, existem **4 entradas `force_lle` intencionais**, fora do
-manifesto de nós: `$00:8000` (reset), `$00:827A` (NMI), `$00:86C0` e
-`$00:88CE` (HDMA). Contando-as como funções, a taxa efetiva é
-**1383 / 1387 = 99,7116% AOT** por contagem de funções.
+Além do grafo, existem **2 entradas `force_lle` intencionais**, fora do
+manifesto de nós: `$00:8000` (reset) e `$00:827A` (NMI). Contando-as como
+funções, a taxa efetiva é **1397 / 1399 = 99,8570% AOT** por contagem de
+funções.
 
 ## Bytes do ROM
 
 | Métrica | Bytes | % do ROM |
 |---|---:|---:|
 | ROM total | 2.097.152 | 100% |
-| Instruções únicas descobertas | **126.482** | **6,0311%** |
-| Instruções no grafo AOT | 126.482 | 100% do grafo |
+| Instruções únicas descobertas | **126.969** | **6,0544%** |
+| Instruções no grafo AOT | 126.969 | 100% do grafo |
 | `data_region` (fronteiras de BRK) | 4 | 0,0002% |
-| Desconhecido (dados/gráficos/som/código não achado) | 1.970.670 | 93,9689% |
+| Desconhecido (dados/gráficos/som/código não achado) | 1.970.183 | 93,9456% |
 
-O número de **6,0311%** é a fração do ROM ocupada por instruções já
+O número de **6,0544%** é a fração do ROM ocupada por instruções já
 decodificadas. Ele **não** significa “6% decompilado”: a maior parte do
 cartucho é dado, gráfico, som ou código ainda não alcançado.
 
@@ -52,9 +52,9 @@ cartucho é dado, gráfico, som ou código ainda não alcançado.
 
 | Denominador | Capacidade | Instruções descobertas | Cobertura |
 |---|---:|---:|---:|
-| 12 bancos com código | 393.216 | 126.482 | **32,1660%** |
-| 6 bancos do núcleo (`$00`,`$01`,`$02`,`$03`,`$05`,`$30`) | 196.608 | 118.477 | **60,2605%** |
-| ROM total | 2.097.152 | 126.482 | **6,0311%** |
+| 12 bancos com código | 393.216 | 126.969 | **32,2899%** |
+| 6 bancos do núcleo (`$00`,`$01`,`$02`,`$03`,`$05`,`$30`) | 196.608 | 118.964 | **60,5082%** |
+| ROM total | 2.097.152 | 126.969 | **6,0544%** |
 
 Os bancos contêm dados além de código; por isso a cobertura dos 12 bancos é
 um **limite inferior** de código mapeado, não uma divisão exata
@@ -64,7 +64,7 @@ código/dados.
 
 | Banco | Bytes de instrução | % do banco (32 KB) | Papel aproximado |
 |---|---:|---:|---|
-| `$00` | 16.819 | 51,33% | núcleo / boot / main loop |
+| `$00` | 17.306 | 52,81% | núcleo / boot / main loop / HDMA |
 | `$01` | 25.667 | 78,33% | núcleo / texto / input / tabelas |
 | `$02` | 18.250 | 55,69% | núcleo / batalha / menus |
 | `$03` | 22.949 | 70,03% | núcleo / save / texto |
@@ -84,30 +84,31 @@ dados, gráficos, som ou código de rotas ainda não capturadas.
 
 | Teste | Resultado |
 |---|---|
-| A/B `save9` | 99,9048–99,9078% AOT, `step 60` 1,032–1,038s |
+| A/B `save9` | 99,9064–99,9079% AOT, `step 60` 1,026–1,036s |
 | Stubs / tier hits | 0 / 0 |
-| Boot até título | frame 3726, 0 off-rails, 0 stubs |
-| Título vs `snesref` | 6 bytes de WRAM, SRAM idêntica, AE 2353 / RMSE 30,29 |
+| Boot até título | frame 3727, 0 off-rails, 0 stubs |
+| Título vs `snesref` | 6 bytes de WRAM, SRAM idêntica, **2353 pixels diferentes (4,10%)** |
 | `save4` / `save9` | party correta, 0 stubs |
 | Batalha/menus (`save0/5/7`) | 0 off-rails, 0 stubs |
 | Campo (`save2`, 2 mil frames) | 0 off-rails, 0 stubs, 99,7082% AOT |
 | LLE quente no campo | `$00:9300`, 0,2742% dos ciclos |
 
-O LLE restante no campo está fora do grafo AOT (reset/NMI/HDMA e o caminho
-`$00:9300`), não em nós LLE-only. O `force_lle` da NMI/HDMA é a próxima
-fronteira da fase 2, junto com o ponteiro `$0080AE` dos sites `$30:*`.
+O LLE restante no campo está fora do grafo AOT (reset/NMI e o caminho
+`$00:9300`), não em nós LLE-only. Os HDMA já são AOT; a próxima fronteira
+da fase 2 é o ponteiro `$0080AE` dos sites `$30:*` e, depois, a rota até o
+6F.
 
 ## Leitura honesta
 
 - **Grafo descoberto:** 100% AOT.
-- **Código já descoberto:** 126.482 bytes, 100% no grafo AOT.
-- **12 bancos de código:** 32,1660% dos bytes são instruções mapeadas; o
+- **Código já descoberto:** 126.969 bytes, 100% no grafo AOT.
+- **12 bancos de código:** 32,2899% dos bytes são instruções mapeadas; o
   resto é dado ou código não descoberto.
-- **6 bancos do núcleo:** 60,2605% dos bytes são instruções mapeadas.
-- **ROM física:** 6,0311% dos bytes são instruções; não é “% de decomp”.
+- **6 bancos do núcleo:** 60,5082% dos bytes são instruções mapeadas.
+- **ROM física:** 6,0544% dos bytes são instruções; não é “% de decomp”.
 - **Jogo:** boot/título/8F/7F/save4/save9/batalha/level-up validados; **6F e
   late game ainda não mapeados**.
 
-O próximo passo para aumentar o denominador é fechar o `force_lle` dos HDMA,
-resolver o `$30:$0080AE` e capturar a rota até o 6F. O mapa acima é a base
-exata para comparar os próximos lotes.
+O próximo passo para aumentar o denominador é resolver o `$30:$0080AE` e
+capturar a rota até o 6F. O mapa acima é a base exata para comparar os
+próximos lotes.

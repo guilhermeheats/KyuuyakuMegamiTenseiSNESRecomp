@@ -74,13 +74,13 @@ Com `tools/regen.sh` (agora com `--cfg-roots` por padrão):
 | Métrica | Linha de base | Depois dos contratos |
 |---|---:|---:|
 | Roots | 11 | 72 |
-| Variantes exatas | 60 | 1383 |
-| Variantes AOT-eligible | 54 | 1383 |
+| Variantes exatas | 60 | 1397 |
+| Variantes AOT-eligible | 54 | 1397 |
 | Variantes LLE-only | 6 | 0 |
 | Bancos emitidos | 8 | 12 |
-| Entradas de dispatch | 51 | 1089 |
-| Entradas com AOT | 46 | 1089 |
-| Variantes AOT no dispatch | 54 | 1383 |
+| Entradas de dispatch | 51 | 1103 |
+| Entradas com AOT | 46 | 1103 |
+| Variantes AOT no dispatch | 54 | 1397 |
 
 No mesmo build, após carregar os save states de 8F/7F/batalha/level-up, o
 `interp_stats` acumulado mostrou **~94,7% AOT / ~5,3% interpretado** (o boot
@@ -393,6 +393,21 @@ Resultado: **+154 nós, todos AOT**. O grafo foi para **1383 nós / 1383 AOT
 **99,90–99,91% AOT** e **1,032–1,038s**, zero stubs/tier; boot/título/
 save4/save9/batalha/menus válidos.
 
+### Destravamento 18: HDMA `$00:86C0`/`$00:88CE`
+
+Os dois dispatchers de HDMA usam `JMP ($0100)` com o ponteiro montado a
+partir de tabelas ROM: `$86FE` (8 alvos: `870E`, `8721`, `8760`, `8782`,
+`8791`, `87B8`, `87F3`, `883E`) e `$88EC` (4 alvos: `8916`, `8908`,
+`8910`, `88F4`). Declarei os dois sites com `ptrtail targets:` e removi o
+`force_lle` de `$86C0`/`$88CE`.
+
+Resultado: **+14 nós, todos AOT**; o grafo foi para **1397 nós / 1397 AOT /
+0 LLE**, com 1103 entradas de dispatch. Restam só **2 `force_lle`**
+intencionais (reset e NMI). A/B save9 em **99,9064–99,9079% AOT** e
+**1,026–1,036s**; boot 3727 sem off-rails/stubs, save4/save9/batalha/menus
+válidos. O título ficou com **2353 pixels diferentes (4,10%)**, exatamente
+o mesmo framebuffer de referência, e a SRAM idêntica.
+
 ## Correções no `tools/regen.sh`
 
 O ganho depende de o regen realmente semear os `func` dos cfgs:
@@ -434,11 +449,11 @@ marcadas com `force_lle 0086C0`/`force_lle 0088CE` em `recomp/bank00.cfg`.
 Agora o interpretador executa o `JMP ($0100)` com o ponteiro vivo,
 `unresolved_stub_get` retorna **zero** e a rota save4/save9 fica em
 **99,4–99,9% AOT / 0,1–0,6% interpretado**. O custo continua sendo duas
-funções em LLE; o resto do grafo cresceu para 1383 variantes AOT com os
+funções em LLE; o resto do grafo cresceu para 1397 variantes AOT com os
 contratos de saída, as fronteiras `$04:BEC6`/`$05:E5DB`, o frame wait AOT,
 o dispatch `$00:9B04`, os lotes do bloco `$30`/`$00:9077`, do hub
 `$9A85`/`$94C3`, dos handlers `$9A85`/`$A1D8`, do bloco `$30`, da cadeia
-do banco `$03`, do main loop e das quatro tabelas indiretas.
+do banco `$03`, do main loop, das quatro tabelas indiretas e dos HDMA.
 
 O próximo passo de decompilação é **modelar esse dispatch vivo no emitter**
 (ou declarar `indirect_dispatch` de forma que o link-closure aceite os 8+4
@@ -449,21 +464,21 @@ chamadas e não definidas; as diretivas foram revertidas.
 
 ## Fronteira atual: 0 nós LLE-only
 
-O grafo descoberto está **100% AOT-eligible: 1383/1383**. Não há mais nó
-LLE-only. O que resta são **4 entradas `force_lle` intencionais**, fora do
+O grafo descoberto está **100% AOT-eligible: 1397/1397**. Não há mais nó
+LLE-only. O que resta são **2 entradas `force_lle` intencionais**, fora do
 manifesto de nós:
 
 | Entrada | Motivo |
 |---|---|
 | `$00:8000` (reset) | ponto de entrada, roda uma vez |
 | `$00:827A` (NMI) | interrupção de hardware, roda a cada frame |
-| `$00:86C0`, `$00:88CE` (HDMA) | `JMP ($0100)` com ponteiro vivo |
 
-O perfil de campo (`save2`) mostrou **0,41% dos ciclos** em `$00:9300`, um
-caminho LLE fora do grafo AOT (provavelmente ligado ao NMI/PPU/APU); não há
-stubs nem off-rails. As quatro tabelas indiretas já foram declaradas; o
-próximo foco da fase 2 é resolver os HDMA com as tabelas `$86FE`/`$88EC`,
-confirmar o ponteiro `$0080AE` dos sites `$30:*` e, depois, a rota até o 6F.
+Os HDMA `$00:86C0`/`$00:88CE` agora são AOT com `ptrtail targets:`; o
+framebuffer do título ficou idêntico ao de referência (2353 pixels
+diferentes, 4,10%). O perfil de campo (`save2`) mostrou **0,27% dos ciclos**
+em `$00:9300`, um caminho LLE fora do grafo AOT (provavelmente ligado ao
+NMI/PPU/APU); não há stubs nem off-rails. O próximo foco é o ponteiro
+`$0080AE` dos 11 sites `$30:*` e, depois, a rota até o 6F.
 
 ### Histórico: o gargalo do `$03:983C`
 
@@ -527,17 +542,14 @@ não a promoção AOT.
 
 ## Próximos passos
 
-1. Resolver os HDMA `$00:86C0`/`$00:88CE` com as tabelas `$86FE` (8 alvos) e
-   `$88EC` (4 alvos) via `ptrtail targets:`, remover `force_lle` e validar o
-   título/framebuffer.
-2. Confirmar o ponteiro `$0080AE` dos 11 sites `$30:*`; se for o alvo único
+1. Confirmar o ponteiro `$0080AE` dos 11 sites `$30:*`; se for o alvo único
    `$00:A220`, declarar os 11 alvos e validar o som numa rota com batalha.
-3. Investigar o caminho LLE quente `$00:9300` no campo (0,41% dos ciclos) e
+2. Investigar o caminho LLE quente `$00:9300` no campo (0,27% dos ciclos) e
    ver se ele pode virar root/AOT; manter o NMI/reset como `force_lle` se
    necessário.
-4. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
+3. Capturar uma rota mais longa (8F, 7F, 6F, menus, batalha, level-up),
    ingerir com `tier2_ingest.py` e adicionar os novos roots.
-5. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
+4. Nomear os placeholders `Coverage_*`, principalmente nos bancos `$30`,
    `$38` e `$3F`, e continuar a separação código/dados (`$04:BEC6`,
    `$05:DD6D`).
-6. Manter gameplay, save states e comparação com emulador como regressão.
+5. Manter gameplay, save states e comparação com emulador como regressão.
